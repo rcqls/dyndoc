@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+########################################################################################
+## vm manage
+## 	dyndoc-init vm  [re]start|stop|status|pause|resume|poweroff
+## the rest is done via bash and ssh: 
+## 	dyndoc-init server [re]start|stop|status
+## 		ssh root@127.0.0.1 /etc/init.d/dyndoc [re]start|stop|status
+########################################################################################
+if false
+elsif ARGV[0]=="vm"
+	exit 0 unless [:start,:restart,:stop,:pause,:resume,:poweroff,:forwarding,:status].include? ARGV[1].to_sym
+	require 'dyndoc/common/vbox'
+	case (cmd=ARGV[1].to_sym)
+	when :start
+		Aws.start
+	when :stop
+		Aws.stop
+	when :pause,:resume,:poweroff
+		Aws.control cmd
+	when :forwading
+		Aws.init_forwarding
+	when :status
+		puts Aws.status
+	end
+
+elsif ARGV[0]=="server"
+	exit 0 unless [:start,:restart,:stop,:status].include?(cmd=ARGV[1].to_sym)
+	case
+	when :start,:restart,:stop
+		system("ssh -p 2222 root@127.0.0.1 /etc/init.d/dyndoc #{cmd}")
+	when :status
+		puts %x[ssh -p 2222 root@127.0.0.1 /etc/init.d/dyndoc #{cmd}]
+	end
+end

@@ -1,0 +1,6 @@
+require 'dyndoc/V3/base/tmpl/manager'
+require 'dyndoc/V3/base/tmpl/parse_do'
+require 'dyndoc/V3/base/tmpl/oop'
+require 'dyndoc/V3/base/tmpl/eval'
+require 'dyndoc/V3/base/tmpl/rbenvir'
+require 'dyndoc/V3/base/tmpl/extension' 

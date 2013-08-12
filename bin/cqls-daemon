@@ -1,0 +1,100 @@
+#!/usr/bin/env ruby
+require 'rubygems'        # if you use RubyGems
+require 'yaml'
+$curARGV=0
+if ARGV[$curARGV]=="--test"
+    $:.unshift(File.join(ENV["HOME"],"static","dyndoc-ruby","lib")) 
+    require 'pry'
+    $curARGV+=1
+end
+require 'cqlsEM/client-server'
+
+if ["-p","--port"].include?  ARGV[$curARGV]
+    PORT=ARGV[$curARGV+1]
+     $curARGV+=2
+else
+    PORT=6666
+end
+
+
+class CqlsServer < EventMachine::Connection
+
+    include CqlsClientServer
+
+    def initialize
+        super
+        init_com("Server")
+    end
+
+    def post_init
+      puts "[Server] someone connected to the dyndoc server!"
+      @current_dir=FileUtils.pwd
+        puts "[Server] change to working directory!"
+        FileUtils.cd("/export/dyndoc-server")
+        puts "[Server] cleaning dyndoc server!"
+        Dir["/export/dyndoc-server/*"].each{|f|
+            FileUtils.rm_rf(f)
+            puts "[Server] #{File.basename(f)} removed!"
+        }
+    end
+    
+    def process(data)
+        if data=="__server_to_exit__"
+            EM::stop
+            puts "[Server] exit sent by client!"
+        elsif data =~ /^__cfg__/
+            $cfg_dyn=YAML.load($')
+            $cfg_dyn[:dyndoc_mode] = :remote_server unless $cfg_dyn[:hostname] == $dyndoc_server_hostname
+            $cfg_dyn[:working_dir] = "/export/dyndoc-server" if $cfg_dyn[:dyndoc_mode] == :remote_server
+            send "__get_files__"
+            puts "[Server] asks for files from client"
+        elsif data == "__dyndoc__"
+            name=$cfg_dyn[:filename_client][:basename_ext]
+            puts "[Server] unzip first"
+            unzip_file(File.join("/export/dyndoc-server",File.basename(name,".*")+".zip"),"/export/dyndoc-server")        
+            puts "[Server] dyndoc process"
+            ##send_data ">>> you sent: #{name}"
+            puts "=> [Server] File to deal with: "+name+"\n"
+            CqlsDoc.read_curDyn(name) #if nothing specified, :V3 is chosen here!
+            unless [:V1,:V2,:V2dtag].include? $curDyn[:version]
+                $curDyn.init
+                $curDyn.tmpl_doc.make_all
+                @files=[]
+                $curDyn.tmpl_doc.docs.each{|k,v|
+                    v.cfg[:created_docs].each{|d|
+                        @files << [File.join("/export/dyndoc-server",d),File.join($cfg_dyn[:dirname_docs],d)]
+                    }
+                }
+                send_files "__client_to_exit__", "client needs to exit"
+            end
+        end
+    end
+    
+    def unbind
+        puts "[Server] change to current directory!"
+        FileUtils.cd(@current_dir)
+        puts "[Server] exit dyndoc server!"
+    end
+
+end
+
+class KeyboardHandler < EM::Connection
+  include EM::Protocols::LineText2
+
+  def receive_line(data)
+    EM::stop if data=="exit"
+  end
+end
+   
+require "R4rb"
+Array.initR
+## detect the gem path!
+$dyn_gem_root=File.join(File.split(File.dirname(__FILE__))[0...-1])
+$dyndoc_server_hostname=Socket.gethostname    
+require "daemons"
+Daemons.run_proc('dyndoc-daemon') do
+EventMachine::run {
+    EventMachine::start_server "0.0.0.0", PORT, CqlsServer
+    puts "running dyndoc server on #{PORT}"
+}
+end

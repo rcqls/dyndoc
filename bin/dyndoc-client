@@ -1,0 +1,274 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'cmdparse'
+require 'dyndocEM/dyndoc-client'
+require 'dyndoc/common/utils' 
+require "dyndoc/common/init"
+require 'securerandom'
+
+
+cmd = CmdParse::CommandParser.new( true )
+cmd.program_name = "dyndoc-client"
+cmd.program_version = [1, 5, 0]
+
+$cfg_dyn={
+  :client_cmd=> :cfg, :client_cmd_opts=>{}, ## to communicate first with the server! 
+  :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
+  :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
+  :nbChar_error=> 300,:proj_list=>[],:working_dir=>"",:dyndoc_mode=>:local_server,
+  :dyndoc_room=>nil,:dyndoc_secret=>nil
+}
+
+# user input dyn variable does not start with "--" and contains "=".
+args=ARGV.select{|name|
+  if(name[0,2]!="--" and name.include? "=") 
+    key,*val=name.split("=")
+    val=val.join("=")
+    $cfg_dyn[:user_input] << [key,val] 
+    false
+  else
+    true
+  end
+}
+
+args,$cfg_dyn[:cmd_pandoc_options]=args[0...(args.index "--pandoc")],args[((args.index "--pandoc")+1)..-1] if args.include? "--pandoc"
+unless (args & PANDOC_CMDS).empty? 
+  $cfg_dyn[:cmd_pandoc_options] = args & PANDOC_CMDS
+  args -= $cfg_dyn[:cmd_pandoc_options]
+end
+#p args
+#p $cfg_dyn[:cmd_pandoc_options]
+
+## secret file
+new_secret_file=true
+
+## read in config file!
+cfgfiles=[]
+cfgfiles << "/etc/dynrc" if File.exists? "/etc/dynrc"
+cfgfiles << File.expand_path("~/.dynrc") if File.exists? File.expand_path("~/.dynrc")
+cfgfiles << ".dynrc" if File.exists? ".dynrc"
+if cfgfiles.empty?
+  cfgfiles << :inside
+end
+
+dyndoc_client_cfg_content = <<-CFG
+{
+        :servers => {
+                :default => :sag6,
+        :sag6 => {:url => "sagag6.upmf-grenoble.fr", :port => 5552 ,:room => "test"} 
+        }
+}
+CFG
+unless cfgfiles.empty?
+    $dyndoc_client_cfg={}
+    cfgfiles.each do |cfgfile|
+      dyndoc_client_cfg= (cfgfile==:inside ? dyndoc_client_cfg_content : File.read(cfgfile).strip )
+      dyndoc_client_cfg = "{\n"+dyndoc_client_cfg+"\n}" unless dyndoc_client_cfg =~ /^\{/
+      dyndoc_client_cfg=eval(dyndoc_client_cfg)
+      $dyndoc_client_cfg.merge!(dyndoc_client_cfg)
+    end
+    ## default server completed if symbolic link (a symbol value)
+    $dyndoc_client_cfg[:servers][:default]=$dyndoc_client_cfg[:servers][$dyndoc_client_cfg[:servers][:default]] if $dyndoc_client_cfg[:servers][:default].is_a? Symbol
+end
+
+cmd.options = CmdParse::OptionParserWrapper.new do |opt|
+  opt.separator "Global options:"
+
+  opt.on('-v','--version VERSION',"dyndoc version to call (special: V3TTM, V3ODT)") {|v| $cfg_dyn[:version]=v}
+  opt.on("--verbose", "Be verbose when outputting info") {|t| $cfg_dyn[:verbose] = true }
+  opt.on("--debug", "debug mode") {|t| $cfg_dyn[:debug] = true }
+  opt.on("-N","--nb-char-error-mode NBCHAR","Number of char in Error mode") {|t| $cfg_dyn[:nbChar_error]=t.to_i}
+  opt.on('-b',"--backup", "backup mode") {|t| $cfg_dyn[:backup] = true }
+  opt.on('-x',"--raw","raw mode, i.e. no model") {|t| $cfg_dyn[:raw_mode]=true;$cfg_dyn[:model_tmpl]=nil }
+=begin
+  opt.on('-o',"--output OUTPUT","output format tex(default),txt,txtl,html,c") {|o| $cfg_dyn[:output]=o.to_sym}
+=end
+  opt.on('--test','Use local package for development purposes') {
+    $:.unshift(File.join(ENV["HOME"],"static","dyndoc-ruby","lib"))
+    require 'pry'
+    p $:
+  }
+  opt.on('-m', '--model MODEL','model (Experimental)') {|m| 
+    m=nil if m.downcase.strip=="no"
+    $cfg_dyn[:model_tmpl] =m
+  }
+  opt.on('-f','--pre TMPL',Array,'template to preload') {|t| $cfg_dyn[:pre_tmpl] += t}
+  opt.on('-l','--post TMPL',Array,'template to postload') {|t| $cfg_dyn[:post_tmpl] += t}
+  opt.on('-o','--out_tags TAGS',Array,'filter tags') {|t| $cfg_dyn[:out_tag] += t}
+  opt.on('-p','--part_tags TAGS',Array,'filter tags') {|t| $cfg_dyn[:part_tag] += t}
+  opt.on('-t','--tags TAGS',Array,'filter tags') {|t| $cfg_dyn[:tag_tmpl] += t}
+  opt.on('-k','--keys KEYS',Array,'filter keys') {|t| $cfg_dyn[:keys_tmpl] += t}
+  opt.on('-R',"--remote","remote mode") {|t| $cfg_dyn[:dyndoc_mode]=:remote_server}
+=begin
+  opt.on('-a',"--append EXTENSION","extension to append to the basename (ex: _corr)") {|a| $curDyn[:append]=a}
+=end
+  opt.on( '-r', '--root DIR', 'Prepend this document root' ) {|dir|
+    $cfg_dyn[:rootDoc]=dir
+}
+  
+  opt.on( '--doc', 'launch doc pdf file' ) {
+    #$curDyn.init
+    #system "#{$curDyn[:pdfviewer]} #{File.join(CqlsDoc.sysRootDoc,'root_utf-8','Doc',$curDyn[:docfile])}&"
+}
+  opt.on('--viewer VIEWER','launch viewer (no=without) ') {|view| $cfg_dyn[:pdfviewer]=$cfg_dyn[:pngviewer]=view}
+  opt.on('--enc ENCODINGS','encodings utf-8 (default) or iso-8859-1') {|enc| $cfg_dyn[:enc]=enc}
+  opt.on('-K',"--keep-secret","keep dropbox secret file") {|t| new_secret_file=false}
+end
+
+cmd.add_command( CmdParse::HelpCommand.new )
+cmd.add_command( CmdParse::VersionCommand.new )
+
+# all
+all = CmdParse::Command.new( 'all', false )
+all.short_desc = "Parse all files"
+all.options = CmdParse::OptionParserWrapper.new do |opt|
+  opt.on( '-d', '--docs DOCS','Array', 'document list' ) {|t| 
+    $cfg_dyn[:doc_list] += t.split(",").map{|e| e.strip}
+  }
+  opt.on('-c', '--cmd COMMAND','[s(ave)][b(ackup)][c(at)][pdf|png][v(iew)] and x=sv') {|c|
+    $cfg_dyn[:cmd] =[]
+    $cfg_dyn[:cmd] << :save if c.include? "s"
+    $cfg_dyn[:cmd] << :backup if c.include? "b"
+    $cfg_dyn[:cmd] << :cat if c.include? "c"
+    $cfg_dyn[:cmd] << :pdf if c.include? "pdf"
+    $cfg_dyn[:cmd] << :png if c.include? "png"
+    $cfg_dyn[:cmd] << :view if c.include? "v"
+    $cfg_dyn[:cmd] << :save << :view if c.include? "x"
+    $cfg_dyn[:cmd] = [ :save, :pdf ] if $cfg_dyn[:cmd].empty? 
+    }
+    opt.on('-t','--test','Useful for testing (equivalent to -mno all -cc') {
+      $cfg_dyn[:cmd] =[:cat]
+      $cfg_dyn[:model_tmpl]=nil
+    }
+    opt.on( '-o', '--output_dir ', 'output directory' ) {|t| $cfg_dyn[:dirname_docs] = t}
+    opt.on( '-p', '--project FILES_OR_DIRS','Array', 'files and directories to import (remote mode)' ) {|t| $cfg_dyn[:proj_list] += t.split(",").map{|e| e.strip}}
+end
+
+
+all.set_execution_block do |args|
+    #added for local use of client-server!
+    $cfg_dyn[:hostname]=Socket.gethostname
+ 
+#puts "dyndoc_mode";p $cfg_dyn[:dyndoc_mode]
+    $cfg_dyn[:working_dir]=File.expand_path(".") if $cfg_dyn[:dyndoc_mode]==:local_server 
+#puts "working dir";p  $cfg_dyn[:working_dir]
+    args.each do |name|
+        puts "[Client] File to deal with: "+name+"\n"
+        #if name =~ /^(?:(ssh|google)\:\/\/)?([^:\/]*)?(?:\:(\d*))?(?:\/(.*))?\@([^\:]*)(?:\:(.*))?$/
+        #  service,server,port,room,name,docs=$1,$2,$3,$4,$5,$6
+        #  port=(port ? port.to_i : $dyndoc_client_cfg[:port])
+=begin          
+        if name =~ /(.*)@(.*)/
+            name=$2
+            server=$1
+            if server =~ /(.*)\:(.*)/
+                server= $1
+                port=$2.to_i
+            else
+                port=$dyndoc_client_cfg[:port]
+            end
+=end
+=begin
+        #else
+        #if name =~ /^([^\:]*)(?:\:(.*))?\@(?:(ssh|google)\:\/\/)?([^:\/]*)?(?:\:(\d*))?(?:\/(.*))?$/
+        
+        if name =~ /^([^\:\@]*)(?:\:([^\@]*))?\@(?:(ssh|google|dropbox)\:\/\/)?([^:\/]*)?(?:\:(\d*))?(?:\/(.*))?$/ 
+          name,docs,service,server,port,room=$1,$2,$3,$4,$5,$6
+          port=(port ? port.to_i : $dyndoc_client_cfg[:port])
+=end
+        if name =~ /^(?:(?:(dyn|dyndoc|ssh|google|dropbox)\:)?(?:\/\/([^\:\/]*)(?:\:(\d*))?\/))?(?:([^\:]*))(?:\:(.*))?$/ 
+          service,url,port,name,docs=$1,$2,$3,$4,$5
+          ##DEBUG: p [service,url,port,name,docs]
+          if !service and !url and !port and File.exists? name #local use
+            service,url,port = :local,"127.0.0.1",6666
+          else
+            server=nil
+            ##DEBUG: p $dyndoc_client_cfg
+            if url and $dyndoc_client_cfg[:servers].keys.include? url.to_sym
+              server,url=$dyndoc_client_cfg[:servers][url.to_sym],nil
+            else
+              server=$dyndoc_client_cfg[:servers][:default]
+            end
+            room,name=name.split("/")[0...-1].join("/"),name.split("/")[-1]
+            ##DEBUG: p room;p server
+            room=(room.empty? ? server[:room] : room)
+            url=(url ? url : server[:url])
+            port=(port ? port.to_i : server[:port])
+            service=(service ? service : server[:service]).to_s
+          end
+        end
+        ##DEBUG: p [service,url,port,room,name,docs]
+        $cfg_dyn[:doc_list] += docs.split(",").map{|e| e.strip} if docs
+        service="dyn" if service=="dyndoc" # basic mode
+        $cfg_dyn[:dyndoc_room]="#{service}://#{room}" if service
+        ## for dropbox authentification
+        if service=="dropbox"
+          secret_file=File.join(ENV["HOME"],"Dropbox","Dyndoc",File.split(room)[0],".secret")
+          if new_secret_file or !(File.exists? secret_file)
+            $cfg_dyn[:dyndoc_secret]=SecureRandom.hex(16)
+            File.open(secret_file, "w") { |file| 
+              file <<  $cfg_dyn[:dyndoc_secret]
+            }
+          else
+            $cfg_dyn[:dyndoc_secret]=File.read(secret_file)
+          end
+        end
+        ##DEBUG: p $cfg_dyn[:dyndoc_secret]
+        puts "[Client] tries to connect #{url} port #{port}"
+        $cfg_dyn[:filename_client]={:name => name}
+        $cfg_dyn[:filename_client][:name] += ".dyn" if !(File.exists? $cfg_dyn[:filename_client][:name]) and  File.exists? $cfg_dyn[:filename_client][:name]+".dyn"
+        ## deals with infiles and outfiles and proj_list
+        if $cfg_dyn[:proj_list].empty? and (File.directory? File.join(File.dirname($cfg_dyn[:filename_client][:name]),"filesIN"))
+          $cfg_dyn[:proj_list] << "filesIN" #default input directory
+        end
+        if tmp_cfg_dyn=(Dyndoc::Utils.cfg_file_exists? $cfg_dyn[:filename_client][:name])
+          ## TODO: next cmd to execute in specific File.dirname($cfg_dyn[:filename_client][:name]))
+          cfg_user=eval(File.read(tmp_cfg_dyn))
+          ## infiles and outfiles
+          $cfg_dyn[:infiles],$cfg_dyn[:outfiles]=[],[]
+          $cfg_dyn[:infiles] += cfg_user[:infiles] if cfg_user[:infiles]
+          $cfg_dyn[:outfiles] += cfg_user[:outfiles] if cfg_user[:outfiles]
+          ## run over doc_list if non empty
+          doc_list = $cfg_dyn[:doc_list]
+          doc_list = cfg_user[:doc_list] if doc_list.empty?
+          doc_list.each{|doc| 
+            $cfg_dyn[:infiles] += cfg_user[:docs][doc][:infiles] if cfg_user[:docs][doc] and cfg_user[:docs][doc][:infiles]
+            $cfg_dyn[:outfiles] += cfg_user[:docs][doc][:outfiles] if cfg_user[:docs][doc] and cfg_user[:docs][doc][:outfiles]
+          } unless doc_list.empty?
+          #p $cfg_dyn[:infiles];p $cfg_dyn[:outfiles]
+        end
+        if service and File.exists? $cfg_dyn[:filename_client][:name]
+            EventMachine.run {
+              #portMin,portMax=5555,5559
+              $cfg_dyn[:client_cmd_opts][:port]=port
+              #EM::add_periodic_timer(1) {
+              #EM::next_tick{
+              ##DEBUG: p $cfg_dyn
+                EventMachine.connect url, port, DyndocClient, $cfg_dyn
+              #}
+              #}
+            }
+        else
+          if service
+            puts "[Client] Stop since file #{$cfg_dyn[:filename_client][:name]} does not exist!"
+          else
+            puts "[Client] Stop since service is not provided!"
+          end
+        end
+  end
+end
+cmd.add_command( all )
+
+=begin
+# texmacs
+exit = CmdParse::Command.new( 'exit', false )
+exit.short_desc = "exit dyndoc server"
+exit.set_execution_block do
+    EventMachine.run {
+        EventMachine.connect $dyndoc_client_cfg[:server], $dyndoc_client_cfg[:port], DyndocClient
+    } 
+end
+cmd.add_command( exit )
+=end
+
+cmd.parse args

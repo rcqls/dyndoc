@@ -1,0 +1,13 @@
+*.exe
+*.dll
+*.do
+*.o
+*.so
+*.dylib
+*.png
+*.jpeg
+*.jpg
+*.pdf
+*~
+*.OLD
+*#

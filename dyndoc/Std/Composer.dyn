@@ -1,0 +1,37 @@
+example: argument of the #Compose function is of the form
+list of lines containing "|"-separated list of elements of the form
+<caseVar in tmplPartDoc> = < tmplPartDoc > : <comma separated list of part> 
+default value for is "docs"
+
+{#def]Compose[#,]list[]
+[#rb<]docs=#{=list}.split("\n").map{|l| l.split("|")}.flatten.map{|e| e.strip}.flatten
+#p docs
+[#>]{#for]doc in docs
+[#rb<]caseVar,partList=doc.split("=")
+partList,caseVar=caseVar,"docs" unless partList
+caseVar.strip!
+partList.strip!
+#split on the first ":"
+docTmpl,*partList=partList.split(":").map{|e| e.strip}
+partList=partList.join(":").strip
+#puts caseVar;puts docTmpl;puts partList
+[#>]:{caseVar}[:{partList}][#<<]:{docTmpl}
+[#for}
+[#def}
+
+Version without #for but directly with ruby for and block code! 
+{#def]Compose[#,]list[]
+[#rb>]docs=#{=list}.split("\n").map{|l| l.split("|")}.flatten.map{|e| e.strip}.flatten
+#p docs
+for doc in docs do
+  caseVar,partList=doc.split("=")
+  partList,caseVar=caseVar,"docs" unless partList
+  caseVar.strip!
+  partList.strip!
+#split on the first ":"
+  docTmpl,*partList=partList.split(":").map{|e| e.strip}
+  partList=partList.join(":").strip
+#puts caseVar;puts docTmpl;puts partList
+  {#>][#>]:{caseVar}[:{partList}][#<<]:{docTmpl}[#>}
+end
+[#def}

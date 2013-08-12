@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+require 'rubygems'
+require 'cmdparse'
+require 'eventmachine'
+require 'yaml'
+require 'socket'
+require 'cqlsEM/client-server'
+
+##########################################
+
+class CqlsClient < EventMachine::Connection
+
+    include CqlsClientServer
+    include CqlsLinker
+
+    def initialize(linker=nil)
+        super
+        init_com("Client")
+        init_linker(:client) if linker
+        # stuff here...
+    end
+  
+    def process(data)
+         if data=="__client_to_exit__"
+            puts "[Client] client to exit!"
+            close_connection_after_writing
+        end
+    end
+
+    def unbind
+        puts '[Client] connection totally closed'
+        EM::stop_event_loop
+    end
+end
+
+###########################################
+ 
+EventMachine.run {
+    server="127.0.0.1"
+    port=6666
+    linker=CqlsLinker.linker #to link keyboard
+    EventMachine.connect server, port, CqlsClient, linker
+    EM.open_keyboard CqlsClientKeyboard,linker 
+}
+  

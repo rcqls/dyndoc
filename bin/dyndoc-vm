@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+########################################################################################
+## 	dyndoc-vm pdf <docu_path> 	#check that File.expand_path(<docu_path>)
+## 		ssh cqls@127.0.0.1 /usr/local/bin/dyndoc-ruby all -cspdf $DOCUS_VM_ROOT_PATH/<vm_docu_path> 
+## 		where <vm_docu_path> is the corresponding path in the vm machine.
+##  	$DOCUS_ROOT_PATH_VM: 	root path of the shared folder corresponding to the vm 
+## 		$DOCUS_ROOT_PATH_LOCAL: root path of the directory related the shared folder
+## 	dyndoc-vm exec 
+#########################################################################################
+$dyndoc_ruby = "/usr/local/bin/dyndoc-ruby"
+$dyndoc_root_path_inside_vm="/home/cqls/VirtualBoxShared"
+$dyndoc_root_path_local_export="/export/VirtualBoxShared"
+
+def local_to_vm(dynfile)
+	dynfile=[".dyn","_tmpl.tex",".dyn_tex"].select{|ext| File.exists? dynfile+ext}[0] unless dynfile =~ /(?:\.dyn|_tmpl.tex|.dyn_tex)$/
+	if dynfile
+		dynfile=File.expand_path(dynfile)
+		dynfile= (dynfile =~ /^#{$dyndoc_root_path_local_export}(.*)/) ? File.join($dyndoc_root_path_inside_vm,$1) : nil
+	end
+	dynfile
+end
+
+if false
+elsif ARGV[0]=="pdf"
+	dynfile=local_to_vm(ARGV[-1])
+	exit 0 unless dynfile
+	%x[ssh -p 2222 cqls@127.0.0.1 #{$dyndoc_ruby} all -cspdf #{ARGV[1...-1].join(" ")} #{dynfile}]
+elsif ARGV[0]=="exec"
+	puts %x[ssh -p 2222 cqls@127.0.0.1 #{ARGV[1..-1].join(" ")}]
+else
+	dynfile=local_to_vm(ARGV[-1])
+	exit 0 unless dynfile
+	%x[ssh -p 2222 cqls@127.0.0.1 #{$dyndoc_ruby} #{ARGV[1...-1].join(" ")} #{dynfile}]
+end

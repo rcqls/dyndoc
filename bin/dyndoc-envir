@@ -1,0 +1,82 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+require 'rubygems'        	# if you use RubyGems
+require 'commander/import'
+require 'dyndoc/common/utils'
+
+
+# :name is optional, otherwise uses the basename of this executable
+program :name, 'dyndoc environment'
+program :version, '0.1.0'
+program :description, 'Dyndoc environment management.'
+
+highline= HighLine.new
+
+command :path do |c|
+  c.syntax = 'dyndoc-envir path'
+  c.description = 'Manage paths for Windows'
+  c.action do |args, options|
+  	if Dyndoc::Utils.is_windows?
+  		dirsR=Dir[File.join(ENV['ProgramFiles'].split('\\'),'**','R.dll')].map{|e| File.dirname(e).split('/').join('\\').strip}.uniq
+	    if dirsR.empty?
+	    	say("No R directory found in your Windows System!")
+	    else
+		    require 'win32/registry'
+		    paths=nil
+			Win32::Registry::HKEY_CURRENT_USER.open('Environment') do |reg|
+				paths=reg['path'].split(";").map{|l| l.strip}
+			end
+			save=false
+			case args[0].downcase.to_sym
+	  		when :r
+				highline.choose do |menu|
+					menu.prompt = "Please select the R directory to add to your PATH:  "
+					menu.choices(*dirsR) do |ch|
+						paths << ch
+						save=true
+						say("#{ch} added to user PATH!") 
+					end
+				  	menu.choice :quit do  say("Nothing done!") end
+				end
+			when :add
+				paths << args[1].split(";").map{|l| l.strip}
+				say("#{args[1]} added to user PATH!") 
+				save=true
+	  		when :del
+	  			highline.choose do |menu|
+					menu.prompt = "Please choose path to delete?  "
+					menu.choices(*paths) do |ch|
+						paths.delete(ch)
+						save=true
+						say("#{ch} removed from user PATH!") 
+					end
+				  	menu.choice :quit do  say("Nothing done!") end
+				end
+	  		end
+	  		if save
+		  		Win32::Registry::HKEY_CURRENT_USER.open('Environment',Win32::Registry::KEY_WRITE) do |reg|
+			  		reg['path'] = paths.join(";")
+			  		puts reg['path']
+			  	end
+			end
+			puts paths.join("\n")+"\n"
+		end
+	end
+  end
+end
+
+command :link do |c|
+  	c.syntax = 'dyndoc-envir link'
+ 	c.description = 'Create a link for Dyndoc Console2'
+  	c.action do |args, options|
+  		console=args[0] ? args[0] : "C:\\tools\\Console2\\Console.exe"
+  		require 'win32/shortcut'
+  		Win32::Shortcut.new(ENV["HOME"].split("/").join("\\")+"\\Desktop\\Dyndoc.lnk") do |s| 
+  		    s.description       = 'Dyndoc'
+		    s.path              = console
+		    s.window_style      = Win32::Shortcut::SHOWNORMAL
+		    s.icon_location		= console
+		    s.working_directory = ENV["HOME"].split("/").join("\\")
+		end
+	end
+end

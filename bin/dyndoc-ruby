@@ -1,0 +1,330 @@
+#!/usr/bin/env ruby
+require 'cmdparse'
+require "dyndoc/V3/init/dyn"
+require "dyndoc/common/init"
+
+CqlsDoc.init_dyn
+CqlsDoc.set_curDyn(:V3)
+
+## detect the gem path!
+$dyn_gem_root=File.join(File.split(File.dirname(__FILE__))[0...-1])
+
+##########################################
+
+cmd = CmdParse::CommandParser.new( true )
+cmd.program_name = "dyndoc"
+cmd.program_version = [1, 5, 0]
+
+$cfg_dyn={
+  :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
+  :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
+  :nbChar_error=> 300,:working_dir=>"",:dyndoc_mode=>:normal
+}
+
+# user input dyn variable does not start with "--" and contains "=".
+args=ARGV.select{|name|
+  if (name[0,2]!="--" and name.include? "=") 
+    key,*val=name.split("=")
+    val=val.join("=")
+    $cfg_dyn[:user_input] << [key,val]
+    false
+  else 
+    true
+  end
+}
+
+args,$cfg_dyn[:cmd_pandoc_options]=args[0...(args.index "--pandoc")],args[((args.index "--pandoc")+1)..-1] if args.include? "--pandoc"
+unless (args & PANDOC_CMDS).empty? 
+  $cfg_dyn[:cmd_pandoc_options] = args & PANDOC_CMDS
+  args -= $cfg_dyn[:cmd_pandoc_options]
+end
+#p args
+#p $cfg_dyn[:cmd_pandoc_options]
+
+cmd.options = CmdParse::OptionParserWrapper.new do |opt|
+  opt.separator "Global options:"
+  opt.on('-v','--version VERSION',"dyndoc version to call (special: V3TTM, V3ODT)") {|v| $cfg_dyn[:version]=v}
+  opt.on("--verbose", "Be verbose when outputting info") {|t| $cfg_dyn[:verbose] = true }
+  opt.on("--debug", "debug mode") {|t| $cfg_dyn[:debug] = true }
+  opt.on("-N","--nb-char-error-mode NBCHAR","Number of char in Error mode") {|t| $cfg_dyn[:nbChar_error]=t.to_i}
+  opt.on('-b',"--backup", "backup mode") {|t| $cfg_dyn[:backup] = true }
+=begin
+  opt.on('-o',"--output OUTPUT","output format tex(default),txt,txtl,html,c") {|o| $cfg_dyn[:output]=o.to_sym}
+=end
+  opt.on('--test','Use local package for development purposes') {
+    ## NEW: this is put in dyndoc-devel!
+    #$:.unshift(File.join(ENV["HOME"],".gPrj","work","dyndoc.ruby","lib"))
+    #puts "RUBY SEARCH PATH:" 
+    #puts $:.join(":")
+    ## put local dyndoc code library in second position 
+    if $cfg_dyn[:rootDoc]
+      $cfg_dyn[:rootDoc]+=":(2)"+File.join(ENV["HOME"],".gPrj","work","dyndoc.ruby","dyndoc")
+    else
+      $cfg_dyn[:rootDoc]="(2)"+File.join(ENV["HOME"],".gPrj","work","dyndoc.ruby","dyndoc")
+    end
+    $cfg_dyn[:devel_mode]=:test
+  }
+
+  opt.on('-d', '--model_doc MODEL','model for document (Experimental)') {|m| 
+    m=nil if m.downcase.strip=="no"
+    $cfg_dyn[:model_doc] =m
+  }
+  # special case added to only have content with no model
+  opt.on('-c',"--content","only content") {|t| $cfg_dyn[:model_doc]="content" }
+  opt.on('-x',"--raw","raw mode, i.e. no preload") {|t| $cfg_dyn[:raw_mode]=true}
+
+  opt.on('-m', '--model MODEL','model (Experimental)') {|m| 
+    m=nil if m.downcase.strip=="no"
+    $cfg_dyn[:model_tmpl] =m
+  }
+  opt.on('-f','--pre TMPL',Array,'template to preload') {|t| $cfg_dyn[:pre_tmpl] += t}
+  opt.on('-l','--post TMPL',Array,'template to postload') {|t| $cfg_dyn[:post_tmpl] += t}
+  opt.on('-o','--out_tags TAGS',Array,'filter tags') {|t| $cfg_dyn[:out_tag] += t}
+  opt.on('-p','--part_tags TAGS',Array,'filter tags') {|t| $cfg_dyn[:part_tag] += t}
+  opt.on('-t','--tags TAGS',Array,'filter tags') {|t| $cfg_dyn[:tag_tmpl] += t}
+  opt.on('-T','--Tag TAG','filter tag and extension') {|t| 
+    if t[0,1]=="/" 
+      t=t[1..-1]
+      a=t
+    else
+      a="-"+t
+    end
+    $cfg_dyn[:tag_tmpl] << t; $cfg_dyn[:append]=a
+  }
+  opt.on('-k','--keys KEYS',Array,'filter keys') {|t| $cfg_dyn[:keys_tmpl] += t}
+#=begin
+  opt.on('-a',"--append EXTENSION","extension to append to the basename (ex: _corr)") {|a| a=(a[0,1]=="/" ? a[1..-1] : "-"+a ); $cfg_dyn[:append]=a}
+#=end
+  opt.on( '-r', '--root DIR', 'Prepend this document root' ) {|dir|
+    $cfg_dyn[:rootDoc]=dir
+  }
+  
+  #opt.on( '--doc', 'launch doc pdf file' ) {
+    #$curDyn.init
+    #system "#{$curDyn[:pdfviewer]} #{File.join(CqlsDoc.sysRootDoc,'root_utf-8','Doc',$curDyn[:docfile])}&"
+  #}
+  opt.on('--viewer VIEWER','launch viewer (no=without) ') {|view| $cfg_dyn[:pdfviewer]=$cfg_dyn[:pngviewer]=view}
+  opt.on('--enc ENCODINGS','encodings utf-8 (default) or iso-8859-1') {|enc| $cfg_dyn[:enc]=enc}
+  opt.on('-R','--rserv CLI','Use Rserve for computing R after initializing a session CLI') {|cli| $dyndoc_rserv=cli}
+end
+
+cmd.add_command( CmdParse::HelpCommand.new )
+cmd.add_command( CmdParse::VersionCommand.new )
+
+# all
+all = CmdParse::Command.new( 'all', false )
+all.short_desc = "Parse all files"
+all.options = CmdParse::OptionParserWrapper.new do |opt|
+  opt.on( '-d', '--docs DOCS','Array', 'document list' ) {|t| $cfg_dyn[:doc_list] += t.split(",").map{|e| e.strip}}
+  opt.on('-c', '--cmd COMMAND','[s(ave)][b(ackup)][c(at)][pdf|png][v(iew)] and x=sv') {|c|
+    $cfg_dyn[:cmd] =[]
+    $cfg_dyn[:cmd] << :save if c.include? "s"
+    $cfg_dyn[:cmd] << :backup if c.include? "b"
+    $cfg_dyn[:cmd] << :cat if c.include? "c"
+    $cfg_dyn[:cmd] << :pdf if c.include? "pdf"
+    $cfg_dyn[:cmd] << :png if c.include? "png"
+    $cfg_dyn[:cmd] << :view if c.include? "v"
+    $cfg_dyn[:cmd] << :save << :view if c.include? "x"
+    $cfg_dyn[:cmd] =[:cat] if $cfg_dyn[:cmd].empty? and  $cfg_dyn[:model_doc]=="content"
+  }
+  opt.on('-t','--test','Useful for testing (equivalent to -mno all -cc') {
+    $cfg_dyn[:cmd] =[:cat]
+    $cfg_dyn[:model_tmpl]=nil
+  }
+  opt.on( '-o', '--output_dir ', 'output directory' ) {|t| $cfg_dyn[:dirname_docs] = t}
+end
+
+all.set_execution_block do |args|
+  args.each do |name|
+      puts "=> File to deal with: "+name+"\n"
+      CqlsDoc.read_curDyn(name) #if nothing specified, :V3 is chosen here!
+      unless [:V1,:V2,:V2dtag].include? $curDyn[:version]
+        $curDyn.init
+        $curDyn.tmpl_doc.make_all
+      end
+  end
+end
+cmd.add_command( all )
+
+# make
+make = CmdParse::Command.new( 'make', false )
+make.short_desc = "make all files"
+$cfg_dyn[:cmd] =[]
+make.options = CmdParse::OptionParserWrapper.new do |opt|
+  opt.on( '-d', '--docs DOCS','Array', 'document list' ) {|t| $cfg_dyn[:doc_list] += t.split(",").map{|e| e.strip}} 
+  opt.on('-t','--test','Useful for testing (equivalent to -mno all -cc') {
+    $cfg_dyn[:cmd] =[:cat]
+    $cfg_dyn[:model_tmpl]=nil
+  }
+  opt.on( '-o', '--output_dir ', 'output directory' ) {|t| $cfg_dyn[:dirname_docs] = t}
+end
+
+make.set_execution_block do |args|
+  args.map{|name|
+    CqlsDoc.read_curDyn(name) #if nothing specified, :V3 is chosen here!
+    unless [:V1,:V2,:V2dtag].include? $curDyn[:version]
+      $curDyn.init
+      $curDyn.tmpl_doc.make_all
+    end
+  }
+end
+cmd.add_command( make )
+
+
+
+# tex
+tex = CmdParse::Command.new( 'tex', false )
+tex.short_desc = "Parse tex file"
+tex.set_execution_block do |args|
+  args.map{|name| 
+    CqlsDoc.read_curDyn(name,:tex)
+    $curDyn.tex(name)
+  }
+end
+cmd.add_command( tex )
+
+# pdf
+pdf = CmdParse::Command.new( 'pdf', false )
+pdf.short_desc = "Parse tex and pdflatex file"
+pdf.set_execution_block do |args|
+  args.map{|name| 
+    CqlsDoc.read_curDyn(name,:tex)
+    $curDyn.tex_pdf(name)
+  }
+end
+cmd.add_command( pdf ,true)
+
+# xpdf
+xpdf = CmdParse::Command.new( 'xpdf', false )
+xpdf.short_desc = "Parse tex and View pdf file"
+xpdf.set_execution_block do |args|
+  args.map{|name| 
+    CqlsDoc.read_curDyn(name,:tex)
+    $curDyn.tex_xpdf(name)
+  }
+end
+cmd.add_command( xpdf ,true)
+
+#png
+png = CmdParse::Command.new( 'png', false )
+png.short_desc = "Parse tex and View png file"
+png.set_execution_block do |args|
+  args.map{|name| 
+    CqlsDoc.read_curDyn(name,:tex)
+    $curDyn.tex_png(name)
+  }
+end
+cmd.add_command( png )
+
+# txt
+txt = CmdParse::Command.new( 'txt', false )
+txt.short_desc = "Parse text file"
+txt.set_execution_block do |args|
+  args.map{|name| 
+    CqlsDoc.read_curDyn(name,:txt)
+    $curDyn.txt(name)
+  }
+end
+cmd.add_command( txt )
+
+# txtl
+txt = CmdParse::Command.new( 'txtl', false )
+txt.short_desc = "Parse textile file"
+txt.set_execution_block do |args|
+  args.map{|name| 
+    CqlsDoc.read_curDyn(name,:txtl)
+    $curDyn[:output]=:txtl
+    $curDyn.txt(name)
+  }
+end
+cmd.add_command( txt )
+
+# texmacs
+tm = CmdParse::Command.new( 'tm', false )
+tm.short_desc = "Parse texmacs file"
+tm.set_execution_block do |args|
+  args.map{|name| 
+    CqlsDoc.read_curDyn(name,:tm)
+    $curDyn[:output]=:tm
+    $curDyn.txt(name)
+  }
+end
+cmd.add_command( tm )
+
+# doc
+doc = CmdParse::Command.new( 'doc', false )
+doc.short_desc = "View doc pdf file"
+doc.set_execution_block do
+  $curDyn.init
+  $curDyn[:cmd]=:doc
+  system "#{$curDyn[:pdfviewer]} #{File.join(CqlsDoc.sysRootDoc,'root_utf-8','Doc','dynOLD',$curDyn[:docfile])}&"
+end
+cmd.add_command( doc )
+
+# scan!
+scan = CmdParse::Command.new( 'scan', false )
+scan.short_desc = "Scan file"
+input,mode,master=false,:process,true
+scan.options = CmdParse::OptionParserWrapper.new do |opt|
+  opt.on( '-p', '--pretty', 'pretty method' ) {mode=:pretty}
+  #opt.on( '-m', '--master', 'master document') {master=true}
+  opt.on( '-i', '--input', 'input line' ) {input=true}
+  opt.on( '-x', '--extract', 'extract method' ) {mode=:extract}
+end
+scan.set_execution_block do |args|
+  #require 'cqlstools/cqlsinit'
+  require 'dyndoc/V1+/base/scanner'
+  p=CqlsDoc::DevTagScanner.new
+  args.each{|arg|
+    b=(input ? arg : File.read(arg) ) 
+    b="{#document][#main]"+b+"[#}" if master
+    p.tokenize(b)
+    case mode
+    when :extract
+      p p.extract
+    when :pretty 
+      p.pretty_print(p.parse_text(p.extract))
+    when :process
+      p p.process(b) 
+    end
+  }
+end
+cmd.add_command( scan )
+
+#get list of docs
+list = CmdParse::Command.new( 'list', false )
+list.short_desc = "get list of docs (only from V3)"
+list.set_execution_block do |args|
+   args.map{|name| 
+    CqlsDoc.read_curDyn(name)
+    puts "Avalaible docus (all -d docs): "+$curDyn.cfg[:docs].keys.join(",")
+  }
+end
+cmd.add_command( list )
+
+#query infos on library
+query = CmdParse::Command.new( 'query', false )
+query.short_desc = "query info on some library"
+query.set_execution_block do |args|
+  args.map{|name|
+      CqlsDoc.init_dyn([:V3])
+      $curDyn=CqlsDoc::DYN[:V3]
+      $curDyn.init(false)
+      $curDyn.tmpl.query_library(name)
+  }
+end
+cmd.add_command( query )
+
+#get cfg
+get = CmdParse::Command.new( 'cfg', false )
+get.short_desc = "get config part tags and path root"
+get.set_execution_block do |args|
+  args.map{|name| 
+    CqlsDoc.read_curDyn(name)
+    $curDyn.init
+    $curDyn.get_cfg(name)
+  }
+end
+cmd.add_command( get )
+
+cmd.parse args
