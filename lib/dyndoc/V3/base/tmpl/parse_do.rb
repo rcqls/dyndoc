@@ -16,7 +16,7 @@ module CqlsDoc
 
     @@cmd=["newBlck","input","require","def","func","meth","new","super","blck","do","if","for","case", "loop","r","renv","rverb","rout","rb","var","set","hide","format","txt","code","<","<<",">","eval","ifndef","tags","keys","opt","document","yield","get","part","style"]
     ## Alias
-    @@cmdAlias={"unless"=>"if","out"=>"do","r<"=>"r","R<"=>"R","rb<"=>"rb","r>"=>"r","R>"=>"R","rb>"=>"rb","m<"=>"m","M<"=>"m","m>"=>"m","M>"=>"m" ,"<"=>"txt","<<"=>"txt",">"=>"txt","code"=>"txt","dyn"=>"eval","r>>"=>"rverb","R>>"=>"rverb","rout"=>"rverb","saved"=>"blck","blckAnyTag"=>"blck"}
+    @@cmdAlias={"unless"=>"if","out"=>"do","r<"=>"r","R<"=>"R","rb<"=>"rb","r>"=>"r","R>"=>"R","rb>"=>"rb","m<"=>"m","M<"=>"m","m>"=>"m","M>"=>"m","jl>"=>"jl","jl<"=>"jl","<"=>"txt","<<"=>"txt",">"=>"txt","code"=>"txt","dyn"=>"eval","r>>"=>"rverb","R>>"=>"rverb","rout"=>"rverb","saved"=>"blck","blckAnyTag"=>"blck"}
     @@cmd += @@cmdAlias.keys
 
     def add_dtag(dtag,cmdAlias=nil)
@@ -440,7 +440,7 @@ p [vars,b2]
           when :do,:<
             i,*b2=next_block(blck,i)
             parse(b2,filter) if cond_tag and cond
-          when :"r<",:"rb<",:"R<",:"m<",:"M<"
+          when :"r<",:"rb<",:"R<",:"m<",:"M<",:"jl<"
             newblck=blck[i]
   #puts "newblock";p newblck;p blck
             i,*b2=next_block(blck,i)
@@ -556,7 +556,7 @@ p [vars,b2]
                   @fmtContainer.shift
                 end
 
-            when :"r>",:"rb>",:"R>",:"m>",:"M>"
+            when :"r>",:"rb>",:"R>",:"m>",:"M>",:"jl>"
                   newblck=blck[i]
                   i,*b2=next_block(blck,i) 
       #puts "RB>";p b2;p i;p blck
@@ -1875,7 +1875,7 @@ p call
 
     def do_R(tex,blck,filter)
       ## rbBlock stuff
-      ## Dyndoc.warn "do_R",blck
+      # Dyndoc.warn "do_R",blck
       dynBlock=dynBlock_in_doLangBlock?(blck)
       if dynBlock 
         @doLangBlock=[] unless @doLangBlock
@@ -1912,7 +1912,7 @@ p call
 
     def do_m(tex,blck,filter)
       newblck=blck[0]
-#puts "do_m";p blck
+# Dyndoc.warn "do_m";p blck
       filter.outType=":m"
       i=0
       i,*b2=next_block(blck,i)
@@ -1923,6 +1923,22 @@ p call
       tex2=CqlsDoc::Converter.mathlink(code)
       if [:"M>",:"m>"].include? blck[0]
         tex << (blck[0]==:"M>" ? ('$'+tex2+'$').gsub("\\\\","\\") : tex2 )
+      end
+      filter.outType=nil
+    end
+
+    def do_jl(tex,blck,filter)
+       newblck=blck[0]
+# Dyndoc.warn "do_jl";p blck
+      filter.outType=":jl"
+      i=0
+      i,*b2=next_block(blck,i)
+      code=parse(b2,filter)
+       
+      #p ["Mathematica",code]
+      tex2=JLServer.eval(code).to_s
+      if [:"jl>"].include? blck[0]
+        tex << tex2
       end
       filter.outType=nil
     end

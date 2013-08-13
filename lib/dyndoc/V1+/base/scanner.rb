@@ -224,7 +224,7 @@ module CqlsDoc
   class CallScanner < Scanner
 
     @@type[:call]={
-          :start=>/\\?(?:\#|\#\#|@|#F|#R|#r|\:R|\:r|#Rb|#rb|\:|\:Rb|\:rb)?\{/,
+          :start=>/\\?(?:\#|\#\#|@|#F|#R|#r|\:R|\:r|#Rb|#rb|\:|\:Rb|\:rb|\:jl|#jl)?\{/,
           :stop=>     /\\?\}/,
           :mode=>{:start=>-1,:stop=>0,:length=>1},
           :escape_start=>['\{'], #doivent être parsable dans start
@@ -267,7 +267,7 @@ module CqlsDoc
       init_tag(@tag_type) if [:dtag].include? @tag_type
     end
 
-    @@tagblck_set=[:<<,:<,:do,:>>,:>,:">!",:out,:nl,:"\\n",:"r<",:"R<",:"rb<",:"m<",:"M<",:"r>>",:"R>>",:rverb,:rout,:"r>",:"R>",:"rb>",:"m>",:"M>",:"_<",:"_>",:"__>",:"html>",:"tex>",:"txtl>",:"ttm>",:"md>",:tag,:"??",:"?",:yield,:"=",:"-",:+,:"%"]
+    @@tagblck_set=[:<<,:<,:do,:>>,:>,:">!",:out,:nl,:"\\n",:"r<",:"R<",:"rb<",:"m<",:"M<",:"jl<",:"r>>",:"R>>",:rverb,:rout,:"r>",:"R>",:"rb>",:"m>",:"M>",:"jl>",:"_<",:"_>",:"__>",:"html>",:"tex>",:"txtl>",:"ttm>",:"md>",:tag,:"??",:"?",:yield,:"=",:"-",:+,:"%"]
     #Rmk: when a symbol is included in another one, you have to place it before! Ex: :>> before :> and also :<< before :<
     @@tag_blck=[] #to cancel soon!!
 
@@ -309,7 +309,7 @@ module CqlsDoc
       },
 =end
       :dtag => {
-        :instr=>["newBlck","input","require","hide","format","txt",">","<","<<",">>","code","verb","if","unless","for","loop","case","var","set","def","func","meth","new","super","do","out","blck","blckAnyTag","saved","b>","call","R","r","m","M","renv","rverb","rout","rb","eval","ifndef","tags","keys","opt","document","yield","get","part"],
+        :instr=>["newBlck","input","require","hide","format","txt",">","<","<<",">>","code","verb","if","unless","for","loop","case","var","set","def","func","meth","new","super","do","out","blck","blckAnyTag","saved","b>","call","R","r","m","M","jl","renv","rverb","rout","rb","eval","ifndef","tags","keys","opt","document","yield","get","part"],
         :alias=>{
           :vars=>:var,
           :dyn=>:eval,
@@ -320,8 +320,10 @@ module CqlsDoc
           #:"b>" => [:blck, :>],
           :"rb>" => [:blck, :"rb>"],
           :"R>" =>  [:blck, :"R>"],
+          :"jl>" => [:blck, :"jl>"],
           :"rb<" => [:blck, :"rb<"],
           :"R<" =>  [:blck, :"R<"],
+          :"jl<" => [:blck, :"jl<"],
           :"r>>" => [:blck, :"r>>"],
           :"R>>" => [:blck, :"r>>"],
           :"*<" =>  [:blck, :"*<"],

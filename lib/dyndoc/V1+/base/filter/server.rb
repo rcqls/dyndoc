@@ -672,4 +672,17 @@ module CqlsDoc
 
   end
 
+  class JLServer
+
+ 	# def JLServer.init(mode=:default) #mode=maybe zmq (to investigate) 
+	# 	require 'jl4rb'
+	# 	Julia.init
+	# end
+
+	def JLServer.eval(code)
+		Julia.eval(code)
+	end
+
+  end
+
 end

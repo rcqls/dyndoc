@@ -10,10 +10,16 @@ module CqlsDoc
     attr_reader :scan, :blckName
     ### attr_accessor :mark
 
+    # Maybe better located inside server.rb
     def TemplateManager.initR
       require "R4rb"
       Array.initR
       R4rb << ".dynStack<-new.env()" #used for R variables used by dyn
+    end
+
+    def TemplateManager.initJulia
+      require "jl4rb"
+      Julia.init
     end
 
     def TemplateManager.attr
@@ -22,7 +28,8 @@ module CqlsDoc
       attr
     end
     
-    def initialize(tmpl_cfg,withR=true)
+    def initialize(tmpl_cfg,with=true)
+      with={:R=>true,:jl=>true} if with==true
 #puts "DEBUT INIT TemplateManager"
       @tmpl_cfg=tmpl_cfg
 =begin
@@ -30,7 +37,8 @@ module CqlsDoc
 =end
       ## default system root appended
       ## To remove: CqlsDoc.setRootDoc(@cfg[:rootDoc],CqlsDoc.sysRootDoc("root_"+@cfg[:enc]),false)
-      TemplateManager.initR if withR
+      TemplateManager.initR if with[:R]
+      TemplateManager.initJulia if with[:jl]
       rbenvir_init(binding)
       @rEnvir=["Global"]
       @envirs={}

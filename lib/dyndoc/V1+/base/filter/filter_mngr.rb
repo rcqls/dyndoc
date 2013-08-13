@@ -326,7 +326,7 @@ module CqlsDoc
 =end
 
     def process(txt,in_type=nil,out_type=nil)
-#puts "process:txt";p txt
+#puts "process:txt";p txt;p in_type
       return txt[1..-1] if txt[0,1]=="\\"
       txt2=txt[(in_type.length+1)..-2] if in_type
       out_type=@outType unless out_type
@@ -365,6 +365,9 @@ module CqlsDoc
           res=txt 
         end
         #puts "#{txt} in #{@rEnvir[0]} is #{res}"
+      when ":jl","#jl"
+        return txt if @mode==:pre
+        res=JLServer.eval(txt2).to_s
       when "@"
         return txt if  @mode==:pre
         res=CallFilter.output(txt,self)
