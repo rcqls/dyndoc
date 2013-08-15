@@ -678,6 +678,19 @@ module CqlsDoc
 	# 	require 'jl4rb'
 	# 	Julia.init
 	# end
+	@@initVerb=nil
+
+	def JLServer.initVerb
+		Julia << "include(\""+File.join($dyn_gem_root,"share","julia","dyndoc.jl")+"\")"
+		@@initVerb=true
+	end
+
+	def JLServer.inputsAndOutputs(code)
+		JLServer.initVerb unless @@initVerb
+		(Julia << 'capture_julia('+code.strip.inspect+')').map{|input,output,output2,error,error2|
+			{:input=>input,:output=>output,:output2=>output2,:error=>error,:error2=>error2}
+		}
+	end
 
 	def JLServer.eval(code)
 		Julia.eval(code)

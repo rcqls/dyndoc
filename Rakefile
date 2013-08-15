@@ -15,6 +15,7 @@ PKG_FILES=FileList[
     'lib/dyndoc/**/*.rb', #not lib/cqlsEM/* lib/dyndocEM
     'dyndoc/**/*',
     'share/odt/**/*',
+    'share/julia/**/*',
     'dyndoc/**/.*' #IMPORTANT file starting with . are by default ignored!
 ]
 
