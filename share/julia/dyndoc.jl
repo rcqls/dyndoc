@@ -1,24 +1,25 @@
 #cmd="a=1\n(a)\nfor i in 1:3\nprintln(i)\nend"
 
-function capture_cmd(cmd::String)
-	add,cmd0=true,String[]
-	res=Any[] #Dict{String,Any}()
-	for l=split(cmd,"\n")
-		#println("l => ",l)
-		push!(cmd0,l) 
-		pcmd0=Base.parse_input_line(join(cmd0,"\n"))
-		#print(join(cmd0,"\n")*":");println(pcmd0)
-		add = typeof(pcmd0)==Expr && pcmd0.head == :continue
-		if !add 
-			#print("ici:")
-			#println(Base.eval(pcmd0))
-			push!(res,(join(cmd0,"\n"),eval(pcmd0))) 
-			cmd0=String[] 
-		end
-		#println(res)
-	end
-	res
-end
+# # Unused! See capture_julia
+# function capture_cmd(cmd::String)
+# 	add,cmd0=true,String[]
+# 	res=Any[] #Dict{String,Any}()
+# 	for l=split(cmd,"\n")
+# 		#println("l => ",l)
+# 		push!(cmd0,l) 
+# 		pcmd0=Base.parse_input_line(join(cmd0,"\n"))
+# 		#print(join(cmd0,"\n")*":");println(pcmd0)
+# 		add = typeof(pcmd0)==Expr && pcmd0.head == :continue
+# 		if !add 
+# 			#print("ici:")
+# 			#println(Base.eval(pcmd0))
+# 			push!(res,(join(cmd0,"\n"),eval(pcmd0))) 
+# 			cmd0=String[] 
+# 		end
+# 		#println(res)
+# 	end
+# 	res
+# end
 
 function get_stdout_iobuffer()
 	seek(STDOUT, 0)
@@ -35,7 +36,6 @@ function get_stderr_iobuffer()
 end
 
 # export weave
-
 # module DyndocSandbox
 #     # Copied from Gadfly.jl/src/weave.jl 
 #     # Replace OUTPUT_STREAM references so we can capture output.

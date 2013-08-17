@@ -15,11 +15,17 @@ module CqlsDoc
       require "R4rb"
       Array.initR
       R4rb << ".dynStack<-new.env()" #used for R variables used by dyn
+      RServer.init_envir 
+      RServer.init_filter
     end
 
     def TemplateManager.initJulia
       require "jl4rb"
       Julia.init
+      # init rb4jl stuff
+      # since inside ruby, no need Ruby.start and Ruby.stop like in rb4R.
+      # sort of equivalent of JLServer.init_filter (but not yet defined)!
+      Julia << "include(\""+File.join($dyn_gem_root,"share","julia","ruby.jl")+"\")"
     end
 
     def TemplateManager.attr
@@ -45,8 +51,6 @@ module CqlsDoc
       @fmtContainer=[]
       @echo=1
       @strip=true
-      RServer.init_envir 
-      RServer.init_filter
 #puts "FIN INIT TemplateManager"
       if $cfg_dyn and $cfg_dyn[:devel_mode] and $cfg_dyn[:devel_mode]==:test
         puts "DYNDOC SEARCH PATH:"

@@ -367,7 +367,8 @@ module CqlsDoc
         #puts "#{txt} in #{@rEnvir[0]} is #{res}"
       when ":jl","#jl"
         return txt if @mode==:pre
-        res=JLServer.eval(txt2).to_s
+        ## puts "#jl:"+txt2
+        res=JLServer.output(txt2,:print=>nil)
       when "@"
         return txt if  @mode==:pre
         res=CallFilter.output(txt,self)
@@ -491,7 +492,7 @@ module CqlsDoc
     end
 
     def convert(res,out_type=nil,in_type=nil)
-#puts "convert:";p res
+##puts "convert:";p [res,out_type]
       return res unless out_type
       case out_type
       when ":=",":rb=",":Rb=","#rb=","#Rb="
@@ -525,7 +526,13 @@ module CqlsDoc
           res.join(",")
         else
           res.to_s
-        end 
+        end
+      when ":jl","#jl"
+        if res.is_a? Array
+          res.join(",")
+        else
+          res.to_s
+        end
       when "=","@=","#=","##=" ,"none="
 #puts "convert [=]";p res
         if res.is_a? Array

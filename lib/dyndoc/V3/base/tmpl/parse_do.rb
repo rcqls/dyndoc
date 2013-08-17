@@ -38,7 +38,7 @@ module CqlsDoc
       @varscan=VarsScanner.new unless @varscan
 #puts "parse";p texblock
       if texblock.is_a? String
-        #puts "parse";p texblock
+        ## Dyndoc.warn "parse",texblock
         Utils.parse_raw_text!(texblock,self)
         #puts "After parse_raw_text";p texblock
         #puts "raw_key and raw_text";p Utils.dyndoc_raw_text
@@ -48,7 +48,7 @@ module CqlsDoc
         Utils.silence_warnings do 
           texblock=@scan.process("{#document][#content]" + texblock + "[#}")
         end
-#p texblock
+        ## Dyndoc.warn "parsed",texblock
       end
 #p "texblock";p texblock
       unless filterLoc
@@ -79,7 +79,7 @@ module CqlsDoc
         if true; method("do_"+cmd).call(out,b,filterLoc); else
         begin
           method("do_"+cmd).call(out,b,filterLoc)
-          ##p [:out,out] if cmd=="eval"
+          ## Dyndoc.warn [:out,out] if cmd=="eval"
         rescue
           puts "=> Leaving block depth #{@@depth}: "
           codeText=b.inspect
@@ -1702,7 +1702,7 @@ p call
 
     attr_accessor :doLangBlock    
 
-    def make_do_lang_blck(blck,id,forR=false)
+    def make_do_lang_blck(blck,id,lang=:rb)
       #p blck
       cptCode=-1
 ## Dyndoc.warn "make_do_lang_blck",blck
@@ -1711,25 +1711,35 @@ p call
         if b.respond_to? "[]" and [:>,:<,:<<].include? b[0]
           cptCode+=1
           @doLangBlock[id][:code][cptCode]=Utils.escape_delim!(b[1])
-          codeLangBlock = "$curDyn.tmpl.evalR"+(forR ? "" : "b")+"Block(#{id.to_s},#{cptCode.to_s},:#{b[0].to_s},#{forR.to_s})"
+          codeLangBlock = "CqlsDoc.curDyn.tmpl.eval"+ lang.to_s.capitalize+"Block(#{id.to_s},#{cptCode.to_s},:#{b[0].to_s},:#{lang})"
 
           @doLangBlockEnvs=[0] unless @doLangBlockEnvs #never empty?
           @doLangBlockEnvs << (doLangBlockEnv=@doLangBlockEnvs.max + 1)
           @doLangBlock[id][:env] << doLangBlockEnv
           
           ## NEW: Special treatment for R code because environment is different from GlobalEnv
-          if forR
+          case lang
+          when :R
             # first, get the environment
             codeLangBlock="{.GlobalEnv$.env4dyn$rbBlock#{doLangBlockEnv.to_s} <- environment();.rb(\""+codeLangBlock+"\");invisible()}"
             # use it to evaluate the dyn block with R stuff! (renv) 
             @doLangBlock[id][:code][cptCode]= "[#<]{#renv]rbBlock#{doLangBlockEnv.to_s}+[#}[#>]"+@doLangBlock[id][:code][cptCode]+"[#<]{#renv]rbBlock#{doLangBlockEnv.to_s}-[#}"
-          else
+          when :jl
+            # Nothing since no binding or environment in Julia
+            # Toplevel used
+            codeLangBlock="begin Ruby.run(\""+codeLangBlock+"\") end"
+            @doLangBlock[id][:code][cptCode]= "[#>]"+@doLangBlock[id][:code][cptCode]
+          when :rb
             ##DEBUG: codeRbBlock="begin $curDyn.tmpl.rbenvir_go_to(:rbBlock#{rbBlockEnv.to_s},binding);p \"rbBlock#{doBlockEnv.to_s}\";p \"rbCode=#{codeRbBlock}\";$result4BlockCode="+codeRbBlock+";$curDyn.tmpl.rbenvir_back_from(:rbBlock#{doLangBlockEnv.to_s});$result4BlockCode; end" 
-            codeLangBlock="begin $curDyn.tmpl.rbenvir_go_to(:rbBlock#{doLangBlockEnv.to_s},binding);$result4BlockCode="+codeLangBlock+";$curDyn.tmpl.rbenvir_back_from(:rbBlock#{doLangBlockEnv.to_s});$result4BlockCode; end"  
+            codeLangBlock="begin CqlsDoc.curDyn.tmpl.rbenvir_go_to(:rbBlock#{doLangBlockEnv.to_s},binding);$result4BlockCode="+codeLangBlock+";CqlsDoc.curDyn.tmpl.rbenvir_back_from(:rbBlock#{doLangBlockEnv.to_s});$result4BlockCode; end"    
           end
-          if forR 
+          case lang
+          when :R 
             process_r(@doLangBlock[id][:code][cptCode])
-          else
+          when :jl
+            # TODO
+            #process_jl(@doLangBlock[id][:code][cptCode])
+          when :rb
             process_rb(@doLangBlock[id][:code][cptCode])
           end
           [:main,codeLangBlock]
@@ -1742,7 +1752,7 @@ p call
       blck2
     end
 
-    def evalRbBlock(id,cpt,tag,forR)
+    def evalRbBlock(id,cpt,tag,lang=:rb)
 ## Dyndoc.warn "@doLangBlock[#{id.to_s}][:code][#{cpt.to_s}]",@doLangBlock[id][:code][cpt]#,@doLangBlock[id][:filter]
       ## this deals with the problem of newBlcks!
       ##puts "block_normal";p blckMode_normal?
@@ -1760,7 +1770,7 @@ p call
       #######################################
 
       if tag == :<<
-        return ( forR ? RServer.output(@doLangBlock[id][:out],@rEnvir[0],true) : eval(@doLangBlock[id][:out]) )
+        return ( lang==:R ? RServer.output(@doLangBlock[id][:out],@rEnvir[0],true) : eval(@doLangBlock[id][:out]) )
       else
         return @doLangBlock[id][:out]
       end  
@@ -1853,12 +1863,13 @@ p call
 #=end
 
 
-    def evalRBlock(id,cpt,tag,forR)
+    def evalRBlock(id,cpt,tag,lang=:R)
       ## this deals with the problem of newBlcks!
       ## Dyndoc.warn "block_normal",blckMode_normal?
       code=(blckMode_normal? ? @doLangBlock[id][:code][cpt] : "{#blckAnyTag]"+@doLangBlock[id][:code][cpt]+"[#blckAnyTag}" )
-      ## Dyndoc.warn "code",code
+      ## Dyndoc.warn "codeR",code
       @doLangBlock[id][:out]=parse(code,@doLangBlock[id][:filter])
+      ## Dyndoc.warn "code2R", @doLangBlock[id][:out]
       if tag == :>
         outcode=@doLangBlock[id][:out].gsub(/\\/,'\\\\\\\\') #to be compatible with R
         outcode='cat(\''+outcode+'\')'
@@ -1866,7 +1877,7 @@ p call
         outcode.to_R # CLEVER: directly redirect in R output that is then captured
       end
       if tag == :<<
-        return ( forR ? RServer.output(@doLangBlock[id][:out],@rEnvir[0],true) : eval(@doLangBlock[id][:out]) )
+        return ( lang==:R ? RServer.output(@doLangBlock[id][:out],@rEnvir[0],true) : eval(@doLangBlock[id][:out]) )
       else
         return @doLangBlock[id][:out]
       end  
@@ -1874,7 +1885,7 @@ p call
 
 
     def do_R(tex,blck,filter)
-      ## rbBlock stuff
+      ## rBlock stuff
       # Dyndoc.warn "do_R",blck
       dynBlock=dynBlock_in_doLangBlock?(blck)
       if dynBlock 
@@ -1882,10 +1893,10 @@ p call
         @doLangBlock << {:tex=>'',:code=>[],:out=>'',:filter=>filter,:env=>[]}
         rBlockId=@doLangBlock.length-1
       end
-      ## this is ruby code!
+      ## this is R code!
       filter.outType=":r"
       ## Dyndoc.warn "do_R",filter.envir.local
-      blck=make_do_lang_blck(blck,rBlockId,true) #true at the end is for R!
+      blck=make_do_lang_blck(blck,rBlockId,:R) #true at the end is for R!
       ## Dyndoc.warn "do_R",blck
       code = parse_args(blck,filter)
       ## Dyndoc.warn "R code="+code
@@ -1910,6 +1921,59 @@ p call
       ## Dyndoc.warn "SORTIE R!",dynBlock,blck,tex2
     end
 
+    def evalJlBlock(id,cpt,tag,lang=:jl)
+      ## Dyndoc.warn "evalJlBlock!!!"
+      ## this deals with the problem of newBlcks!
+      ## Dyndoc.warn "block_normal",blckMode_normal?
+      code=(blckMode_normal? ? @doLangBlock[id][:code][cpt] : "{#blckAnyTag]"+@doLangBlock[id][:code][cpt]+"[#blckAnyTag}" )
+      ## Dyndoc.warn "codeJL",code
+      ## Dyndoc.warn "filter",@doLangBlock[id][:filter]
+      @doLangBlock[id][:out]=parse(code,@doLangBlock[id][:filter])
+      ## Dyndoc.warn "code2JL",@doLangBlock[id][:out]
+      ## Dyndoc.warn tag
+      if tag == :>
+        outcode=@doLangBlock[id][:out] #.gsub(/\\/,'\\\\\\\\') #to be compatible with R
+        outcode='print("'+outcode+'")'
+        ## Dyndoc.warn "outcode",outcode
+        Julia.exec outcode,:get=>nil # CLEVER: directly redirect in R output that is then captured
+      end
+      if tag == :<<
+        return ( lang==:jl ? JLServer.eval(@doLangBlock[id][:out],@rEnvir[0],true) : eval(@doLangBlock[id][:out]) )
+      else
+        return @doLangBlock[id][:out]
+      end  
+    end
+
+    def do_jl(tex,blck,filter)
+      ## rbBlock stuff
+      dynBlock=dynBlock_in_doLangBlock?(blck)
+      if dynBlock 
+        @doLangBlock=[] unless @doLangBlock
+        @doLangBlock << {:tex=>'',:code=>[],:out=>'',:filter=>filter,:env=>[]}
+        jlBlockId=@doLangBlock.length-1
+      end
+# Dyndoc.warn "do_jl";p blck
+      filter.outType=":jl"
+      # i=0
+      # i,*b2=next_block(blck,i)
+      # code=parse(b2,filter)
+      blck=make_do_lang_blck(blck,jlBlockId,:jl)
+      ## Dyndoc.warn "do_jl",blck
+      code = parse_args(blck,filter)
+      ## Dyndoc.warn "code_jl",code
+      if [:"jl>"].include? blck[0]
+        tex << JLServer.outputs(code,:block => true)
+      else
+        JLServer.eval(code)
+      end
+      ## revert all the stuff
+      if dynBlock
+        @doLangBlockEnvs -= @doLangBlock[jlBlockId][:env] #first remove useless envRs
+        @doLangBlock.pop
+      end
+      filter.outType=nil
+    end
+
     def do_m(tex,blck,filter)
       newblck=blck[0]
 # Dyndoc.warn "do_m";p blck
@@ -1926,23 +1990,6 @@ p call
       end
       filter.outType=nil
     end
-
-    def do_jl(tex,blck,filter)
-       newblck=blck[0]
-# Dyndoc.warn "do_jl";p blck
-      filter.outType=":jl"
-      i=0
-      i,*b2=next_block(blck,i)
-      code=parse(b2,filter)
-       
-      #p ["Mathematica",code]
-      tex2=JLServer.eval(code).to_s
-      if [:"jl>"].include? blck[0]
-        tex << tex2
-      end
-      filter.outType=nil
-    end
-
 
     def do_tags(tex,blck,filter)
       i=0

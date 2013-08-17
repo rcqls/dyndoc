@@ -48,6 +48,10 @@ module CqlsDoc
     end
   end
 
+  def CqlsDoc.curDyn
+    $curDyn
+  end
+
 
   def CqlsDoc.set_curDyn(version)
     case version.to_s
