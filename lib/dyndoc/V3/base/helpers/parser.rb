@@ -47,13 +47,33 @@ module CqlsDoc;module V3;module Helpers
               "@vars.extract_raw(#{delim}"+var+"#{delim})[:r].value"
             end
           }
+
+          part[i].gsub!(/<([\w\.\_\-]+)((?:[\&\[][^>])+(?:(?!\&>).){0,500})?\&>/) {|e|
+            var=$1+"&"
+  #puts "process_rb:<var$>";p $1;p $2 
+            if (arg=$2)
+              #@vars.extract_raw(var)[:r].arg=arg
+  #puts "arg";p arg;p @vars.extract_raw(var)[:r].value_with_arg
+              "@vars.extract_raw(#{delim}"+var+"#{delim})[:jl].set_arg(#{delim}"+arg+"#{delim}).value_with_arg"
+            else
+              "@vars.extract_raw(#{delim}"+var+"#{delim})[:jl].value"
+            end
+          }
 #=end
           part[i].gsub!(/<[\w\.\_\-]+\:>/) {|e| 
             "@vars.extract_raw(#{delim}"+e[1...-2]+"#{delim})[:val][0]"
           }
-#p str
+          ## dynArray var
+          part[i].gsub!(/<[\w\.\_\-]+\%>/) {|e|
+            #p e[1...-1]
+            #p @vars.extract_raw(e[1...-1])
+            #@vars.extract_raw(e[1...-1])[:rb][0]-= 10
+            #(Dyndoc::Vector.get[@vars.extract_raw(e[1...-1])[:rb].ids(:rb)])[0]=10
+            @vars.extract_raw(e[1...-1])[:rb].wrapper(:rb)
+          }
 
         }
+        #-| TO DEBUG: Dyndoc.warn part.join("") if part.join("")!=str
 #p part.join("")
         str.replace(part.join(""))
 
@@ -103,23 +123,46 @@ module CqlsDoc;module V3;module Helpers
         #str.gsub!(/<[\w\.\_\-]+\@>/) {|e| 
         #  "dynVar[["+e[1...-2]+"]]"
         #} 
+        str2=str.dup
+        ## ruby var
         str.gsub!(/<([\w\.\_\-]+)(\@)?((?:[\@\[][^>])+(?:(?!\@>).){0,500})?\@>/) {|e| 
 #puts "process_r: ("+$1+","+($2 ? $2 : "nil" )+","+($3 ? $3 : "nil")+")"
           if $3
             arg =( $3[0,1]=="@" ? "."+$3[1..-1] : $3 )
 #p arg
 #p "dynRbVar[\""+$1+"@\",\""+arg+"\"]"
-            "dynRbVar[\""+$1+"@\",\""+arg+"\"]"
+            "dynVarWithArg[[\""+$1+"\",\""+arg+"\",mode=\"@\"]]"
           else
-            "dynVar[["+$1+","+($2 ? "FALSE" : "TRUE")+"]]"
+            "dynVar[["+$1+",mode=\"@\","+($2 ? "FALSE" : "TRUE")+"]]"
           end
         }
+        ## Julia var
+        str.gsub!(/<([\w\.\_\-]+)(\&)?((?:[\&\[][^>])+(?:(?!\&>).){0,500})?\&>/) {|e| 
+#puts "process_r(jl): ("+$1+","+($2 ? $2 : "nil" )+","+($3 ? $3 : "nil")+")"
+          if $3
+            arg =( $3[0,1]=="&" ? "."+$3[1..-1] : $3 ) #TODO: try to apply
+#p arg
+#p "dynRbVar[\""+$1+"@\",\""+arg+"\"]"
+            "dynVarWithArg[[\""+$1+"\",\""+arg+"\",mode=\"&\"]]"
+          else
+            "dynVar[["+$1+",mode=\"&\","+($2 ? "FALSE" : "FALSE")+"]]"
+          end
+        }
+        ## R var
         str.gsub!(/<[\w\.\_\-]+\$>/) {|e| 
           ".dynStack$rb"+@vars.extract_raw(e[1...-1]).object_id.abs.to_s
         }
+        ## dynArray var
+        str.gsub!(/<[\w\.\_\-]+\%>/) {|e|
+          #p e[1...-1]
+          #p @vars.extract_raw(e[1...-1])
+          @vars.extract_raw(e[1...-1])[:rb].wrapper(:r)
+        }
+        ## Dyndoc var
         str.gsub!(/<[\w\.\_\-]+\:>/) {|e| 
           "dynVar["+e[1...-2]+"]"
         }
+        #-| TO DEBUG:  Dyndoc.warn str if str!=str2
       end
 
       def clean_block_without_bracket(code)

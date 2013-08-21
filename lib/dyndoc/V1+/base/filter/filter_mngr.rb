@@ -6,7 +6,7 @@ module CqlsDoc
 
     attr_accessor :envir, :rbEnvir, :rEnvir, :outType, :tmpl
 
-    @@letters="_,\\-,\\.,\\@,\\$,a-z,0-9,A-Z,à,é,è,ë,ù,ü,ö"
+    @@letters="_,\\-,\\.,\\@,\\$,\\&,\\%,a-z,0-9,A-Z,à,é,è,ë,ù,ü,ö"
     @@letters_short="_,\\-,\\.,a-z,0-9,A-Z,à,é,è,ë,ù,ü,ö"
     @@start,@@stop="\\{","\\}"
 
@@ -224,7 +224,20 @@ module CqlsDoc
             v[:r]=R4rb::RVector.new rname
 #p k;p v
             v[:r] << rname
-            R4rb << rname+"<-"+ v[:val][0] #initialized to 0
+            R4rb << rname+"<-"+ v[:val][0]
+          end
+          if k[-1,1]=="&"
+            jlname="_dynStack_"+v.object_id.abs.to_s
+            v[:jl]=Julia::Vector.new jlname
+#p k;p v
+            v[:jl] << jlname
+            Julia << "("+jlname+"="+ v[:val][0]+")"
+          end
+
+          if k[-1,1]=="%"
+            v[:rb]=Dyndoc::Vector.new([:r,:jl])
+#p k;p v
+            v[:rb].replace eval(v[:val][0],@rbEnvir[0])
           end
 	      end
 	      #special treatment for null array and hash
@@ -422,6 +435,26 @@ module CqlsDoc
 #p $1;p @envir.extract_raw($1);p $2
           #if @envir.extract_raw($1)
             res= ( $2.empty? ? @envir.extract_raw($1)[:r].value : (@envir.extract_raw($1)[:r].name+$2).to_R )
+          #else
+          #  return txt
+          #end
+          #TO CHNAGE!!! res=eval("res"+$2) if $2 #TO CHANGE!!!!
+#puts "res R";p res
+        elsif  /([^\&]+\&)([^\&]*)/ =~ txt2 ##and !(txt2.include? "{") #deal with R variable
+#puts "ICI";p txt2
+## p "jl";p $1;p $2 ;p @envir.extract_raw($1)
+          #if @envir.extract_raw($1)
+            res= ( $2.empty? ? @envir.extract_raw($1)[:jl].value : (@envir.extract_raw($1)[:jl].name+$2).to_jl )
+          #else
+          #  return txt
+          #end
+          #TO CHNAGE!!! res=eval("res"+$2) if $2 #TO CHANGE!!!!
+#puts "res R";p res
+        elsif  /([^\%]+\%)([^\%]*)/ =~ txt2 ##and !(txt2.include? "{") #deal with R variable
+#puts "ICI";p txt2
+## p "dynArray";p $1;p $2 ;p @envir.extract_raw($1)
+          #if @envir.extract_raw($1)
+            res= ( $2.empty? ? @envir.extract_raw($1)[:rb] : (@envir.extract_raw($1)[:rb]+$2) )
           #else
           #  return txt
           #end

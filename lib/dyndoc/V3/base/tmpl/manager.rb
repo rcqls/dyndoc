@@ -17,6 +17,9 @@ module CqlsDoc
       R4rb << ".dynStack<-new.env()" #used for R variables used by dyn
       RServer.init_envir 
       RServer.init_filter
+      ## ruby and R init for dynArray stuff
+      require "dyndoc/common/dynArray"
+      R4rb << "source(\""+File.join($dyn_gem_root,"share","R","dynArray.R")+"\")"
     end
 
     def TemplateManager.initJulia
@@ -26,6 +29,8 @@ module CqlsDoc
       # since inside ruby, no need Ruby.start and Ruby.stop like in rb4R.
       # sort of equivalent of JLServer.init_filter (but not yet defined)!
       Julia << "include(\""+File.join($dyn_gem_root,"share","julia","ruby.jl")+"\")"
+      Julia << "include(\""+File.join($dyn_gem_root,"share","julia","dynArray.jl")+"\")"
+      
     end
 
     def TemplateManager.attr
