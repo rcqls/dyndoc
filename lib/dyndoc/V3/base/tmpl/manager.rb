@@ -30,7 +30,13 @@ module CqlsDoc
       # sort of equivalent of JLServer.init_filter (but not yet defined)!
       Julia << "include(\""+File.join($dyn_gem_root,"share","julia","ruby.jl")+"\")"
       Julia << "include(\""+File.join($dyn_gem_root,"share","julia","dynArray.jl")+"\")"
-      
+      #-| To debug ruby.jl and dynArray.jl => uncomment below and commnt above
+      # Julia << "include(\""+File.expand_path("~/Github/dyndoc/share/julia/ruby.jl")+"\")"
+      # Julia << "include(\""+File.expand_path("~/Github/dyndoc/share/julia/dynArray.jl")+"\")"
+      Julia << "using Dyndoc"
+      Julia << "Ruby.alive(true)"
+      Julia << "global _dynArray=DynArray()"
+
     end
 
     def TemplateManager.attr

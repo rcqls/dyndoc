@@ -235,9 +235,9 @@ module CqlsDoc
           end
 
           if k[-1,1]=="%"
-            v[:rb]=Dyndoc::Vector.new([:r,:jl])
+            v[:rb]=Dyndoc::Vector.new([:r,:jl],eval(v[:val][0],@rbEnvir[0]))
 #p k;p v
-            v[:rb].replace eval(v[:val][0],@rbEnvir[0])
+            #v[:rb].replace eval(v[:val][0],@rbEnvir[0])
           end
 	      end
 	      #special treatment for null array and hash
@@ -454,7 +454,7 @@ module CqlsDoc
 #puts "ICI";p txt2
 ## p "dynArray";p $1;p $2 ;p @envir.extract_raw($1)
           #if @envir.extract_raw($1)
-            res= ( $2.empty? ? @envir.extract_raw($1)[:rb] : (@envir.extract_raw($1)[:rb]+$2) )
+            res= ( $2.empty? ? @envir.extract_raw($1)[:rb].ary : (@envir.extract_raw($1)[:rb].ary+$2) )
           #else
           #  return txt
           #end

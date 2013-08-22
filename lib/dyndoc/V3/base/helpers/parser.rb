@@ -165,6 +165,17 @@ module CqlsDoc;module V3;module Helpers
         #-| TO DEBUG:  Dyndoc.warn str if str!=str2
       end
 
+      def process_jl(str)
+        str2=str.dup
+        ## dynArray var
+        str.gsub!(/<[\w\.\_\-]+\%>/) {|e|
+          #p e[1...-1]
+          #p @vars.extract_raw(e[1...-1])
+          @vars.extract_raw(e[1...-1])[:rb].wrapper(:jl)
+        }
+        #-| TO DEBUG:  Dyndoc.warn str if str!=str2
+      end
+
       def clean_block_without_bracket(code)
         #puts "initial code";p code
         if code[0][0]==:main and code[0][1] =~ /^\s*\[/ and code[-1][0]==:main and code[-1][1] =~ /\]\s*$/

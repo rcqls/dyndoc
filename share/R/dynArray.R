@@ -19,8 +19,8 @@ init.dynArray <- function() {
   obj$vars[[key]] <- value
   #if(sync) { # Easily convertible to Julia!  
     # Clever: no need to convert ruby object in R object (done in the ruby part!)
-    cat("sync",key,"\n")
-    .rb(paste("Dyndoc::Vector.get[\"",key,"\"].sync(:r)",sep=""))
+    ##cat("sync",key,"\n")
+    .rb(paste("Dyndoc::Vector[\"",key,"\"].sync(:r)",sep=""))
     #cat("sync",key,"\n")
   #}
   obj   

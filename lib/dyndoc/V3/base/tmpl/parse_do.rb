@@ -117,9 +117,8 @@ module CqlsDoc
       return parse(txt,filterLoc,tags)
     end
 
-
-
     def parse_args(blck,filter)
+      ## Dyndoc.warn "parse_args",blck
       parse(blck[1..-1],filter)
     end
 
@@ -441,22 +440,25 @@ p [vars,b2]
             i,*b2=next_block(blck,i)
             parse(b2,filter) if cond_tag and cond
           when :"r<",:"rb<",:"R<",:"m<",:"M<",:"jl<"
+            # if current_block_tag==:"jl<"
+            #   ##p "iciiiii"
+            # end
             newblck=blck[i]
   #puts "newblock";p newblck;p blck
             i,*b2=next_block(blck,i)
   #p b2 
   	          code=b2[0][1..-1]
-#p code
+##p code
               #need to be cleaned with no bracket at the beginning and the end of the block!
               clean_block_without_bracket(code)
   	          if cond_tag and cond
-              b2=[code.unshift(newblck)]
-  #puts "r<;rb<";p b2
-              filter.outType=":"+(blck[i].to_s)[0...-1]
-              #p filter.outType
-              parse(b2,filter)
-              filter.outType=nil
-      	    end
+                b2=[code.unshift(newblck)]
+    ##puts "r<;rb<";p b2
+                filter.outType=":"+(blck[i].to_s)[0...-1]
+                #p filter.outType
+                parse(b2,filter)
+                filter.outType=nil
+        	    end
       	  when :"=" #equivalent of :var but DO NOT USE :var
       	    i,*b2=next_block(blck,i)
       	    if cond_tag and cond
@@ -1952,7 +1954,7 @@ p call
         @doLangBlock << {:tex=>'',:code=>[],:out=>'',:filter=>filter,:env=>[]}
         jlBlockId=@doLangBlock.length-1
       end
-# Dyndoc.warn "do_jl";p blck
+      ## Dyndoc.warn "do_jl";p blck
       filter.outType=":jl"
       # i=0
       # i,*b2=next_block(blck,i)
@@ -1960,6 +1962,7 @@ p call
       blck=make_do_lang_blck(blck,jlBlockId,:jl)
       ## Dyndoc.warn "do_jl",blck
       code = parse_args(blck,filter)
+      process_jl(code)
       ## Dyndoc.warn "code_jl",code
       if [:"jl>"].include? blck[0]
         tex << JLServer.outputs(code,:block => true)

@@ -385,7 +385,7 @@ module CqlsDoc
       	},
         :mode_arg=>:next_block,
         :tag_code=>[:code,:<,:>,:<<,:txt], #used for arg mode!
-        :arg=>[:if,:unless,:elsif,:for,:case,:def,:func,:meth,:new,:super,:call,:input,:when,:break,:set,:style,:keys,:"?",:"rb<",:"r<",:"R<",:"m<",:"M<"],
+        :arg=>[:if,:unless,:elsif,:for,:case,:def,:func,:meth,:new,:super,:call,:input,:when,:break,:set,:style,:keys,:"?",:"rb<",:"r<",:"R<",:"m<",:"M<",:"jl<"],
         :blck=>{
           :instr=>[:document,:if,:unless,:case,:loop,:set,:tag,:keys,:rverb,:for],
           :keyword=>{

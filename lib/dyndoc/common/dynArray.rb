@@ -3,7 +3,7 @@ require 'R4rb'
 
 module Dyndoc
 	
-	class Vector < Array
+	class Vector
 
 		## global stuff
 		@@all={}
@@ -12,24 +12,35 @@ module Dyndoc
 			@@all
 		end
 
+		def Vector.[](key)
+			@@all[key]
+		end
+
+		def Vector.[]=(key,value)
+			@@all[key].replace(value) if value.is_a? Array
+			@@all[key]
+		end
+
 		## object stuff
-		attr_accessor :vectors
+		attr_accessor :vectors, :ary
 		
 
-		def initialize(langs=[:r])
+		def initialize(langs=[:r],ary=[])
+			@ary=ary
 			@vectors={}
-			super()
 			if langs.include? :r
 				Array.initR 
 				@vectors[:r]=R4rb::RVector.new ""
 				@vectors[:r] << ids(:r)
+				@vectors[:r] < @ary unless @ary.empty?
 			end
 			if langs.include? :jl
 				Julia.init 
 				@vectors[:jl]=Julia::Vector.new ""
 				@vectors[:jl] << ids(:jl)
+				Julia << wrapper(:jl)+"=Any[]"
+				@vectors[:jl] < @ary unless @ary.empty?
 			end
-
 			# global register => callable for update 
 			@@all[ids(:rb)]=self
 			# first init
@@ -37,7 +48,7 @@ module Dyndoc
 		end
 
 		def inspect
-			"Dyndoc::Vector"+super
+			"Dyndoc::Vector"+@ary.inspect
 		end
 
 		def ids(lang)
@@ -54,7 +65,7 @@ module Dyndoc
 		def wrapper(lang)
 			case lang
 			when :rb
-				 "Dyndoc::Vector.get[\""+ids(:rb)+"\"]"
+				 "Dyndoc::Vector[\""+ids(:rb)+"\"]"
 			when :jl
 				"_dynArray[\"rb"+self.object_id.abs.to_s+"\"]"
 			when :r
@@ -67,25 +78,30 @@ module Dyndoc
 			if @unlock
 				@unlock=nil #to avoid the same update several times
 				## puts "rb sync (from #{from}):"+ids(:rb)
-				@vectors[from] > self unless from==:rb
+				@vectors[from] > @ary unless from==:rb
 				([:jl,:r]-[from]).each do |to|
 					## puts "rb sync (to #{to})"
-					@vectors[to] < self
+					@vectors[to] < @ary
+					## p @vectors[to].value
 				end
 				@unlock=true
 			end
 		end
 
+		def [](key)
+			@ary[key]
+		end
+
 		# when modified from ruby, other languages are updated
 		def []=(key,val)
-			super
+			@ary[key]=val #super
 			sync
 			self
 		end
 
 
 		def replace(ary)
-			super(ary)
+			@ary.replace ary #super ary
 			sync
 			self
 		end

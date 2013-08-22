@@ -26,6 +26,10 @@ module Ruby
 	 	return nothing
 	end
 
+	function alive(b::Bool)
+		global ruby_alive=b
+	end
+
 	function alive()
 		ruby_alive
 	end
