@@ -235,7 +235,17 @@ module CqlsDoc
           end
 
           if k[-1,1]=="%"
-            v[:rb]=Dyndoc::Vector.new([:r,:jl],eval(v[:val][0],@rbEnvir[0]))
+            cmdCode=v[:val][0]
+            args=case cmdCode
+            when /^jl\:/
+              [cmdCode[3..-1],:jl]
+            when /^(r|R)\:/
+              [cmdCode[2..-1],:r]
+            else
+              [eval(cmdCode,@rbEnvir[0]),:rb]
+            end
+            ## Dyndoc.warn "args",args
+            v[:rb]=Dyndoc::Vector.new([:r,:jl],args[0],args[1])
 #p k;p v
             #v[:rb].replace eval(v[:val][0],@rbEnvir[0])
           end

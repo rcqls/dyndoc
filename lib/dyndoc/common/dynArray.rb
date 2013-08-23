@@ -24,9 +24,9 @@ module Dyndoc
 		## object stuff
 		attr_accessor :vectors, :ary
 		
-
-		def initialize(langs=[:r],ary=[])
-			@ary=ary
+		# ary is a String when lang is not :rb
+		def initialize(langs=[:r],first=[],lang=:rb)
+			@ary=(first.is_a? String) ? [] : first
 			@vectors={}
 			if langs.include? :r
 				Array.initR 
@@ -45,6 +45,16 @@ module Dyndoc
 			@@all[ids(:rb)]=self
 			# first init
 			@unlock=true
+			case lang
+			when :jl
+				Julia << ids(:jl)+"="+first
+				sync(:jl)
+				## Julia << "println("+wrapper(:jl)+")"
+			when :r,:R
+				R4rb << ids(:r)+"<-"+first
+				sync(:r)
+				## R4rb << "print("+wrapper(:r)+")"
+			end
 		end
 
 		def inspect
