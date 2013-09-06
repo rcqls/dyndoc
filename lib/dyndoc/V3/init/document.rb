@@ -519,7 +519,9 @@ module CqlsDoc
           system(SOFTWARE[:taskkill]+" /FI \"windowtitle eq "+@basename+".pdf*\"")
         end
       end
-      out=`pdflatex -halt-on-error -file-line-error -interaction=nonstopmode #{@basename}`.split("\n")
+      out=`pdflatex -halt-on-error -file-line-error -interaction=nonstopmode #{@basename}`
+      out=out.b if RUBY_VERSION >= "1.9" #because out is not necessarily utf8 encoded  
+      out=out.split("\n")
       if out[-2].include? "Fatal error"
         if $cfg_dyn[:dyndoc_mode]==:normal
           print " -> NOT OKAY!!!\n==> "
