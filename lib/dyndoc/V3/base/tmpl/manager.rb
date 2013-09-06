@@ -46,7 +46,11 @@ module CqlsDoc
     end
     
     def initialize(tmpl_cfg,with=true)
-      with={:R=>true,:jl=>true} if with==true
+      # just in case it is not yet initialized!
+      unless $cfg_dyn[:langs]
+        $cfg_dyn[:langs]=[] 
+        $cfg_dyn[:langs] << :R if with==true
+      end
 #puts "DEBUT INIT TemplateManager"
       @tmpl_cfg=tmpl_cfg
 =begin
@@ -54,8 +58,8 @@ module CqlsDoc
 =end
       ## default system root appended
       ## To remove: CqlsDoc.setRootDoc(@cfg[:rootDoc],CqlsDoc.sysRootDoc("root_"+@cfg[:enc]),false)
-      TemplateManager.initR if with[:R]
-      TemplateManager.initJulia if with[:jl]
+      TemplateManager.initR if $cfg_dyn[:langs].include? :R
+      TemplateManager.initJulia if $cfg_dyn[:langs].include? :jl
       rbenvir_init(binding)
       @rEnvir=["Global"]
       @envirs={}

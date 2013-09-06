@@ -18,7 +18,7 @@ cmd.program_version = [1, 5, 0]
 $cfg_dyn={
   :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
   :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
-  :nbChar_error=> 300,:working_dir=>"",:dyndoc_mode=>:normal
+  :nbChar_error=> 300,:working_dir=>"",:dyndoc_mode=>:normal,:langs=>[:R]
 }
 
 # user input dyn variable does not start with "--" and contains "=".
@@ -77,6 +77,10 @@ cmd.options = CmdParse::OptionParserWrapper.new do |opt|
     m=nil if m.downcase.strip=="no"
     $cfg_dyn[:model_tmpl] =m
   }
+  opt.on('-L','--lang LANGS',Array,'language to initialize: R,julia') {|t| $cfg_dyn[:langs]=t.map{|l| l.to_sym}}
+  opt.on('-j','--jl','with julia initialized') { $cfg_dyn[:langs] << :jl}
+  opt.on('--no-jl','without julia initialized') { $cfg_dyn[:langs] -= [:jl]}
+  opt.on('--no-R','without R initialized') { $cfg_dyn[:langs] -= [:R]}
   opt.on('-f','--pre TMPL',Array,'template to preload') {|t| $cfg_dyn[:pre_tmpl] += t}
   opt.on('-l','--post TMPL',Array,'template to postload') {|t| $cfg_dyn[:post_tmpl] += t}
   opt.on('-o','--out_tags TAGS',Array,'filter tags') {|t| $cfg_dyn[:out_tag] += t}

@@ -20,6 +20,14 @@
 
 require 'strscan'
 
+if RUBY_VERSION < "1.9"
+  
+  class String
+    alias :byteslice :"[]"
+  end
+
+end
+
 module CqlsDoc
   class Scanner
     
@@ -449,7 +457,7 @@ module CqlsDoc
       ## Instruction delimiter
       delim=@block[@scan.pos,1]
       #p delim
-      @scan.pos += delim.length
+      @scan.pos += delim.bytesize #.length
       st=@scan.pos
       delim=@@close[delim] if @@close[delim]
       #p delim
@@ -457,8 +465,8 @@ module CqlsDoc
       begin
         @scan.scan_until(/#{Regexp.escape(delim)}/)
       end while @block[@scan.pos-2,1]=='\\'
-      sp=@scan.pos - delim.length - 1
-      args=@block[st..sp]
+      sp=@scan.pos - delim.bytesize - 1 #.length - 1
+      args=@block.byteslice(st..sp) #@block[st..sp]
       inside2=[]
       (1..(args.split(@re_strange,-1).length-1)).each{ inside2 << inside.shift }
       return [:args,{:txt=>args,:inside=>inside2}]
@@ -471,23 +479,26 @@ module CqlsDoc
       @next_pre=nil
       if @scan[1].nil? or @scan[1].empty? or @is_arg
 #p "key=";p key;p @tag_selected
-	if @tag_selected
-	  @next_pre=key[2...-1].scan(@dtag[:named_tag][@tag_selected.to_sym][:rest])[0][0]
-	  @next_pre=nil if @next_pre.empty?
-	end
+      	if @tag_selected
+      	  @next_pre=key[2...-1].scan(@dtag[:named_tag][@tag_selected.to_sym][:rest])[0][0]
+      	  @next_pre=nil if @next_pre.empty?
+      	end
         @scan.scan_until(/#{Regexp.escape(key)}/)
-        to=@scan.pre_match.length
-        res=@block[from...to]
+        to=@scan.pre_match.bytesize #.length
+        ##Dyndoc.warn "TOOOOOOOOOOO",[@scan.pre_match,to]
+        res=@block.byteslice(from...to) #@block[from...to]
       else
 #p @scan.pre_match
-        to=@scan.pre_match.length
+        to=@scan.pre_match.bytesize #.length
+        ##Dyndoc.warn "TOOOOOOOOOOO2222",[@scan.pre_match,to]
         delim2=@scan[1] 
         delim2=@@open[delim2] if @@open[delim2]
 #puts "delim2";p delim2; p /#{Regexp.escape(delim2)}/
 #p @block[from...-1]
         @scan.exist?(/#{Regexp.escape(delim2)}/)
-        to_tmp=@scan.pre_match.length
-        pre=@block[from...to_tmp].strip unless pre
+        to_tmp=@scan.pre_match.bytesize #.length
+        ## pre=@block[from...to_tmp].strip unless pre
+        pre=@block.byteslice(from...to_tmp).strip unless pre
         from=to_tmp+1
 #puts "key:";p key; p @scan.matched;p from; p @block[from-1,1]
         @scan.scan_until(/#{@tag[:block]}\s*#{Regexp.escape(key)}/)
@@ -511,25 +522,25 @@ module CqlsDoc
     def complete_tag(key,add=true)
       #Regexp.escape(key.to_s)+((@dtag[:named_tag][key]) ? @dtag[:named_tag][key] : "")
       if @dtag[:named_tag][key]
-	if add
-	  @named_tags << key 
-	  return nil 
-	else
-	  @dtag[:named_tag][key][:tag].sub("_TAG_",Regexp.escape( key.to_s ))
-	end
-      else 
-	return Regexp.escape(key.to_s)
+      	if add
+      	  @named_tags << key 
+      	  return nil 
+      	else
+      	  @dtag[:named_tag][key][:tag].sub("_TAG_",Regexp.escape( key.to_s ))
+      	end
+            else 
+      	return Regexp.escape(key.to_s)
       end
     end
 
     def check_until_for_named_tags
       #if res
       @named_tags.each_index{|i|
-	if @scan[3+i]
-	  @tag_selected=@scan[3+i].to_sym
-#puts "here we go: #{@tag_selected}"
-	  break
-	end
+    	if @scan[3+i]
+    	  @tag_selected=@scan[3+i].to_sym
+    #puts "here we go: #{@tag_selected}"
+    	  break
+    	end
       }
       #end
       #return res
@@ -615,35 +626,36 @@ module CqlsDoc
 	            keytags += @@keystagblck
 	            @named_tags += @@named_tags_blck
 	          end
-#puts "keytags(2)";p keytags
+##puts "keytags(2)";p keytags
 	          tag_reg=/(?:#{keytags})/
 	          unless @named_tags.empty?
 	            keytags += "|"+(@named_tags.map{|tag| complete_tag(tag,nil)}.join("|"))
 	          end
+            ##Dyndoc.warn "keytags",keytags
 	          blocktag_reg=/(#{@tag[:block]}?)\s*(#{@tag[:keyword][0]}(?:#{keytags})#{@dtag[:empty_keyword][0]}#{@tag[:keyword][1]})/
 	        end
-#puts "to scan";p @scan.string[@scan.pos..-1]
-#puts "tag_reg";p blocktag_reg;p tag_reg
+##Dyndoc.warn "to scan", @scan.string[@scan.pos..-1]
+##Dyndoc.warn "tag_reg",[blocktag_reg,tag_reg]
 	      end
         if (tag_keyword and (@scan.check_until(blocktag_reg))) #or (!@named_tags.empty? and check_until_for_named_tags)
 	        check_until_for_named_tags unless @named_tags.empty?
           key=@scan[2]
-#puts "keyword";p key; p @scan[0]; p @scan[1]; p @scan[2]
-#p @scan.pre_match
-#p @tag_selected
+##Dyndoc.warn "keyword",[key,@scan[0],@scan[1],@scan[2]]
+##Dyndoc.warn "pre_math,tag_selected",[@scan.pre_match,@tag_selected] if key=="[#tag]"
           res << find_text(from,key,inside)
           @is_arg=false if @is_arg
-#puts "key(AV)";p key;p tag_reg
+##Dyndoc.warn "key(AV)",[key,tag_reg] if key=="[#tag]"
 	        if @tag_selected
 #puts "tag_selected";p @tag_selected
 	          res << (key=@tag_selected)
 	        else
 	    #key=tag_reg.match(key)[0]
 	          key= key.scan(tag_reg)[0]
-#puts "key(AP)";p key
+##Dyndoc.warn "key(AP)",key if key=="tag"
 	          res << (key=key.to_sym) if key and !key.empty?
 	        end
 	    #res << (key=key[1..-1].to_sym)
+      #p @tag_arg
           if @tag_arg.include? key #without @tag_code inside a block 
             case @dtag[:mode_arg]
             when :find 
@@ -825,7 +837,7 @@ module CqlsDoc
 #p res
 #puts "inside";p res[:inside]
       res[:inside].map do |e|
-        vars2= [e[:type][2..-1].strip,(e[:inside] ? make_vars(e) : e[:txt][(e[:type].length+1)...-1] )]
+        vars2= [e[:type][2..-1].strip,(e[:inside] ? make_vars(e) : e[:txt][(e[:type].bytesize+1)...-1] )] #instead of length
         vars << vars2
       end
 #puts "vars";p vars

@@ -448,7 +448,7 @@ module CqlsDoc
           #else
           #  return txt
           #end
-          #TO CHNAGE!!! res=eval("res"+$2) if $2 #TO CHANGE!!!!
+          #TO CHANGE!!! res=eval("res"+$2) if $2 #TO CHANGE!!!!
 #puts "res R";p res
         elsif  /([^\&]+\&)([^\&]*)/ =~ txt2 ##and !(txt2.include? "{") #deal with R variable
 #puts "ICI";p txt2

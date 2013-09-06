@@ -404,9 +404,11 @@ p [vars,b2]
   	        end
   #puts "cond in block #{code}=";p cond
   	      when :tag,:"??"
+  ## Dyndoc.warn "tag:blck",blck         
   	        i,*b2=next_block(blck,i)
+  ## Dyndoc.warn "tag:b2",b2
   	        code=parse(b2,filter).strip.downcase
-  #puts "tag:#{code}"
+  ## Dyndoc.warn "tag",code
   	        if ["!","else"].include? code
   	          cond_tag = !cond_tag
   	        elsif ["*","all","end"].include? code
@@ -414,9 +416,9 @@ p [vars,b2]
   	        else
   	          mode=nil
   	          mode,code=code[0,1],code[1..-1] if ["&","|","-"].include? code[0,1]
-  #puts "mode and code";p mode;p code
+  ## Dyndoc.warn "mode and code",[mode,code]
   	          tags=TagManager.make_tags(code)
-  #puts "tags, @tags";p tags;p @tags
+  ## Dyndoc.warn "tags, @tags",[tags,@tags]
   	    
   	          cond2_tag=TagManager.tags_ok?(tags,@tags)
   #puts "mode, cond_tag et cond2_tag";p mode; p cond_tag;p cond2_tag

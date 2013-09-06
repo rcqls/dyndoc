@@ -64,7 +64,7 @@ puts "last";p part;p tmp
     end
 
     def TagManager.tags_ok?(part,partTag)
-#puts "tags_ok?:partTag";p partTag
+## Dyndoc.warn "tags_ok?",[part,partTag]
       return true if partTag.include? /^all$/
       part[0]=part[0][1..-1] if (neg=(part[0][0,1] == "-"))
       tmp=false
@@ -106,7 +106,7 @@ puts "last";p part;p tmp
     end
 
     def TagManager.make_tags(str)
-#puts "make_tags";p str
+## Dyndoc.warn "make_tags",str
       if str.is_a? String
         TagManager.pre_tag(str)
         str.split(",").map{|e| e.strip}.map{|t|
