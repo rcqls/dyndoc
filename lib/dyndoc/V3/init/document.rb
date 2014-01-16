@@ -49,12 +49,13 @@ module CqlsDoc
 
     def make_content(content=nil)
       @content=content if content
+      ##@tmplMngr.cfg[:debug]=true
       if @tmplMngr.cfg[:debug]
+        ##puts "@content";p @content
         return prepare_content
       else
         begin
-          return prepare_content
-          ##puts "@content";p @content
+          return prepare_content 
         rescue
           print "WARNING: fail to eval content #{@content} !!\n"
           return ""
@@ -86,8 +87,12 @@ module CqlsDoc
       else
         # find the basename of the template
         @basename=basename_tmpl
+        @dirname=File.dirname(@basename)
+        @basename=File.basename(@basename)
   #p @basename
         @basename_orig=basename_tmpl_orig
+        @dirname_orig=File.dirname(@basename_orig)
+        @basename_orig=File.basename(@basename_orig)
   #p @basename_orig
         # read content of the template
         @content=CqlsDoc.clean_cfg_dyn_from(File.read(@cfg[:filename_tmpl]))
@@ -244,7 +249,10 @@ module CqlsDoc
     end
 
     def open_log
-      $dyn_logger=File.new(logfile=File.join(@dirname,@tmpl.basename_orig+".dyn_log"),"w")
+      #p [@tmpl.basename_orig,@tmpl.basename]
+      logfile=File.join(@dirname,@tmpl.basename_orig+".dyn_log")
+      #p logfile
+      $dyn_logger=File.new(logfile,"w")
       @cfg[:created_docs] << @basename+".dyn_log"
     end
 

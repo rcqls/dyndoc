@@ -59,11 +59,20 @@ module CqlsDoc
 
 	    begin
 	        if rbEnvir.is_a? Binding
-		    	out=eval(code,rbEnvir)
+		    	out=rbEnvir.eval(code)
 		    elsif rbEnvir.is_a? Module
 		        out=rbEnvir.module_eval(code)
 		    end
 	    rescue
+	    	if RUBY_VERSION >= "1.9.3" and rbEnvir.is_a? Binding and rbEnvir.eval("local_variables").include? :childBinding 
+	    		begin 
+		    		rbEnvir2=rbEnvir.eval("childBinding")
+		    		out=rbEnvir2.eval(code)
+		    		return out
+		    	rescue
+		    	end
+	    	end
+
 			#two solution:
 			#in the same spirit as #{}
 			# out="\\:{"+code+"}"
@@ -72,11 +81,12 @@ module CqlsDoc
 			out="\\:{"+code+"}"
 			
 			if $dyndoc_ruby_debug and !$dyndoc_ruby_debug==:expression
-	        	puts "WARNING: >>>>>>>>>>>>>>>>>>+\n"+opts[:error]+" in #{rbEnvir}:\n"+code+"\n<<<<<<<<<<<<<<<<<<" 
+	        	Dyndoc.warn "WARNING: >>>>>>>>>>>>>>>>>>+\n"+opts[:error]+" in #{rbEnvir}:\n"+code+"\n<<<<<<<<<<<<<<<<<<" 
 			end
 
 
 			if $cfg_dyn and $cfg_dyn[:dyndoc_mode]!=:normal
+				##p ["error ruby",code]
 	        	$dyn_logger.write("\nERROR Ruby:\n"+code+"\n")
 	        end
 			
@@ -542,11 +552,16 @@ module CqlsDoc
     
     def RServer.formatInput(out)
       out2=out.gsub(/\\n/,'\textbackslash{n}')
-      unless out2=~/\\\w*\{.*\}/
-        out2.gsub("{",'\{').gsub("}",'\}')
-      else
-        out2
-      end
+      ## {\texttildelow}
+      # unless out2=~/\\\w*\{.*\}/
+      #   out2.gsub("{",'\{').gsub("}",'\}')
+      # else
+      #   out2
+      # end
+      out2,out3=out2.split("#")
+      out2=out2.gsub("{",'\{').gsub("}",'\}')
+      out2=out2+"#"+out3 if out3
+      return out2
     end
     
 

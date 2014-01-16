@@ -149,19 +149,22 @@ end
 
 desc "Create #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'}" 
 task :client do |t|
-  Gem::Builder.new(spec_client).build
+  #Gem::Builder.new(spec_client).build
+  Gem::Package.build(spec_client)
   `mv #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
 end
 
 desc "Create #{PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem'}" 
 task :server do |t|
-  Gem::Builder.new(spec_server).build
-  `mv #{PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
+    #Gem::Builder.new(spec_server).build
+    Gem::Package.build(spec_server)
+    `mv #{PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
 end
 
 desc "Create #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'}" 
 task :vm do |t|
-  Gem::Builder.new(spec_vm).build
+  ##Gem::Builder.new(spec_vm).build
+  Gem::Package.build(spec_vm)
   `mv #{PKG_NAME_VM+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
 end
 

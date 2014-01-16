@@ -37,6 +37,13 @@ module CqlsDoc
         eval("local_variables",rbEnvir)
       end
 
+      def rbenvir_get(rbEnvir=nil)
+        rbEnvir=@rbEnvir[0] unless rbEnvir #the current if nil
+        rbEnvir=@rbEnvirs[rbEnvir] if rbEnvir.is_a? Symbol
+        rbEnvir=@rbEnvir[rbEnvir] if rbEnvir.is_a? Integer
+        rbEnvir
+      end
+
       def rbenvir_current
         @rbEnvirs.keys.select{|b| @rbEnvirs[b]==@rbEnvir[0]}
       end

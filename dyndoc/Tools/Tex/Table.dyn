@@ -23,14 +23,14 @@ curRow=nil
 mat=[]
 cells={}
 matxt=#{=mat}.strip
-#puts matxt
+#Dyndoc.warn "matxt",matxt
 
 #create the matrix
 rows=matxt.split("\\\\").map{|r| r.strip}
 rows.each{|r| #
 #p r
   row=r.strip.split("&",-1).map{|e| e.strip}
-#p row
+#p [:row,row]
   #first column -> maybe a preliminary variable to initialize! 
   while row[0] =~ /^(?:\#|\:)(var|row|col|rb|r)/
     cmd=$1
@@ -114,13 +114,12 @@ mat.map!{|row|
   end
 }
 #p mat
-#p cells
+#Dyndoc.warn "make:cells",cells
 @vars.extract_raw("self")[:cells]=cells
 #p @vars.extract_raw("self")
 #@vars["self"][:cells]=cells
 [#%]put it in R! Là, c'est magic! Le job est fait sans itération!
 [#r<]#{.tabR}<-matrix(:{=mat.flatten},nr=:{nrow},nc=:{ncol},byrow=TRUE)
-
 [#yield]default
 [#?]#{transpose}[#r<]#{tabR}<-t(#{.tabR})[#?]end
 [#<]{#init]self[#}
@@ -204,40 +203,48 @@ for i in 1..#{.imax} do
 end
 =end
 
-#puts "cells"
 cells=@vars.extract_raw("self")[:cells]
-
-#p cells
+#Dyndoc.warn "print:cells",cells
+ 
 
 #=begin
 
-here,res=binding(),nil
-
+## Introduce because of Ruby >= 1.9.3 change of behavior about binding
+## childBinding used inside filter_mngr.rb
+childBinding,res=binding(),nil
 #load("/export/prjCqls/work/R4rb/lib/R4rb/converter.rb")
 #R4rb.pair="<<"
 
-#"print(#{.tabR})".to_R
+## DEBUG: Dyndoc.warn 'tabR';R4rb < "print(#{.tabR})"
 
-for i in 1..#{.imax} do 
-  
+#for i in 1..#{.imax} do 
+(1..#{.imax}).each do |i| # 
+
   if cells[i]
     cells[i].each{|cmd,code,sep| #
       case cmd
         when :var
           code =~ /^([^=]*)=(.*)/
-#p $1;p $2
+#Dyndoc.warn [$1,$2]
           res=$2.strip.to_aRy(sep)
           res.unshift(nil) #to have the counter in the R spirit
-#p res
-#p "#{$1}=res"
-          eval("#{$1}=res",here)
-#p eval("#{$1}",here)
+#Dyndoc.warn "res",res
+#Dyndoc.warn "#{$1}=res"
+          childBinding.eval("#{$1}=res")
+#Dyndoc.warn "print.Tableau",["#{$1}",eval("#{$1}",childBinding),childBinding]
       end
     }
   end
+end
 
+#if RUBY_VERSION >= "1.9.3"
+  ## DO NOT REMOVE => bug in Ruby 2.0! Notice that this line fails in Ruby 1.8.7!
+#  Dyndoc.warn "Row,col:",[row,col]
+#end
 
-  for j in 1..#{.jmax} do
+(1..#{.imax}).each do |i| # 
+  #for j in 1..#{.jmax} do
+  (1..#{.jmax}).each do |j| #
 
     {#>][#=]cell[:r{#{.tabR}[:{i},:{j}]}]
     [#>]{#if]#{=cell}[0,8]=="__MCOL__"[#=]cell[:{#{=cell}[8..-1]}]
@@ -253,6 +260,24 @@ for i in 1..#{.imax} do
 
   end 
 end
+
+##### ruby 2.0 trouble about binding!
+#Dyndoc.warn "HERE!!!!",[childBinding,$curDyn.tmpl.rbenvir_ls(childBinding),$curDyn.tmpl.rbEnvirs]
+#Dyndoc.warn "TOTO",(tmp=$curDyn.tmpl.rbEnvirs.values.map{|v| $curDyn.tmpl.rbenvir_ls(v)})
+#Dyndoc.warn "TOTOA",[:a,($curDyn.tmpl.rbEnvirs.values.map{|v| $curDyn.tmpl.rbenvir_ls(v)}.flatten.include? :childBinding)]
+#if $curDyn.tmpl.rbEnvirs.values.map{|v| $curDyn.tmpl.rbenvir_ls(v)}.flatten.include? :childBinding
+#  tmp=[];
+#  $curDyn.tmpl.rbEnvirs.each_key{|k| 
+#    Dyndoc.warn "TOTOB",$curDyn.tmpl.rbenvir_ls($curDyn.tmpl.rbEnvirs[k])
+#    if $curDyn.tmpl.rbenvir_ls($curDyn.tmpl.rbEnvirs[k]).include? :childBinding
+#      if $curDyn.tmpl.rbenvir_ls(($curDyn.tmpl.rbEnvirs[k]).eval("childBinding")).include? :toto
+#        tmp << ($curDyn.tmpl.rbEnvirs[k]).eval("childBinding").eval("toto[i]")
+#      end
+#    end
+#  }
+#  Dyndoc.warn "TOTO2", tmp
+#end
+
 #=end
 [#>]\end{tabular}
 [#meth}

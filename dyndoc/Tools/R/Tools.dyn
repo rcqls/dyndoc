@@ -122,7 +122,7 @@ header=header.map{|k,v| k+"="+v.to_s}.join(",")
 RServer.device(#{=RDevice.type})
 #p #{=rcode}
 res=CqlsDoc::RServer.inputsAndOutputs(#{=rcode}.strip.gsub("\r\n","\n"),$dyn_supeR+=1,#{=RDevice.opt})
-#puts "res";p res
+puts "res";p res
 header={"fontfamily"=>"courier","fontseries"=>"b","fontsize"=>"\\small"}
 header2=@vars.extract("_optLst")
 header.merge!(header2) if header2 and header2.is_a? Hash
@@ -275,7 +275,11 @@ contIn=nil
 [#for}
 [#def}
 
-{#def]initScriptR[#<]{#document][#package]\RequirePackage[formats]{listings}\RequirePackage{textcomp}[#}[#def}
+{#def]initScriptR[#<]{#document][#package]
+\usepackage[formats]{listings}
+\usepackage{textcomp}
+\usepackage{xcolor}
+[#}[#def}
 
 
 {#hide] CECI est rendu possible grace au escapeinside!
@@ -283,11 +287,7 @@ plot(x,y) {#lstEsc]\label{comment}[#} #toto
 #comment
 [#hide}
 {#def]scriptR[#,]rcode[][#,]exec[true][#>]
-%\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{blue}, escapeinside={\#(*}{*)}}
-\lstdefineformat{R}{%
-"=\texttt{"}%
-}
-\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, name=R, keepspaces=true,format=R}
+\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=R,name=R}
 \begin{lstlisting}[numbers=left]
 #{rcode}
 \end{lstlisting}

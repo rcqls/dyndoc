@@ -1,23 +1,26 @@
-require 'jl4rb'
+#require 'jl4rb'
 require 'R4rb'
 
 # Since more than one language is used for Array transfert
 # This stuff is moved from R4rb package to here
+# => Undone because R4rb is not self-content
+# => methods :> and :< overloaded from R4rb
 
 class Array
 
-	def rb2R=(mode=nil)
-		##puts "rb2R mode #{object_id}";p mode
-		mode=R4rb unless mode
-		return if @rb2R_mode and @rb2R_mode==mode
-		@rb2R_mode=mode unless @rb2R_mode
-		@rb2R=(@rb2R_mode==Rserve ? Rserve::RVector.new("") :  R2rb::RVector.new("") )
-		##puts "rb2R=";p @rb2R
-	end
+	## Already in R4rb and still there to be self-contents
+	# def rb2R=(mode=nil)
+	# 	##puts "rb2R mode #{object_id}";p mode
+	# 	mode=R4rb unless mode
+	# 	return if @rb2R_mode and @rb2R_mode==mode
+	# 	@rb2R_mode=mode unless @rb2R_mode
+	# 	@rb2R=(@rb2R_mode==Rserve ? Rserve::RVector.new("") :  R2rb::RVector.new("") )
+	# 	##puts "rb2R=";p @rb2R
+	# end
 
 	def rb2jl! #only one mode
 		@rb2jl= Julia::Vector.new("") 
-		##puts "rb2R=";p @rb2R
+		##puts "rb2jl=";p @rb2jl
 	end
 	# out is a String representing a R or Julia expression 
 

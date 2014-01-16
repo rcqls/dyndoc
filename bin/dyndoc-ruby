@@ -2,6 +2,7 @@
 require 'cmdparse'
 require "dyndoc/V3/init/dyn"
 require "dyndoc/common/init"
+require 'configliere'
 
 CqlsDoc.init_dyn
 CqlsDoc.set_curDyn(:V3)
@@ -15,10 +16,16 @@ cmd = CmdParse::CommandParser.new( true )
 cmd.program_name = "dyndoc"
 cmd.program_version = [1, 5, 0]
 
+Settings({
+  :langs => ['R']
+})
+Settings.define :langs, :type => Array
+Settings.read cfg if File.exists?(cfg=File.expand_path(File.join("~","dyndoc","etc","dyndoc.cfg")))
+
 $cfg_dyn={
   :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
   :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
-  :nbChar_error=> 300,:working_dir=>"",:dyndoc_mode=>:normal,:langs=>[:R]
+  :nbChar_error=> 300,:working_dir=>"",:dyndoc_mode=>:normal,:langs=>Settings[:langs].map{|e| e.to_sym}
 }
 
 # user input dyn variable does not start with "--" and contains "=".

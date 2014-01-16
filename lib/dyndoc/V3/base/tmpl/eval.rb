@@ -480,7 +480,7 @@ end
 #puts "filter2.local";p filter2.envir.local
 #puts "bCall";p bCall
 #puts "call binding";p filter2.envir.local
-  ###puts "rbEnvir tricks"
+#Dyndoc.warn "rbEnvir tricks", [filter2.envir.extract("binding"),@rbEnvir4calls]
   inRb=filter2.envir.extract("binding") #first the call parameter
   inRb=@rbEnvir4calls[call] unless inRb #second, the tag binding
   rbenvir_go_to(inRb)

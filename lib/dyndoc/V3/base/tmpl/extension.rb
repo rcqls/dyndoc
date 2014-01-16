@@ -267,7 +267,7 @@ end]
       i=(blckname ? 2 : 1)
       ## blckAnyTag behaves like the previous tag in @@newBlcks.keys (all the user-defined commands)
       cmd=@blckDepth.reverse.find{|e| @@newBlcks.keys.include? e} if cmd=="blckAnyTag"
-      #p i;p cmd;p @@newBlcks[cmd];p @blckDepth
+#Dyndoc.warn "extension",[i,cmd,@@newBlcks[cmd],@blckDepth]
       items=(@@newBlcks[cmd].keys)-[":pre",":post",:aggregate]
       #puts "completed:items";p items
       if @@newBlcks[cmd][:aggregate] #and blckname

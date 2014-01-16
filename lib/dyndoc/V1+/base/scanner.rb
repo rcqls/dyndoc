@@ -473,12 +473,12 @@ module CqlsDoc
     end
 
     def find_text(from,key,inside)
-#puts "key";p key
+#p ["key=",key]
       res,to=nil,nil
       pre=(@next_pre ? @next_pre : nil )
       @next_pre=nil
       if @scan[1].nil? or @scan[1].empty? or @is_arg
-#p "key=";p key;p @tag_selected
+#p ["key=",key,@tag_selected]
       	if @tag_selected
       	  @next_pre=key[2...-1].scan(@dtag[:named_tag][@tag_selected.to_sym][:rest])[0][0]
       	  @next_pre=nil if @next_pre.empty?
@@ -488,29 +488,32 @@ module CqlsDoc
         ##Dyndoc.warn "TOOOOOOOOOOO",[@scan.pre_match,to]
         res=@block.byteslice(from...to) #@block[from...to]
       else
-#p @scan.pre_match
+#p ["pre_match=",@scan.pre_match,"to=",@scan.pre_match.bytesize]
         to=@scan.pre_match.bytesize #.length
         ##Dyndoc.warn "TOOOOOOOOOOO2222",[@scan.pre_match,to]
         delim2=@scan[1] 
         delim2=@@open[delim2] if @@open[delim2]
-#puts "delim2";p delim2; p /#{Regexp.escape(delim2)}/
+#p ["delim2=",delim2,/#{Regexp.escape(delim2)}/]
 #p @block[from...-1]
         @scan.exist?(/#{Regexp.escape(delim2)}/)
         to_tmp=@scan.pre_match.bytesize #.length
+#p ["to_tmp=",to_tmp]
         ## pre=@block[from...to_tmp].strip unless pre
+#p [:pre,pre]
         pre=@block.byteslice(from...to_tmp).strip unless pre
+#p ["pre=",pre]
         from=to_tmp+1
-#puts "key:";p key; p @scan.matched;p from; p @block[from-1,1]
+#p ["key:",key,@scan.matched,from,@block[from-1,1]]
         @scan.scan_until(/#{@tag[:block]}\s*#{Regexp.escape(key)}/)
 =begin
         @scan.scan_until(/[\]|]\s*#{key}/)
 =end
-#p @scan.matched
+#p ["matched=",@scan.matched]
 #p @scan.pre_match
 #to=@scan.pre_match.length
-        res= @block[from...to]
+        res=@block.byteslice(from...to) #does not work for ruby2 => @block[from...to]
         pre=nil if pre.empty?
-#p res
+#p ["res=",from,to,res,@block.byteslice(from...to)]
       end
     inside2=[]
     (1..(res.split(@re_strange,-1).length-1)).each{ inside2 << inside.shift }
@@ -565,7 +568,7 @@ module CqlsDoc
       #@scan.scan_until(/(?:#{@tag_instr.join("|")})/)
       @scan.scan_until(@start)
       instr=@scan[1] #@scan.matched
-#p instr
+#p [:instr,instr]
       # next block is a arg block?
       @is_arg=false
       if @tag_instr.include? instr

@@ -19,4 +19,5 @@ dynlib_path=nil
 }
 $:.unshift(dynlib_path) if  dynlib_path
 puts `ruby -v`
-load Gem.bin_path('dyndoc-ruby', 'dyndoc-ruby', version)
+#load Gem.bin_path('dyndoc-ruby', 'dyndoc-ruby', version)
+load File.join(ENV["HOME"],"Github","dyndoc","bin","dyndoc-ruby")

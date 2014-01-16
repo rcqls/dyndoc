@@ -123,7 +123,7 @@ module CqlsDoc
     end
 
     def eval_args(blck,filter)
-      eval(parse(blck[1..-1],filter),@rbEnvir[0])
+      @rbEnvir[0].eval(parse(blck[1..-1],filter))
     end
 
     def next_block(blck,i)
@@ -231,7 +231,10 @@ p [vars,b2]
 #puts "make_named_blck:val";p val
       # NB: bang is processed only at the end and not in the recursive process of parsing!
       # The reason is that maybe the form <NAME>! is not correct in some old document!
+#Dyndoc.warn "make_named_blck:val",[val,process_bang(val),filter.rbEnvir] if bang
+#DEBUG ONLY: val2=val if bang
       val=parse(process_bang(val),filter) if bang
+#Dyndoc.warn "make_named_blck:val2",[val2,val]      if bang
       val=Utils.format_blocktext(val)
 #puts "format_blocktext:val";p val
       if vars
@@ -345,6 +348,7 @@ p [vars,b2]
   	          mode,blckname = :prepend,blckname[1..-1].strip    
   	        end
   	        to_exec,blckname=true,blckname[0...-1] if blckname[-1,1]=="!"
+#Dyndoc.warn "to_exec",[to_exec,blckname]
   	        @savedBlocks[blckname]= ( mode==:normal ? blck[2..-1].unshift(:blck) : ( mode==:append ? @savedBlocks[blckname]+blck[2..-1] : (blck[2..-1]+@savedBlocks[blckname][1..-1]).unshift(:blck) ) )
   	        tex << parse([@savedBlocks[blckname]],filter) if to_exec
   	      elsif to_end
@@ -390,7 +394,7 @@ p [vars,b2]
   	            nbPop.times{cond=condArch.pop}
   	          else
   	            mode,code=code[0,1],code[1..-1] if ["&","|"].include? code[0,1]
-  	            cond2=eval(code,@rbEnvir[0])
+  	            cond2=@rbEnvir[0].eval(code)
   	            condArch << cond
   	            if mode=="&"
   		            cond=  cond & cond2
@@ -525,8 +529,7 @@ p [vars,b2]
       #puts "do_blck:out";p b2
       #p blck
                   vars,b2=get_named_blck(b2,filter)
-      #puts "do_blck:out"
-      #p vars
+#Dyndoc.warn "do_blck:out, >!",[vars,b2] if current_block_tag==:">!"
       #p b2
       #p current_block_tag
       #p current_block_tag==:">!"
@@ -860,14 +863,14 @@ p [vars,b2]
       res = (@curCmd=="txt" ? code : @protected_txt )
       #puts "res";p res
       if name #unless name.empty?
-#puts name; p code
+#Dyndoc.warn "txt:name",[name,code]
         ## the following is only applied when @curCmd==">" or maybe ">>"
         filter.envir[name]=[code]
         outType=nil
         outType=filter.outType+"=" if filter.outType
         tex << filter.convert(name+"!",outType) if @curCmd==">"  #useful for templating as in Table.dyn 
       else
-        #sputs "res2";p res
+#Dyndoc.warn  "res",res
         tex << res
       end
     end
@@ -1552,7 +1555,7 @@ p call
 #p code
 #puts "titi";p filter.envir.local
 #p @rbCode[cpt]
-      eval(code,@rbEnvir[0])
+      @rbEnvir[0].eval(code)
       @rbCode.delete(cpt)
 #p @rbCode
       @texRbCode.delete(cpt)
@@ -1763,14 +1766,15 @@ p call
       code=(blckMode_normal? ? @doLangBlock[id][:code][cpt] : "{#blckAnyTag]"+@doLangBlock[id][:code][cpt]+"[#blckAnyTag}" )
       #puts "code";p code
       @doLangBlock[id][:out]=parse(code,@doLangBlock[id][:filter])
-      #p @doLangBlock[id][:out]
+      ##Dyndoc.warn "evalRbBlock:doLangBlock",[id,code,@doLangBlock[id][:out]] if tag == :>
 
       #########################################
       ## THIS IS FOR OLD
       ##@doLangBlock[id][:tex] << @doLangBlock[id][:out] if tag == :>
       ## THIS IS NEW
       print @doLangBlock[id][:out] if tag == :>
-      ## Dyndoc.warn "EVALRBBLOCK: @doLangBlock[id][:out]",@doLangBlock[id][:out] if tag == :>
+      ## 
+      #Dyndoc.warn "EVALRBBLOCK: @doLangBlock[id][:out]",@doLangBlock[id][:out] if tag == :>
       #######################################
 
       if tag == :<<
@@ -1848,7 +1852,8 @@ p call
 
       if blck[0]==:"rb>"
         tex2=@rbIO.pop.string
-        ## Dyndoc.warn "RbRbRbRbRbRbRb:", (tex2.empty? ? res : tex2)
+#Dyndoc.warn "res",res
+#Dyndoc.warn "RbRbRbRbRbRbRb:", (tex2.empty? ? res : tex2)
         tex << (tex2.empty? ? res : tex2)
       else
         @rbIO.pop

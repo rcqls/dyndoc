@@ -9,7 +9,8 @@ class DyndocServer < EventMachine::Connection
     ##@@clients_list ||= {}
     @@busy=nil
 
-    WorkDir=(RUBY_PLATFORM =~ /(win|w)32$/ ? File.join(ENV["HOME"],"dyndoc-server")  : "/export/dyndoc-server")
+    ##WorkDir=(RUBY_PLATFORM =~ /(win|w)32$/ ? File.join(ENV["HOME"],"dyndoc-server")  : "/export/dyndoc-server")
+    WorkDir=File.join(ENV["HOME"],"dyndoc","dyndoc-server")
     RunDir=File.join(WorkDir,"run") #for the daemons!
     RoomsDir=File.join(WorkDir,"rooms") #for the projects
     GuestRoom="guestOnly"

@@ -178,7 +178,8 @@ all.set_execution_block do |args|
 =end
         if name =~ /^(?:(?:(dyn|dyndoc|ssh|google|dropbox)\:)?(?:\/\/([^\:\/]*)(?:\:(\d*))?\/))?(?:([^\:]*))(?:\:(.*))?$/ 
           service,url,port,name,docs=$1,$2,$3,$4,$5
-          ##DEBUG: p [service,url,port,name,docs]
+          ##DEBUG: 
+          p [service,url,port,name,docs]
           if !service and !url and !port and File.exists? name #local use
             service,url,port = :local,"127.0.0.1",6666
           else
