@@ -233,7 +233,7 @@ class DyndocServer < EventMachine::Connection
 
             outfiles=Dir[File.join("filesOUT","**","*")]
             unless outfiles.empty?
-                require 'zip/zip'
+                require 'zip'
                 require 'fileutils'
                 zipfilename=File.join(@room_dir,"filesOUT.zip")
                 FileUtils.rm zipfilename if File.exists? zipfilename

@@ -34,6 +34,8 @@ PKG_FILES_SERVER=FileList[
     'dyndoc/**/*',
     'share/initscript/**/*',
     'share/odt/**/*',
+    'share/julia/**/*',
+    'share/R/dynArray.R',
     'dyndoc/**/.*' #IMPORTANT file starting with . are by default ignored!
 ]
 

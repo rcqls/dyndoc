@@ -1,6 +1,6 @@
 require 'eventmachine'
 require 'socket'
-require 'zip/zip'
+require 'zip'
 require 'fileutils'
 require 'zlib'
 

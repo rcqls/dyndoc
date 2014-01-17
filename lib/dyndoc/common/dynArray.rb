@@ -1,5 +1,5 @@
 #require 'jl4rb'
-require 'R4rb'
+#require 'R4rb'
 
 # Since more than one language is used for Array transfert
 # This stuff is moved from R4rb package to here

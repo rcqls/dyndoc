@@ -211,13 +211,16 @@ cells=@vars.extract_raw("self")[:cells]
 
 ## Introduce because of Ruby >= 1.9.3 change of behavior about binding
 ## childBinding used inside filter_mngr.rb
-childBinding,res=binding(),nil
+childBinding,res=binding,nil
 #load("/export/prjCqls/work/R4rb/lib/R4rb/converter.rb")
 #R4rb.pair="<<"
 
 ## DEBUG: Dyndoc.warn 'tabR';R4rb < "print(#{.tabR})"
 
-#for i in 1..#{.imax} do 
+
+col,row=[],[]
+
+#for i in 1..#{.imax} do
 (1..#{.imax}).each do |i| # 
 
   if cells[i]
@@ -230,17 +233,25 @@ childBinding,res=binding(),nil
           res.unshift(nil) #to have the counter in the R spirit
 #Dyndoc.warn "res",res
 #Dyndoc.warn "#{$1}=res"
-          childBinding.eval("#{$1}=res")
+          case "#{$1}"
+          when "col"
+            col=res
+          when "row"
+            row=res
+          else
+            childBinding.eval("#{$1}=res")
+          end
 #Dyndoc.warn "print.Tableau",["#{$1}",eval("#{$1}",childBinding),childBinding]
       end
     }
   end
 end
 
-#if RUBY_VERSION >= "1.9.3"
-  ## DO NOT REMOVE => bug in Ruby 2.0! Notice that this line fails in Ruby 1.8.7!
-#  Dyndoc.warn "Row,col:",[row,col]
-#end
+if RUBY_VERSION >= "1.9.3"
+## DO NOT REMOVE this apparently useless line
+## Otherwise => bug in Ruby >= 1.9.3! Notice that this line fails in Ruby 1.8.7!
+    Dyndoc.warn "Row:",[row] # [childBinding.eval("row")]
+end
 
 (1..#{.imax}).each do |i| # 
   #for j in 1..#{.jmax} do

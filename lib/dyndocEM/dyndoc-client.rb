@@ -2,7 +2,7 @@ require 'eventmachine'
 require 'yaml'
 require 'socket'
 require 'cqlsEM/client-server'
-require 'zip/zip'
+require 'zip'
 require 'fileutils'
 
 
