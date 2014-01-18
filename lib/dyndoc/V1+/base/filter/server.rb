@@ -681,7 +681,7 @@ module CqlsDoc
     end
 
     def RServer.init_filter
-    	## if RUBY_ENGINE defined (not defined for 1.8.7)
+    	## if RUBY_ENGINE (ruby,jruby,rbx) defined (actually, not defined for 1.8.7)
     	if Object.constants.map{|e| e.to_s}.include? "RUBY_ENGINE"
     		R4rb << ".libPaths('~/dyndoc/R/library/"+RUBY_ENGINE+"/"+RUBY_VERSION+"')"
     	end

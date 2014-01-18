@@ -184,43 +184,20 @@ curHL=""
 [#=]hlines?[1-#{jmax}][#=]vlines?[|:{"c|"*#{jmax}}:{"c"*(#{.jmax}-#{jmax})}]
 [#<]{#init]self[#hlines]#{hlines}[#vlines]#{vlines}[#}
 [#>]\begin{tabular}{#{.vlines}}[#rb>][hlines[0]]
-[#rb>]
-=begin
-for i in 1..#{.imax} do 
-
-
-  for j in 1..#{.jmax} do
-
-    {#>][#=]cell[:r{#{.tabR}[:{i},:{j}]}]
-    [#?]j>#{jmax} or i>#{imax}[#>]\phantom{[#?]end
-    [#?]#{=cell}[-1,1]=="!"[#=]cell[::{#{=cell}[0...-1]}][#>][#{cell!}]
-    [#?]else[#>][#{cell}][#?]end
-    [#?]j>#{jmax} or i>#{imax}[#>]}[#?]end
-    [#?]j<#{.jmax}[#>][ & ][#?]else[#>]\\ {#if]!:r{=hlines[:{i}+1]}[0].empty?[#>]\cline{:r{hlines[:{i}+1]}}[#}[#nl][#?]end
-    [#>}
-
-  end 
-end
-=end
+[#rb<]
 
 cells=@vars.extract_raw("self")[:cells]
 #Dyndoc.warn "print:cells",cells
- 
 
-#=begin
 
 ## Introduce because of Ruby >= 1.9.3 change of behavior about binding
-## childBinding used inside filter_mngr.rb
+## childBinding used inside filter_mngr.rb to fetch variables defined inside
 childBinding,res=binding,nil
-#load("/export/prjCqls/work/R4rb/lib/R4rb/converter.rb")
-#R4rb.pair="<<"
 
 ## DEBUG: Dyndoc.warn 'tabR';R4rb < "print(#{.tabR})"
 
+varnames=[] # to save the predefined names used in Table
 
-col,row=[],[]
-
-#for i in 1..#{.imax} do
 (1..#{.imax}).each do |i| # 
 
   if cells[i]
@@ -229,28 +206,27 @@ col,row=[],[]
         when :var
           code =~ /^([^=]*)=(.*)/
 #Dyndoc.warn [$1,$2]
+          varnames << $1
           res=$2.strip.to_aRy(sep)
           res.unshift(nil) #to have the counter in the R spirit
 #Dyndoc.warn "res",res
 #Dyndoc.warn "#{$1}=res"
-          case "#{$1}"
-          when "col"
-            col=res
-          when "row"
-            row=res
-          else
-            childBinding.eval("#{$1}=res")
-          end
+          childBinding.eval("#{$1}=res")
 #Dyndoc.warn "print.Tableau",["#{$1}",eval("#{$1}",childBinding),childBinding]
       end
     }
   end
 end
 
-if RUBY_VERSION >= "1.9.3"
-## DO NOT REMOVE this apparently useless line
-## Otherwise => bug in Ruby >= 1.9.3! Notice that this line fails in Ruby 1.8.7!
-    Dyndoc.warn "Row:",[row] # [childBinding.eval("row")]
+[#rb>] ## VERY IMPORTANT: DO NOT REMOVE this #rb> tag this was added to use dyndoc to call newly created variables inside the previous block
+if RUBY_VERSION >= "1.9.3" # not necessary with other ruby engine and previous version
+## DO NOT REMOVE this apparently useless line, otherwise there is a bug in Ruby >= 1.9.3!
+    ## DEBUG: Dyndoc.warn "Table: vars => "+varnames.join(",")+":",[:{varnames}] unless varnames.empty?
+    [:{varnames}]
+    ## My explanation: creation of variables in binding as in the previous #rb< block is delayed and are not directly synchronized inside the environment.
+    ## this leads to a bug when calling as in the next block these variables.
+    ## Thanks of dyndoc, the line [:{varnames}] simply call these variables 
+    ## to get them ready to be used in the next block. 
 end
 
 (1..#{.imax}).each do |i| # 
