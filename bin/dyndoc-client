@@ -6,6 +6,7 @@ require 'dyndoc/common/utils'
 require "dyndoc/common/init"
 require 'securerandom'
 
+Encoding.default_external = Encoding::UTF_8 if RUBY_VERSION > '1.8.7'
 
 cmd = CmdParse::CommandParser.new( true )
 cmd.program_name = "dyndoc-client"

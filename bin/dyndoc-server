@@ -29,7 +29,9 @@ if ["-R","--Rserv"].include?  ARGV[$curARGV]
     $dyndoc_rserv=ARGV[$curARGV+1]
     $curARGV+=2
 end
-   
+
+Encoding.default_external = Encoding::UTF_8 if RUBY_VERSION > '1.8.7'
+
 require "dyndoc/V3/init/dyn"
 CqlsDoc.init_dyn
 CqlsDoc.set_curDyn(:V3)

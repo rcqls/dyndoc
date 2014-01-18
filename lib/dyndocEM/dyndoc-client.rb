@@ -2,7 +2,7 @@ require 'eventmachine'
 require 'yaml'
 require 'socket'
 require 'cqlsEM/client-server'
-require 'zip'
+require (RUBY_VERSION <= "1.8.7" ? 'zip/zip' : 'zip')
 require 'fileutils'
 
 

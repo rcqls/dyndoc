@@ -10,7 +10,7 @@ class DyndocServer < EventMachine::Connection
     @@busy=nil
 
     ##WorkDir=(RUBY_PLATFORM =~ /(win|w)32$/ ? File.join(ENV["HOME"],"dyndoc-server")  : "/export/dyndoc-server")
-    WorkDir=File.join(ENV["HOME"],"dyndoc","dyndoc-server")
+    WorkDir=File.join(ENV["HOME"],"dyndoc","server")
     RunDir=File.join(WorkDir,"run") #for the daemons!
     RoomsDir=File.join(WorkDir,"rooms") #for the projects
     GuestRoom="guestOnly"
@@ -233,7 +233,7 @@ class DyndocServer < EventMachine::Connection
 
             outfiles=Dir[File.join("filesOUT","**","*")]
             unless outfiles.empty?
-                require 'zip'
+                require (RUBY_VERSION <= "1.8.7" ? 'zip/zip' : 'zip')
                 require 'fileutils'
                 zipfilename=File.join(@room_dir,"filesOUT.zip")
                 FileUtils.rm zipfilename if File.exists? zipfilename

@@ -472,7 +472,7 @@ module CqlsDoc
 	      make_odt_content_xml
 	      make_odt_automatic_styles
 	      FileUtils.cp(EMPTY_ODT,@cfg[:filename_doc]) unless File.exists? @cfg[:filename_doc]
-        require 'zip'
+        require (RUBY_VERSION <= "1.8.7" ? 'zip/zip' : 'zip')
         @ar=Zip::ZipFile.open(@cfg[:filename_doc])
         @ar.get_output_stream('content.xml') do |f|
 	        f.write @content_xml.to_s

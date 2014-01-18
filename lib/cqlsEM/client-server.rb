@@ -1,6 +1,6 @@
 require 'eventmachine'
 require 'socket'
-require 'zip'
+require (RUBY_VERSION <= "1.8.7" ? 'zip/zip' : 'zip')
 require 'fileutils'
 require 'zlib'
 

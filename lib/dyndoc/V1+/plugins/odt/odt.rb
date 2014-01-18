@@ -16,7 +16,7 @@ module CqlsDoc
 
     def initialize(filename)
       @filename = filename
-      require 'zip/zip'
+      require (RUBY_VERSION <= "1.8.7" ? 'zip/zip' : 'zip')
       @ar = Zip::ZipFile.open(@filename)
       extract
       @prefix=File.basename(@filename, '.odt').gsub(/[^A-Za-z0-9_]/,'_')

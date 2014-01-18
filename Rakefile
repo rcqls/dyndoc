@@ -52,7 +52,8 @@ spec = Gem::Specification.new do |s|
     s.licenses = ['MIT', 'GPL-2']
     s.requirements << 'none'
     s.add_dependency("cmdparse","~>2.0",">=2.0.2")
-    s.add_dependency("rubyzip","~>1.0",">=1.0.0")
+    s.add_dependency("rubyzip","~> 0.9" ,">=0.9.9") if RUBY_VERSION < "1.9.2"
+    s.add_dependency("rubyzip","~> 1.0" ,">=1.0.0") if RUBY_VERSION >= "1.9.2"
     s.add_dependency("RedCloth","~>4.2",">=4.2.9")
     s.add_dependency("commander","~>4.1",">=4.1.3")
     s.add_dependency("highline","~>1.6",">=1.6.15")
@@ -81,7 +82,8 @@ spec_client = Gem::Specification.new do |s|
     s.requirements << 'none'
     s.add_dependency("eventmachine","~>1.0",">=1.0.0")
     s.add_dependency("cmdparse","~>2.0",">=2.0.2")
-    s.add_dependency("rubyzip","~>1.0",">=1.0.0")
+    s.add_dependency("rubyzip","~> 0.9" ,">=0.9.9") if RUBY_VERSION < "1.9.2"
+    s.add_dependency("rubyzip","~> 1.0" ,">=1.0.0") if RUBY_VERSION >= "1.9.2"
     s.require_path = 'lib'
     s.files = PKG_FILES_CLIENT.to_a
     s.bindir = "bin"
@@ -104,7 +106,8 @@ spec_server = Gem::Specification.new do |s|
     s.requirements << 'none'
     s.add_dependency("eventmachine", "~> 1.0" ,">=1.0.0")
     s.add_dependency("cmdparse","~> 2.0" , ">=2.0.2")
-    s.add_dependency("rubyzip","~> 1.0" ,">=1.0.0")
+    s.add_dependency("rubyzip","~> 0.9" ,">=0.9.9") if RUBY_VERSION < "1.9.2"
+    s.add_dependency("rubyzip","~> 1.0" ,">=1.0.0") if RUBY_VERSION >= "1.9.2"
     s.add_dependency("daemons","~> 1.1" ,">=1.1.0")
     s.add_dependency("ptools","~> 1.2" ,">=1.2.1")
     s.require_path = 'lib'
@@ -144,7 +147,11 @@ end
 opt={};ARGV.select{|e| e=~/\=/ }.each{|e| tmp= e.split("=");opt[tmp[0]]=tmp[1]}
 
 ## rake ... pkgdir=<path to provide> to update PKG_INSTALL_DIR
-PKG_INSTALL_DIR=opt["pkgdir"] || ENV["RUBYGEMS_PKGDIR"]  || "pkg"
+if RUBY_VERSION <= "1.8.7" 
+    PKG_INSTALL_DIR= File.join(opt["pkgdir"] || ENV["RUBYGEMS_PKGDIR"]  || "pkg","1.8")
+else
+    PKG_INSTALL_DIR=opt["pkgdir"] || ENV["RUBYGEMS_PKGDIR"]  || "pkg"
+end
 
 ## OLD: gem task!!!
 # desc "Create #{PKG_NAME+'-'+PKG_VERSION+'.gem'}" 
@@ -153,28 +160,41 @@ PKG_INSTALL_DIR=opt["pkgdir"] || ENV["RUBYGEMS_PKGDIR"]  || "pkg"
 #     pkg.need_zip = false
 #     pkg.need_tar = false
 # end
+task :default => :package
+
+task :package => [:ruby,:client,:server]
 
 # NEW: it is less verbose than the previous one
-desc "Create #{PKG_NAME+'-'+PKG_VERSION+'.gem'}" 
-task :package do |t|
+desc "Create #{PKG_NAME+'-'+PKG_VERSION+'.gem'} in #{PKG_INSTALL_DIR}" 
+task :ruby do |t|
   #Gem::Builder.new(spec_client).build
   Gem::Package.build(spec)
   `mv #{PKG_NAME+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
 end
 
-desc "Create #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'}" 
+desc "Create #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'} in #{PKG_INSTALL_DIR}" 
 task :client do |t|
   #Gem::Builder.new(spec_client).build
   Gem::Package.build(spec_client)
   `mv #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
 end
 
-desc "Create #{PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem'}" 
+desc "Create #{PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem'} in #{PKG_INSTALL_DIR}" 
 task :server do |t|
     #Gem::Builder.new(spec_server).build
     Gem::Package.build(spec_server)
     `mv #{PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
 end
+
+## quick install task
+desc "Quick install #{File.join(PKG_INSTALL_DIR,PKG_NAME+'-'+PKG_VERSION+'.gem')}"
+task :install => :package do |t|
+    `gem install #{File.join(PKG_INSTALL_DIR,PKG_NAME+'-'+PKG_VERSION+'.gem')} --local --no-rdoc --no-ri` #-i /usr/local/lib/ruby/gems/1.8`
+    `gem install #{File.join(PKG_INSTALL_DIR,PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem')} --local --no-rdoc --no-ri` #-i /usr/local/lib/ruby/gems/1.8`
+    `gem install #{File.join(PKG_INSTALL_DIR,PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem')} --local --no-rdoc --no-ri` #-i /usr/local/lib/ruby/gems/1.8`
+end
+
+
 
 desc "Create #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'}" 
 task :vm do |t|
@@ -193,15 +213,6 @@ end
 desc "Install #{File.join(PKG_INSTALL_DIR,PKG_NAME+'-'+PKG_VERSION+'.gem')}"
 task :install_with_doc do |t|
   `gem install #{File.join(PKG_INSTALL_DIR,PKG_NAME+'-'+PKG_VERSION+'.gem')}`
-end
-
-## quick install task
-desc "Quick install #{File.join(PKG_INSTALL_DIR,PKG_NAME+'-'+PKG_VERSION+'.gem')}"
-task :install do |t|
-    `gem install #{File.join(PKG_INSTALL_DIR,PKG_NAME+'-'+PKG_VERSION+'.gem')} --local --no-rdoc --no-ri -i /usr/local/lib/ruby/gems/1.8`
-    `gem install #{File.join(PKG_INSTALL_DIR,PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem')} --local --no-rdoc --no-ri -i /usr/local/lib/ruby/gems/1.8`
-    `gem install #{File.join(PKG_INSTALL_DIR,PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem')} --local --no-rdoc --no-ri -i /usr/local/lib/ruby/gems/1.8`
-    `gem install #{File.join(PKG_INSTALL_DIR,PKG_NAME_VM+'-'+PKG_VERSION+'.gem')} --local --no-rdoc --no-ri -i /usr/local/lib/ruby/gems/1.8`
 end
 
 ## quick install task

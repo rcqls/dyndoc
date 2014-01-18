@@ -30,7 +30,7 @@ module CqlsDoc
 
     def initialize(filename)
       @filename = filename
-      require 'zip'
+      require (RUBY_VERSION <= "1.8.7" ? 'zip/zip' : 'zip')
       @jar = Zip::ZipFile.open(@filename)
       return true
     end

@@ -1,5 +1,9 @@
 require "open3"
-require 'redcloth'
+begin
+  require 'redcloth'
+rescue LoadError
+  Dyndoc.warn "Warning: RedCloth not installed or supported!"
+end
 #require 'pandoc-ruby'
 
 module CqlsDoc
