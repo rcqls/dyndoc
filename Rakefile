@@ -4,6 +4,7 @@ require 'rubygems/package_task'
 PKG_NAME='dyndoc-ruby'
 PKG_NAME_CLIENT='dyndoc-client'
 PKG_NAME_SERVER='dyndoc-server'
+PKG_NAME_SOFTWARE='dyndoc-software'
 PKG_NAME_VM='dyndoc-vm'
 PKG_VERSION='1.6.0'
 
@@ -37,6 +38,10 @@ PKG_FILES_SERVER=FileList[
     'share/julia/**/*',
     'share/R/dynArray.R',
     'dyndoc/**/.*' #IMPORTANT file starting with . are by default ignored!
+]
+
+PKG_FILES_SOFTWARE=FileList[
+    'lib/dyndoc/software.rb'
 ]
 
 PKG_FILES_VM=FileList[
@@ -123,6 +128,26 @@ spec_server = Gem::Specification.new do |s|
     s.rubyforge_project = nil
 end
 
+spec_software = Gem::Specification.new do |s|
+    s.platform = Gem::Platform::RUBY
+    s.summary = "Dyndoc server"
+    s.name = PKG_NAME_SOFTWARE
+    s.version = PKG_VERSION
+    s.licenses = ['MIT', 'GPL-2']
+    s.requirements << 'none'
+    s.require_path = 'lib'
+    s.files = PKG_FILES_SOFTWARE.to_a
+    s.bindir = "bin"
+    s.executables = [] #"dyndoc-check-software"]
+    s.description = <<-EOF
+  software for dyndoc.
+  EOF
+    s.author = "CQLS"
+    s.email= "rdrouilh@gmail.com"
+    s.homepage = "http://cqls.upmf-grenoble.fr"
+    s.rubyforge_project = nil
+end
+
 spec_vm = Gem::Specification.new do |s|
     s.platform = Gem::Platform::RUBY
     s.summary = "Dyndoc vm"
@@ -194,7 +219,12 @@ task :install => :package do |t|
     `gem install #{File.join(PKG_INSTALL_DIR,PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem')} --local --no-rdoc --no-ri` #-i /usr/local/lib/ruby/gems/1.8`
 end
 
-
+desc "Create #{PKG_NAME_SOFTWARE+'-'+PKG_VERSION+'.gem'} in #{PKG_INSTALL_DIR}" 
+task :software do |t|
+    #Gem::Builder.new(spec_server).build
+    Gem::Package.build(spec_server)
+    `mv #{PKG_NAME_SOFTWARE+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
+end
 
 desc "Create #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'}" 
 task :vm do |t|

@@ -518,15 +518,16 @@ module CqlsDoc
         return ""
       end
       print "\n==> pdflatex #{@basename} in #{@dirname}"
-      if RUBY_PLATFORM =~ /(win|w)32$/
-        unless SOFTWARE[:taskkill]
-            cmd = `which taskkill`.strip
-            SOFTWARE[:taskkill]=cmd unless cmd.empty?
-        end
-        if SOFTWARE[:taskkill]
-          system(SOFTWARE[:taskkill]+" /FI \"windowtitle eq "+@basename+".pdf*\"")
-        end
-      end
+      # NEW: Not to be devkit dependent!!! 
+      # if RUBY_PLATFORM =~ /(win|w)32$/
+      #   unless SOFTWARE[:taskkill]
+      #       cmd = `which taskkill`.strip
+      #       SOFTWARE[:taskkill]=cmd unless cmd.empty?
+      #   end
+      #   if SOFTWARE[:taskkill]
+      #     system(SOFTWARE[:taskkill]+" /FI \"windowtitle eq "+@basename+".pdf*\"")
+      #   end
+      # end
       out=`pdflatex -halt-on-error -file-line-error -interaction=nonstopmode #{@basename}`
       out=out.b if RUBY_VERSION >= "1.9" #because out is not necessarily utf8 encoded  
       out=out.split("\n")
