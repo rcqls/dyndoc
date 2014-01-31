@@ -26,7 +26,7 @@ module CqlsBeamer
   end
 
   def CqlsBeamer.where(where,scene=nil)
-    #puts "xy";p ou
+    #Dyndoc.warn "xy",where
     from,ou=where.split(":")
     ou,from=from,ou unless ou
     if from
@@ -39,10 +39,13 @@ module CqlsBeamer
       actorFrom=CqlsBeamer::Actor[fromKey]
       from=eval("["+actorFrom.where+"]")
       #puts "xy";p ou
-      ou ="0.0,0.0" if !ou #and ou.empty? 
+      ou ="0.0,0.0" if !ou #and ou.empty?
       if actorFrom.isR
-        R4rb.eval("ou<-xyPercent(c("+ou+"),'#{fromKey}')")   
-        ou=[] < :ou
+        # R4rb.eval("ou<-xyPercent(c("+ou+"),'#{fromKey}')")   
+        # ou=[] < :ou
+        # Replacement of previous 2 lines failing now!
+        ou = "xyPercent(c("+ou+"),'#{fromKey}')"
+        ou = ou.to_R
         zoom=actorFrom.isR.dup
         dim=CqlsBeamer::Scene[scene].dim
         ou[0] /= dim[2].to_f
@@ -148,7 +151,9 @@ module CqlsBeamer
       local[:what]=@what unless local[:what]
       local[:mode]=@mode unless local[:mode]
       local[:minipage]=@minipage unless local[:minipage]
-      local[:what]=['\begin{minipage}{'+local[:minipage]+'}'+local[:what]+'\end{minipage}'] unless local[:minipage].empty?
+      #Dyndoc.warn  :outputInRuby, local[:what]
+      local[:what]='\begin{minipage}{'+local[:minipage]+'}'+local[:what]+'\end{minipage}' unless local[:minipage].empty?
+      #Dyndoc.warn  :outputInRuby2, local[:what]
       if @isRaw or !local[:where]
         txt << "\\#{local[:mode]}<#{local[:when]}>{\n #{local[:what]}}\n"
       else

@@ -3,9 +3,9 @@ list of lines containing "|"-separated list of elements of the form
 <caseVar in tmplPartDoc> = < tmplPartDoc > : <comma separated list of part> 
 default value for is "docs"
 
-{#def]Compose[#,]list[]
+{#hide]{#def]Compose[#,]list[]
 [#rb<]docs=#{=list}.split("\n").map{|l| l.split("|")}.flatten.map{|e| e.strip}.flatten
-#p docs
+#p [:docs,docs]
 [#>]{#for]doc in docs
 [#rb<]caseVar,partList=doc.split("=")
 partList,caseVar=caseVar,"docs" unless partList
@@ -17,12 +17,13 @@ partList=partList.join(":").strip
 #puts caseVar;puts docTmpl;puts partList
 [#>]:{caseVar}[:{partList}][#<<]:{docTmpl}
 [#for}
-[#def}
+[#def}[#hide}
 
 Version without #for but directly with ruby for and block code! 
 {#def]Compose[#,]list[]
-[#rb>]docs=#{=list}.split("\n").map{|l| l.split("|")}.flatten.map{|e| e.strip}.flatten
-#p docs
+[#rb<]docs=#{=list}.split("\n").map{|l| l.split("|")}.flatten.map{|e| e.strip}.flatten
+#Dyndoc.warn [:docs_in_compose,docs]
+[#rb>]
 for doc in docs do
   caseVar,partList=doc.split("=")
   partList,caseVar=caseVar,"docs" unless partList
@@ -31,7 +32,7 @@ for doc in docs do
 #split on the first ":"
   docTmpl,*partList=partList.split(":").map{|e| e.strip}
   partList=partList.join(":").strip
-#puts caseVar;puts docTmpl;puts partList
+#Dyndoc.warn "caseVar",[caseVar,docTmpl,partList]
   {#>][#>]:{caseVar}[:{partList}][#<<]:{docTmpl}[#>}
 end
 [#def}

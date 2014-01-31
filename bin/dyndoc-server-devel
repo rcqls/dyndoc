@@ -1,0 +1,23 @@
+#!/usr/bin/ruby
+
+require 'rubygems'
+
+version = ">= 0"
+
+gem 'dyndoc-ruby', version
+
+# $:.unshift(File.join(ENV["HOME"],".gPrj","work","dyndoc.ruby","lib"))
+#     puts "RUBY SEARCH PATH:" 
+#     puts $:.join(":")
+#     ## put local dyndoc code library in second position 
+
+dynlib_path=nil
+# The two first paths are for devel mode (the second one is maybe obsolete)
+# The two last paths are for production mode (the last one is closed to be abandonned)
+[["Github","dyndoc"],["Dropbox","Dyndoc","System","dyndoc.ruby"],["DyndocVB","SharedFolder","System","dyndoc-ruby"],["DyndocVB","System","dyndoc.ruby"],[".gPrj","work","dyndoc.ruby"]].each {|prefix|
+	dynlib_path=Dir[File.join(ENV["HOME"],prefix,"lib")][0] unless dynlib_path
+}
+$:.unshift(dynlib_path) if  dynlib_path
+
+#load Gem.bin_path('dyndoc-client', 'dyndoc-client', version)
+load File.join(ENV["HOME"],"Github","dyndoc","bin","dyndoc-server")

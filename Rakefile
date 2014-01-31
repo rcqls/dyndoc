@@ -118,7 +118,7 @@ spec_server = Gem::Specification.new do |s|
     s.require_path = 'lib'
     s.files = PKG_FILES_SERVER.to_a
     s.bindir = "bin"
-    s.executables = ["dyndoc-server","dyndoc-daemon"]
+    s.executables = ["dyndoc-server","dyndoc-daemon","dyndoc-server-devel"]
     s.description = <<-EOF
   server for dyndoc.
   EOF

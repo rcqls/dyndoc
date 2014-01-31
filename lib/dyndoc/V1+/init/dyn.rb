@@ -96,14 +96,16 @@ module CqlsDoc
 	      version.strip! if version
       end
     end
+    #p [:version,version]
     CqlsDoc.set_curDyn(version) if version
     p $curDyn[:version] if version and $cfg_dyn[:verbose]
     #otherwise it is the default version!
     $curDyn.append_cfg(cfg_dyn) if cfg_dyn
     #read the optional cfg
+    #p [:cfg_dyn_readCurDyn,$cfg_dyn[:doc_list]]
     $cfg_dyn.delete(:doc_list) if $cfg_dyn[:doc_list].empty?
     $curDyn.append_cfg($cfg_dyn)
-    p $curDyn.cfg if $curDyn[:debug]
+    p [:curDyn_cfg_readCurDyn,$curDyn.cfg] if $curDyn[:debug]
     if !$curDyn[:filename_tmpl] or $curDyn[:filename_tmpl].empty?
 #puts "read_curDyn:dir";p name_tmpl;p $curDyn[:version]
       name_tmpl2=CqlsDoc.directory_tmpl? name_tmpl

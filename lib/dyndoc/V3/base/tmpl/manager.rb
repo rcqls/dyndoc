@@ -12,9 +12,11 @@ module CqlsDoc
 
     # Maybe better located inside server.rb
     def TemplateManager.initR
-      require "R4rb"
+      first=require "R4rb" #save if it the first initialization!
+      Dyndoc.warn "FIRST INIT OF R!!!! => #{first}"
       Array.initR
-      R4rb << ".dynStack<-new.env()" #used for R variables used by dyn
+      R4rb << "rm(list=ls(all=TRUE))" unless first #remove all initial variables if previous documents session
+      R4rb << ".dynStack<-new.env()" #used for R variables used by dyndoc
       RServer.init_envir 
       RServer.init_filter
       ## ruby and R init for dynArray stuff
@@ -23,7 +25,7 @@ module CqlsDoc
     end
 
     def TemplateManager.initJulia
-      require "jl4rb"
+      first=require "jl4rb" #save if it the first initialization!
       Julia.init
       # init rb4jl stuff
       # since inside ruby, no need Ruby.start and Ruby.stop like in rb4R.
@@ -121,7 +123,7 @@ module CqlsDoc
 #p @alias
 #puts "init_tags";p @tags
       #To deal later: TagManager.apply_alias(@tags,@alias)
-      p @tags if @cfg[:cmd]==:cfg
+      p [:init_tags, @tags] if @cfg[:cmd]==:cfg
     end
 
     def init_keys

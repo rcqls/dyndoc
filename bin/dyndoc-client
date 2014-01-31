@@ -179,8 +179,7 @@ all.set_execution_block do |args|
 =end
         if name =~ /^(?:(?:(dyn|dyndoc|ssh|google|dropbox)\:)?(?:\/\/([^\:\/]*)(?:\:(\d*))?\/))?(?:([^\:]*))(?:\:(.*))?$/ 
           service,url,port,name,docs=$1,$2,$3,$4,$5
-          ##DEBUG: 
-          p [service,url,port,name,docs]
+          ##DEBUG: p [:before,service,url,port,name,docs]
           if !service and !url and !port and File.exists? name #local use
             service,url,port = :local,"127.0.0.1",6666
           else
@@ -199,8 +198,9 @@ all.set_execution_block do |args|
             service=(service ? service : server[:service]).to_s
           end
         end
-        ##DEBUG: p [service,url,port,room,name,docs]
+        ##DEBUG: p [:after,service,url,port,room,name,docs]
         $cfg_dyn[:doc_list] += docs.split(",").map{|e| e.strip} if docs
+        ##DEBUG: p [:cfg_dyn_doc_list,$cfg_dyn[:doc_list]]
         service="dyn" if service=="dyndoc" # basic mode
         $cfg_dyn[:dyndoc_room]="#{service}://#{room}" if service
         ## for dropbox authentification
@@ -239,6 +239,7 @@ all.set_execution_block do |args|
           } unless doc_list.empty?
           #p $cfg_dyn[:infiles];p $cfg_dyn[:outfiles]
         end
+        ##DEBUG: p [:filename,$cfg_dyn[:filename_client][:name]]
         if service and File.exists? $cfg_dyn[:filename_client][:name]
             EventMachine.run {
               #portMin,portMax=5555,5559

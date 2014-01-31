@@ -33,13 +33,15 @@ class DyndocServer < EventMachine::Connection
 
     def init_server
         ## working_dir saved in dyndocEM under room_dir!
-        p $cfg_dyn[:dyndoc_room]
+        ##DEBUG: p [:init_server_cfg_dyn,$cfg_dyn]
         $cfg_dyn[:dyndoc_mode]=:remote_server if $cfg_dyn[:hostname] != $dyndoc_server_hostname or ($cfg_dyn[:dyndoc_room]=~/^dropbox\:\/\//)
         ##puts "local server!!!";p $cfg_dyn[:hostname];p $dyndoc_server_hostname
+        ##DEBUG: p ({:room => $cfg_dyn[:dyndoc_room], :mode => $cfg_dyn[:dyndoc_mode]})
         if $cfg_dyn[:dyndoc_mode]==:remote_server
             $cfg_dyn[:working_dir] = working_dir_for_remote_server
         elsif $cfg_dyn[:dyndoc_mode]==:local_server
-            @room_dir,@room_mode=$cfg_dyn[:working_dir],:file 
+            ##p "LOOOCAAAALLL"
+            @room_dir,@room_mode= $cfg_dyn[:filename_client][:dirname],:file #$cfg_dyn[:working_dir],:file 
         end
         ## puts "room dir";p @room_dir;puts "room_mode";p @room_mode
 
@@ -180,7 +182,7 @@ class DyndocServer < EventMachine::Connection
         ##send_data ">>> you sent: #{name}"
         puts "=> [Server] File to deal with: "+name+"\n"
         ## check if it exists!
-        ##p @room_dir
+        ##DEBUG: p [:dyndoc_file_to_proceed,File.join(@room_dir,name)]
         unless File.exists? File.join(@room_dir,name)
             puts "[Server] #{name} does not  exist! Dyndoc process aborted!"
             server_not_busy
@@ -213,13 +215,19 @@ class DyndocServer < EventMachine::Connection
         end
 
         ## dyndoc process start!
+        #IMPORTANT: this next line (normally optionnal) really matters 
+        # since it ensures a true reinitialization of dyndoc!
+        # ex: $cfg_dyn[:doc_list] is not updated properly otherwise!
+        CqlsDoc.init_dyn 
         CqlsDoc.read_curDyn(name) #if nothing specified, :V3 is chosen here!
         unless [:V1,:V2,:V2dtag].include? $curDyn[:version]
             $curDyn.init
             $curDyn.tmpl_doc.make_all
             @files=[]
             ### zipfile=Zip::ZipFile.open(File.join(@room_dir,"zipfile.zip"), Zip::ZipFile::CREATE)
+            #p $curDyn.tmpl_doc.docs.keys
             $curDyn.tmpl_doc.docs.each{|k,v|
+                #p [:docs,[k,v.cfg]]
                 v.cfg[:created_docs].each{|d|
                     @files << [File.join(@room_dir,d),File.join($cfg_dyn[:dirname_docs],d)]
                     ### zipfile.add(d,File.join(@room_dir,d))

@@ -368,7 +368,7 @@ module CqlsDoc
         return txt if @mode==:pre or !@rbEnvir[0]
         @tmpl.process_rb(txt2)
         res=RbServer.output(txt2,@rbEnvir[0])
-#Dyndoc.warn "process [rb]",[res,txt2,@rbEnvir[0],@tmpl.rbenvir_ls(@rbEnvir[0])] if txt2=="toto[i]"
+#Dyndoc.warn "process [rb]",res #,txt2,@rbEnvir[0],@tmpl.rbenvir_ls(@rbEnvir[0])] if txt2=~/\\\\be/
 #Dyndoc.warn "#rb", [@rbEnvir[0],$curDyn.tmpl.rbenvir_current,$curDyn.tmpl.rbenvir_get($curDyn.tmpl.rbenvir_current[0])] if txt2=="toto[i]"
       when ":R","#R"
         return txt if @mode==:pre
