@@ -1,3 +1,5 @@
+# coding: utf-8
+
 module CqlsDoc
 
     VERB={:tex=>{
@@ -342,7 +344,7 @@ module CqlsDoc
       # the following  is equivalent to each_line!
       block.each_line{|l|
 	      l2=l.chomp
-	      #Dyndoc.warn l2
+	      #Dyndoc.warn :l2,l2
 	      inst=l2.delete(" ").split("|")[0]
 	      #Dyndoc.warn "inst",inst
 	      if inst and inst[0,2]=="##"
@@ -386,6 +388,7 @@ module CqlsDoc
           echoLines=[]
 	      end
 
+#Dyndoc.warn :inst, inst
 	      case inst
 	      when "##echo" ##need to be added
 	        echo=nb.to_i
@@ -397,6 +400,7 @@ module CqlsDoc
 	        optout=opt
 	      when "##hide"
 	        hide = nb.to_i
+	        #Dyndoc.warn :hide,hide
 	      when "##fig"
 	        if opt and opt["img"] and !opt["img"].empty?
 	          imgName=File.basename(opt["img"].strip,".*")
@@ -415,6 +419,7 @@ module CqlsDoc
 	      when "##add"
 	        results[-1][:add]=opt
 	      else
+	      	#Dyndoc.warn :hide?, [hide,passe,@@mode]
 	        if hide==0
 	          promptMode=(code.length==0 ? :normal : :continue )
 	          input << prompt[promptMode] if prompt
@@ -493,8 +498,12 @@ module CqlsDoc
 	            output << txt.join("\n")
 	            output += "\n" if @@out.length>0
 	          end
-	          input=RServer.formatInput(input)
-	          output=RServer.formatOutput(output)
+	          #Dyndoc.warn :inputAndOutput,[input,output]
+
+	          input=RServer.formatInput(input).force_encoding("utf-8")
+	          #Dyndoc.warn :input,[input,output]
+	          output=RServer.formatOutput(output).force_encoding("utf-8")
+	          #Dyndoc.warn :output2,[input,output]
 	          #if hide==0
 	            result={}
 	            result[:input]= (hide==0 ? input : "")
@@ -524,6 +533,7 @@ module CqlsDoc
 	        optout=nil 
 	        hide -= 1 if hide>0
 	        passe -=1 if passe>0
+	        #Dyndoc.warn :hide2,hide
 	      end
       }
       R4rb << "dev.off()"
@@ -558,9 +568,13 @@ module CqlsDoc
       # else
       #   out2
       # end
-      out2,out3=out2.split("#")
+      #Dyndoc.warn :formatInput, [out,out2]
+      out2,out3=out2.split("#") unless out2.empty?
+      #Dyndoc.warn :formatInput2, [out,out2,out3]
       out2=out2.gsub("{",'\{').gsub("}",'\}')
+      #Dyndoc.warn :formatInput3, [out,out2]
       out2=out2+"#"+out3 if out3
+      #Dyndoc.warn :formatInput4, [out,out2,out3]
       return out2
     end
     

@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module CqlsDoc
   module V3
   

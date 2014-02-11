@@ -624,8 +624,8 @@ module CqlsDoc
         end
       end
       if str.split(CqlsDoc::AS_IS).length>1
-        puts "str to apply";p str
-        puts "res";p res
+        Dyndoc.warn "str to apply",str
+        Dyndoc.warn "res",res
       end
       res
     end

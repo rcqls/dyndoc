@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 module CqlsDoc
 
   def CqlsDoc.vars=(vars)
@@ -1545,16 +1547,17 @@ p call
       code=""
       # @forFilter is here to make available the dyn variables!
       @cptRbCode,@rbCode,@texRbCode,@forFilter=-1,{},{},filter unless @rbCode
-      code << "for " << parse_args(blck[1],filter).strip << " do\n"
+      code << "if res; for " << parse_args(blck[1],filter).strip << " do\n"
       cpt=(@cptRbCode+=1) #local value to delete later! 
 #p cpt
       @rbCode[cpt]=[blck[2..-1].unshift(:blck)]
       @texRbCode[cpt]=tex
       code << "@texRbCode[#{cpt}] << parse(@rbCode[#{cpt}],@forFilter)\n"
-      code << "end\n"
+      code << "end;end\n"
 #p code
 #puts "titi";p filter.envir.local
 #p @rbCode[cpt]
+#Dyndoc.warn :for_code,[code.encoding,code,__ENCODING__]
       @rbEnvir[0].eval(code)
       @rbCode.delete(cpt)
 #p @rbCode

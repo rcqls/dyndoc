@@ -114,15 +114,16 @@ header=header.map{|k,v| k+"="+v.to_s}.join(",")
 [#?]!$dyn_supeR[#rb<]$dyn_supeR=0 
 [#<]{#document][#package]
 %\RequirePackage{fancyvrb}
-\RequirePackage{xcolor} 
+\usepackage{xcolor}
+[#preamble]
 \definecolor{beaubleu}{rgb}{0.26,0.31,0.61}
 \definecolor{beauvert}{rgb}{0.27,0.52,0.42}
 [#}[#?]end
 [#rb<]
 RServer.device(#{=RDevice.type})
-#p #{=rcode}
+##Dyndoc.warn #{=rcode}.encoding
 res=CqlsDoc::RServer.inputsAndOutputs(#{=rcode}.strip.gsub("\r\n","\n"),$dyn_supeR+=1,#{=RDevice.opt})
-puts "res";p res
+#Dyndoc.warn "res_in_Rems",res
 header={"fontfamily"=>"courier","fontseries"=>"b","fontsize"=>"\\small"}
 header2=@vars.extract("_optLst")
 header.merge!(header2) if header2 and header2.is_a? Hash
@@ -275,10 +276,11 @@ contIn=nil
 [#for}
 [#def}
 
-{#def]initScriptR[#<]{#document][#package]
+{#def]initScriptLstLang[#,]langs[R,C++,Fortran][#<]{#document][#package]
 \usepackage[formats]{listings}
 \usepackage{textcomp}
 \usepackage{xcolor}
+[#preamble]\lstloadlanguages{#{langs}}
 [#}[#def}
 
 
@@ -292,6 +294,20 @@ plot(x,y) {#lstEsc]\label{comment}[#} #toto
 #{rcode}
 \end{lstlisting}
 [#?]#{exec}[#r<]#{rcode}
+[#def}
+
+{#def]scriptCpp[#,]code[][][#>]
+\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=C++,name=Cpp}
+\begin{lstlisting}[numbers=left]
+#{code}
+\end{lstlisting}
+[#def}
+
+{#def]scriptFortran[#,]code[][][#>]
+\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=Fortran,name=Fortran}
+\begin{lstlisting}[numbers=left]
+#{code}
+\end{lstlisting}
 [#def}
 
 {#def]lstEsc[#,]latex[][#>]#(*#{latex}*)[#}
