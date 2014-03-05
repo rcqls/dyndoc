@@ -1,5 +1,6 @@
 # encoding: UTF-8
 
+## TODO: .force_encoding("utf-8") needs to be added (see server.rb)
 module CqlsDoc
 
   def CqlsDoc.vars=(vars)
@@ -244,7 +245,7 @@ p [vars,b2]
           eval_SET(var.strip,val,filter)
         }
       else
-        tex << val
+        tex << val.force_encoding("utf-8")
       end
     end
 
@@ -982,7 +983,7 @@ p [vars,b2]
           when :binding
             i,*b2=next_block(blck,i)
             rbEnvir=b2[0][1].strip
-          when :do,:<,:out,:>,:"r<",:"rb<",:"r>",:"R>",:"r>>",:rverb,:"rb>",:"?",:tag,:"??",:yield,:>>,:"=",:"+",:<<,:"txtl>",:"html>",:"tex>",:"_>"
+          when :do,:<,:out,:>,:"r<",:"rb<",:"r>",:"R>",:"R<",:"r>>",:rverb,:"rb>",:"?",:tag,:"??",:yield,:>>,:"=",:"+",:<<,:"txtl>",:"html>",:"tex>",:"_>"
             code = blck[i..-1].unshift(:blck)
           when :"," 
             i,*b2=next_block(blck,i)
@@ -1884,8 +1885,10 @@ p call
       ## Dyndoc.warn "code2R", @doLangBlock[id][:out]
       if tag == :>
         outcode=@doLangBlock[id][:out].gsub(/\\/,'\\\\\\\\') #to be compatible with R
+        outcode=outcode.gsub(/\'/,"\\\\\'")
+        #Dyndoc.warn 
         outcode='cat(\''+outcode+'\')'
-        ## Dyndoc.warn "outcode",outcode
+        #Dyndoc.warn "outcode",outcode
         outcode.to_R # CLEVER: directly redirect in R output that is then captured
       end
       if tag == :<<

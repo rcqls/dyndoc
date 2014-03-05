@@ -427,6 +427,7 @@ module CqlsDoc
 	          l2,envLoc=RServer.find_envir(l2,envLoc)
 	          #Dyndoc.warn "after",l,envLoc
 	          input <<  l2 << "\n"
+	          #Dyndoc.warn :input3, input 
 	        end
 	        if passe==0 and l2[0,1]!="#"
 	          ## redirect R output
@@ -436,6 +437,7 @@ module CqlsDoc
 	            ##TODO: instead of only splitting check that there is no 
 	            ## or ask the user to use another character instead of ";" printed as is in the input! 
 	            codes=code.split(";")
+	            #Dyndoc.warn :codes, codes
 	            evalOk=(R4rb << ".output <<- ''")
 	            codes.each{|cod|
 	              evalOk &= (R4rb <<  (tmp=".output <<- c(.output,capture.output.cqls({"+RServer.code_envir(cod,envLoc)+"}))"))
@@ -516,7 +518,7 @@ module CqlsDoc
 	        end
 	        if passe==0 and l2[0,1]=="#"
 	          result={}
-	          result[:input]=input
+	          result[:input]=RServer.formatInput(input).force_encoding("utf-8")
 	          result[:prompt]=promptMode
 	          result[:output]=""
 	          results << result
@@ -524,9 +526,10 @@ module CqlsDoc
 	        end
 	        if passe>=1
 	          result={}
-	          result[:input]=input
+	          result[:input]=RServer.formatInput(input).force_encoding("utf-8")
 	          result[:prompt]= ( passe == passeNb ? :normal : :continue )#promptMode
 	          result[:output]= ((optpasse and optpasse["print"]) ? optpasse["print"] : output)
+	          #Dyndoc.warn :result,result
 	          results << result
 	          input,output="",""
 	        end
