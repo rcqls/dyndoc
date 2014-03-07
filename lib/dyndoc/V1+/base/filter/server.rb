@@ -308,10 +308,15 @@ module CqlsDoc
       @@mode
     end
 
-    @@device="png"
+    @@device_cmd,@@device="png","png"
     
     def RServer.device(dev="pdf")
-      @@device=dev
+    	case dev
+    	when "pdf"
+      		@@device_cmd,@@device="pdf","pdf" #(%{capabilities()["cairo"]}.to_R ? "cairo_pdf" : "pdf"),"pdf"
+    	when "png"
+    		@@device_cmd,@@device="png","png"
+    	end
     end
     
     #def RServer.input_semi_colon(block)
@@ -339,7 +344,8 @@ module CqlsDoc
       FileUtils.mkdir_p imgdir unless File.directory? imgdir
       Dir[imgfile+"*"].each{|f| FileUtils.rm_f(f)}
 #p Dir[imgfile+"*"]
-      R4rb << "#{@@device}(\"#{imgfile}%d.#{@@device}\",#{optRDevice})"
+
+      R4rb << "#{@@device_cmd}(\"#{imgfile}%d.#{@@device}\",#{optRDevice})"
       #block=RServer.input_semi_colon(block)
       # the following  is equivalent to each_line!
       block.each_line{|l|
@@ -574,7 +580,7 @@ module CqlsDoc
       #Dyndoc.warn :formatInput, [out,out2]
       out2,out3=out2.split("#") unless out2.empty?
       #Dyndoc.warn :formatInput2, [out,out2,out3]
-      out2=out2.gsub("{",'\{').gsub("}",'\}')
+      out2=out2.gsub(/(?<!\\textbackslash)\{/,'\{').gsub(/(?<!\\textbackslash\{n)\}/,'\}')
       #Dyndoc.warn :formatInput3, [out,out2]
       out2=out2+"#"+out3 if out3
       #Dyndoc.warn :formatInput4, [out,out2,out3]
