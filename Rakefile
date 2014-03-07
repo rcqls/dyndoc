@@ -189,6 +189,18 @@ task :default => :package
 
 task :package => [:ruby,:client,:server]
 
+##########################################
+# this is for gem specific_install
+desc "Create #{PKG_NAME+'-'+PKG_VERSION+'.gem'} for specific_install"
+task :gemspec => [:ruby_only]
+##########################################
+
+desc "Create #{PKG_NAME+'-'+PKG_VERSION+'.gem'}" 
+task :ruby_only do |t|
+  #Gem::Builder.new(spec_client).build
+  Gem::Package.build(spec)
+end
+
 # NEW: it is less verbose than the previous one
 desc "Create #{PKG_NAME+'-'+PKG_VERSION+'.gem'} in #{PKG_INSTALL_DIR}" 
 task :ruby do |t|
@@ -197,11 +209,23 @@ task :ruby do |t|
   `mv #{PKG_NAME+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
 end
 
+desc "Create #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'}" 
+task :client_only do |t|
+  #Gem::Builder.new(spec_client).build
+  Gem::Package.build(spec_client)
+end
+
 desc "Create #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'} in #{PKG_INSTALL_DIR}" 
 task :client do |t|
   #Gem::Builder.new(spec_client).build
   Gem::Package.build(spec_client)
   `mv #{PKG_NAME_CLIENT+'-'+PKG_VERSION+'.gem'} #{PKG_INSTALL_DIR}`
+end
+
+desc "Create #{PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem'}" 
+task :server_only do |t|
+    #Gem::Builder.new(spec_server).build
+    Gem::Package.build(spec_server)
 end
 
 desc "Create #{PKG_NAME_SERVER+'-'+PKG_VERSION+'.gem'} in #{PKG_INSTALL_DIR}" 
