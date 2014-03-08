@@ -289,7 +289,7 @@ plot(x,y) {#lstEsc]\label{comment}[#} #toto
 #comment
 [#hide}
 {#def]scriptR[#,]rcode[][#,]exec[true][#>]
-\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=R,name=R}
+\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=R,name=R, showstringspaces=false}
 \begin{lstlisting}[numbers=left]
 #{rcode}
 \end{lstlisting}
@@ -297,14 +297,14 @@ plot(x,y) {#lstEsc]\label{comment}[#} #toto
 [#def}
 
 {#def]scriptCpp[#,]code[][][#>]
-\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=C++,name=Cpp}
+\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=C++,name=Cpp,showstringspaces=false}
 \begin{lstlisting}[numbers=left]
 #{code}
 \end{lstlisting}
 [#def}
 
 {#def]scriptFortran[#,]code[][][#>]
-\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=Fortran,name=Fortran}
+\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=Fortran,name=Fortran, showstringspaces=false}
 \begin{lstlisting}[numbers=left]
 #{code}
 \end{lstlisting}
