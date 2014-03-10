@@ -566,7 +566,7 @@ module CqlsDoc
 
     def RServer.formatOutput(out)
       #out2=out.gsub(/\\n/,'\textbackslash{n}')
-      out.gsub("{",'\{').gsub("}",'\}')
+      out.gsub("{",'\{').gsub("}",'\}').gsub("~",'\boldmath\ensuremath{\mathtt{\sim}}')
     end
     
     def RServer.formatInput(out)
@@ -584,7 +584,7 @@ module CqlsDoc
       #Dyndoc.warn :formatInput3, [out,out2]
       out2=out2+"#"+out3 if out3
       #Dyndoc.warn :formatInput4, [out,out2,out3]
-      return out2
+      return out2.gsub("~",'\boldmath\ensuremath{\mathtt{\sim}}')
     end
     
 

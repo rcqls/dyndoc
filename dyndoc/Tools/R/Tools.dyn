@@ -289,7 +289,7 @@ plot(x,y) {#lstEsc]\label{comment}[#} #toto
 #comment
 [#hide}
 {#def]scriptR[#,]rcode[][#,]exec[true][#>]
-\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=R,name=R, showstringspaces=false}
+\lstset{framexleftmargin=5mm, frame=shadowbox, rulesepcolor=\color{gray}, escapeinside={\#(*}{*)}, numberstyle=\small, stepnumber=1, numbersep=5pt, keepspaces=true,language=R,name=R, showstringspaces=false,upquote=true,basicstyle=\ttfamily}
 \begin{lstlisting}[numbers=left]
 #{rcode}
 \end{lstlisting}
