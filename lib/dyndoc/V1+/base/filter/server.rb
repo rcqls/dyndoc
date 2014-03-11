@@ -345,6 +345,8 @@ module CqlsDoc
       Dir[imgfile+"*"].each{|f| FileUtils.rm_f(f)}
 #p Dir[imgfile+"*"]
 
+	
+	#Dyndoc.warn "fig command:", "#{@@device_cmd}(\"#{imgfile}%d.#{@@device}\",#{optRDevice})"
       R4rb << "#{@@device_cmd}(\"#{imgfile}%d.#{@@device}\",#{optRDevice})"
       #block=RServer.input_semi_colon(block)
       # the following  is equivalent to each_line!
