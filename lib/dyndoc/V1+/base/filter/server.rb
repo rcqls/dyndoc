@@ -514,12 +514,13 @@ module CqlsDoc
 	          #Dyndoc.warn :input,[input,output]
 	          output=RServer.formatOutput(output).force_encoding("utf-8")
 	          #Dyndoc.warn :output2,[input,output]
+	          #Dyndoc.warn :state, {:hide=>hide,:passe=>passe}
 	          #if hide==0
 	            result={}
 	            result[:input]= (hide==0 ? input : "")
 	            result[:prompt]= (hide==0 ? promptMode : :none)
 	            result[:output]=output.gsub(/^[\n]*/,"")
-	            results << result
+	            results << result unless (result[:input]+result[:output]).empty?
 	          #end
 	          input,output="",""
 	          
@@ -559,6 +560,7 @@ module CqlsDoc
 	      end
       }
       #TODO: remove all the file newly created!
+      #Dyndoc.warn :results, results
       return results
     end
  
