@@ -189,6 +189,7 @@ module CqlsDoc
   def CqlsDoc.get_pathenv(rootDoc=nil,with_currentRoot=true)
     pathenv =  CqlsDoc.init_pathenv
     pathenv += ":" + File.join($dyn_gem_root,"dyndoc") + ":" + File.join($dyn_gem_root,"dyndoc","Std") if File.exists? File.join($dyn_gem_root,"dyndoc")
+    pathenv += ":" + File.join(@@cfg_dir[:home_root],"library") if File.exists? File.join(@@cfg_dir[:home_root],"library")
     pathenv += ":" + $dyndoc_currentRoot if with_currentRoot and $dyndoc_currentRoot and !$dyndoc_currentRoot.empty?
     pathenv += ":" + rootDoc  if rootDoc and !rootDoc.empty?
     pathenv += ":" + $cfg_dyn[:rootDoc]  if $cfg_dyn and $cfg_dyn[:rootDoc] and !$cfg_dyn[:rootDoc].empty?
