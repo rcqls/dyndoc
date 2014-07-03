@@ -151,7 +151,7 @@ module CqlsDoc
 #p name
 #p File.join(@@cfg_dir[:home_root],["root",$curDyn[:version].to_s,"Default","index"])
 
-##IMPORTANT: this file could not depend onthe format_doc because it is related to the template and not the document!!!
+##IMPORTANT: this file could not depend on the format_doc because it is related to the template and not the document!!!
       resname=CqlsDoc.doc_filename(File.join(@@cfg_dir[:home_root],["root",version,"Default","index"]),exts,false) unless resname
       name=resname
     end

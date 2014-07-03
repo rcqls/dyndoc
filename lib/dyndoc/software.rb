@@ -26,7 +26,7 @@ module CqlsDoc
 
     unless SOFTWARE[:ruby]
       cmd=`type "ruby"`
-      SOFTWARE[:pdflatex]=cmd.strip.split(" ")[2] unless cmd.empty?
+      SOFTWARE[:ruby]=cmd.strip.split(" ")[2] unless cmd.empty?
     end
      
     unless SOFTWARE[:pdflatex]
@@ -56,4 +56,12 @@ module CqlsDoc
     software - SOFTWARE.keys
   end
 
+  def CqlsDoc.pdflatex
+    unless SOFTWARE[:pdflatex]
+      cmd=`type "pdflatex"`
+      SOFTWARE[:pdflatex]=cmd.strip.split(" ")[2] unless cmd.empty?
+    end
+    SOFTWARE[:pdflatex]
+  end
+  
 end
