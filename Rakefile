@@ -63,6 +63,7 @@ spec = Gem::Specification.new do |s|
     s.add_dependency("commander","~>4.1",">=4.1.3")
     s.add_dependency("highline","~>1.6",">=1.6.15")
     s.add_dependency("configliere","~>0.4",">=0.4.18")
+    s.add_dependency("specific_install","~>0.2",">=0.2.10")
     s.require_path = 'lib'
     s.files = PKG_FILES.to_a
     s.bindir = "bin"

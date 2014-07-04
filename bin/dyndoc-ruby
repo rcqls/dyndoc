@@ -124,6 +124,13 @@ end
 cmd.add_command( CmdParse::HelpCommand.new )
 cmd.add_command( CmdParse::VersionCommand.new )
 
+update = CmdParse::Command.new( 'update', false )
+update.short_desc = "update dyndoc"
+update.set_execution_block do
+  `gem specific_install -l http://github.com/rcqls/dyndoc.git`
+end
+cmd.add_command( update )
+
 # all
 all = CmdParse::Command.new( 'all', false )
 all.short_desc = "Parse all files"
