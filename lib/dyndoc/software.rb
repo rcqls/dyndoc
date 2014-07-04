@@ -60,7 +60,7 @@ module CqlsDoc
     unless SOFTWARE[:pdflatex]
       cmd=`type "pdflatex"`
       SOFTWARE[:pdflatex]=cmd.empty? ? "pdflatex" : cmd.strip.split(" ")[2]
-      SOFTWARE[:pdflatex] = "env TEXINPUTS=#{ENV['TEXINPUTS']} " + SOFTWARE[:pdflatex] if ENV['TEXINPUTS']
+      SOFTWARE[:pdflatex] = "env TEXINPUTS=#{ENV['TEXINPUTS']}" + (RUBY_VERSION=~/mingw32/ ? "; " : " ") + SOFTWARE[:pdflatex] if ENV['TEXINPUTS']
     end
     SOFTWARE[:pdflatex]
   end

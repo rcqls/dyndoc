@@ -1477,7 +1477,8 @@ p call
 	          $dyn_lastblock+=b2
 	    #p $dyn_lastblock
           when :texinputs
-            ENV["TEXINPUTS"]+=":"+res.strip.split("\n").join(":")
+            sep=(RUBY_VERSION=~/mingw32/ ? ";" : ":")
+            ENV["TEXINPUTS"]+=sep+res.strip.split("\n").join(sep)
           when :optclass
             optclass=res.strip.split("\n").join(",").split(",").map { |e| "\""+e.strip+"\"" }.join(",")
             #puts "optclass";p optclass
