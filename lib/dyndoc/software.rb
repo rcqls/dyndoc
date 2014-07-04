@@ -5,7 +5,7 @@ module CqlsDoc
   def CqlsDoc.software_init
 
     unless SOFTWARE[:R]
-      if RUBY_VERSION=~/mingw32/
+      if RUBY_PLATFORM=~/mingw32/
         cmd=Dir[File.join(ENV["HomeDrive"],"Program Files","R","**","R.exe")]
         SOFTWARE[:R]=cmd[0] unless cmd.empty?
       else
@@ -15,7 +15,7 @@ module CqlsDoc
     end
 
     unless SOFTWARE[:Rscript]
-      if RUBY_VERSION=~/mingw32/
+      if RUBY_PLATFORM=~/mingw32/
         cmd=Dir[File.join(ENV["HomeDrive"],"Program Files","R","**","Rscript.exe")]
         SOFTWARE[:Rscript]=cmd[0] unless cmd.empty?
       else
@@ -60,7 +60,7 @@ module CqlsDoc
     unless SOFTWARE[:pdflatex]
       cmd=`type "pdflatex"`
       SOFTWARE[:pdflatex]=cmd.empty? ? "pdflatex" : cmd.strip.split(" ")[2]
-      SOFTWARE[:pdflatex] = "env TEXINPUTS=#{ENV['TEXINPUTS']}" + (RUBY_VERSION=~/mingw32/ ? "; " : " ") + SOFTWARE[:pdflatex] if ENV['TEXINPUTS']
+      SOFTWARE[:pdflatex] = "env TEXINPUTS=#{ENV['TEXINPUTS']}" + (RUBY_PLATFORM=~/mingw32/ ? "; " : " ") + SOFTWARE[:pdflatex] if ENV['TEXINPUTS']
     end
     SOFTWARE[:pdflatex]
   end
