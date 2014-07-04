@@ -60,6 +60,7 @@ module CqlsDoc
     unless SOFTWARE[:pdflatex]
       cmd=`type "pdflatex"`
       SOFTWARE[:pdflatex]=cmd.strip.split(" ")[2] unless cmd.empty?
+      p ENV['TEXINPUTS']
       SOFTWARE[:pdflatex] = "env TEXINPUTS=#{ENV['TEXINPUTS']} " + SOFTWARE[:pdflatex] if ENV['TEXINPUTS']
     end
     SOFTWARE[:pdflatex]
