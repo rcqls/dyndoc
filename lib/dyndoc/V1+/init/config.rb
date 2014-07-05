@@ -171,12 +171,14 @@ module CqlsDoc
     return name
   end
 
+  PATH_SEP=";"
+
   def CqlsDoc.init_pathenv
       if !$cfg_dyn or $cfg_dyn[:dyndoc_mode]==:normal #normal mode
          pathenv="."
       else #client server mode
         #puts "working directory";p $cfg_dyn[:working_dir]
-        pathenv = $cfg_dyn[:working_dir] + ":."
+        pathenv = $cfg_dyn[:working_dir] + PATH_SEP + "."
       end
       return pathenv
   end
@@ -184,7 +186,7 @@ module CqlsDoc
 
   def CqlsDoc.ordered_pathenv(pathenv)
     path_ary=[]
-    pathenv.split(":").each{|e| 
+    pathenv.split(PATH_SEP).each{|e| 
       if e=~/(?:\((\-?\d*)\))(.*)/ 
         path_ary.insert($1.to_i-1,$2.strip)
       else 
@@ -200,13 +202,13 @@ module CqlsDoc
   ## dynamically get pathenv!!!!
   def CqlsDoc.get_pathenv(rootDoc=nil,with_currentRoot=true)
     pathenv =  CqlsDoc.init_pathenv
-    pathenv += ":" + File.join($dyn_gem_root,"dyndoc") + ":" + File.join($dyn_gem_root,"dyndoc","Std") if File.exists? File.join($dyn_gem_root,"dyndoc")
-    pathenv += ":" + File.join(@@cfg_dir[:home_root],"library") if File.exists? File.join(@@cfg_dir[:home_root],"library")
-    pathenv += ":" + ENV["DYNDOC_LIBRARY_PATH"] if ENV["DYNDOC_LIBRARY_PATH"] and !ENV["DYNDOC_LIBRARY_PATH"].empty?
-    pathenv += ":" + $dyndoc_currentRoot if with_currentRoot and $dyndoc_currentRoot and !$dyndoc_currentRoot.empty?
-    pathenv += ":" + rootDoc  if rootDoc and !rootDoc.empty?
-    pathenv += ":" + $cfg_dyn[:rootDoc]  if $cfg_dyn and $cfg_dyn[:rootDoc] and !$cfg_dyn[:rootDoc].empty?
-    pathenv += ":" + ENV["TEXINPUTS"] if ENV["TEXINPUTS"] if @@mode==:tex
+    pathenv += PATH_SEP + File.join($dyn_gem_root,"dyndoc") + PATH_SEP + File.join($dyn_gem_root,"dyndoc","Std") if File.exists? File.join($dyn_gem_root,"dyndoc")
+    pathenv += PATH_SEP + File.join(@@cfg_dir[:home_root],"library") if File.exists? File.join(@@cfg_dir[:home_root],"library")
+    pathenv += PATH_SEP + ENV["DYNDOC_LIBRARY_PATH"] if ENV["DYNDOC_LIBRARY_PATH"] and !ENV["DYNDOC_LIBRARY_PATH"].empty?
+    pathenv += PATH_SEP + $dyndoc_currentRoot if with_currentRoot and $dyndoc_currentRoot and !$dyndoc_currentRoot.empty?
+    pathenv += PATH_SEP + rootDoc  if rootDoc and !rootDoc.empty?
+    pathenv += PATH_SEP + $cfg_dyn[:rootDoc]  if $cfg_dyn and $cfg_dyn[:rootDoc] and !$cfg_dyn[:rootDoc].empty?
+    pathenv += PATH_SEP + ENV["TEXINPUTS"].split(RUBY_PLATFORM =~ /mingw/ ? ";" : ":" ).join(";") if ENV["TEXINPUTS"] and @@mode==:tex
     
     #puts "pathenv";p pathenv
     return CqlsDoc.ordered_pathenv(pathenv)
