@@ -6,6 +6,7 @@ require 'configliere'
 
 CqlsDoc.init_dyn
 CqlsDoc.set_curDyn(:V3)
+CqlsDoc.init_dyndoc_library_path
 
 ## detect the gem path!
 $dyn_gem_root=File.join(File.split(File.dirname(__FILE__))[0...-1])
@@ -346,5 +347,12 @@ get.set_execution_block do |args|
   }
 end
 cmd.add_command( get )
+
+path=CmdParse::Command.new( 'path', false )
+path.short_desc = "get search path"
+path.set_execution_block do |args|
+    p CqlsDoc.get_pathenv
+end
+cmd.add_command( path )
 
 cmd.parse args

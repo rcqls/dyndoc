@@ -21,6 +21,18 @@ module CqlsDoc
     @@cfg_dir
   end
 
+  def CqlsDoc.init_dyndoc_library_path
+    dyndoc_library_path=File.join(@@cfg_dir[:home],"dyndoc_library_path")
+    if File.exists? dyndoc_library_path
+      path=File.read(dyndoc_library_path).strip
+      if !ENV["DYNDOC_LIBRARY_PATH"] or ENV["DYNDOC_LIBRARY_PATH"].empty?
+        ENV["DYNDOC_LIBRARY_PATH"]=path 
+      else
+        ENV["DYNDOC_LIBRARY_PATH"]+= ":" + path
+      end
+    end
+  end
+
 # rootDoc
   def CqlsDoc.setRootDoc(rootDoc,root,before=true)  
     if rootDoc
@@ -190,10 +202,12 @@ module CqlsDoc
     pathenv =  CqlsDoc.init_pathenv
     pathenv += ":" + File.join($dyn_gem_root,"dyndoc") + ":" + File.join($dyn_gem_root,"dyndoc","Std") if File.exists? File.join($dyn_gem_root,"dyndoc")
     pathenv += ":" + File.join(@@cfg_dir[:home_root],"library") if File.exists? File.join(@@cfg_dir[:home_root],"library")
+    pathenv += ":" + ENV["DYNDOC_LIBRARY_PATH"] if ENV["DYNDOC_LIBRARY_PATH"] and !ENV["DYNDOC_LIBRARY_PATH"].empty?
     pathenv += ":" + $dyndoc_currentRoot if with_currentRoot and $dyndoc_currentRoot and !$dyndoc_currentRoot.empty?
     pathenv += ":" + rootDoc  if rootDoc and !rootDoc.empty?
     pathenv += ":" + $cfg_dyn[:rootDoc]  if $cfg_dyn and $cfg_dyn[:rootDoc] and !$cfg_dyn[:rootDoc].empty?
     pathenv += ":" + ENV["TEXINPUTS"] if ENV["TEXINPUTS"] if @@mode==:tex
+    
     #puts "pathenv";p pathenv
     return CqlsDoc.ordered_pathenv(pathenv)
   end
