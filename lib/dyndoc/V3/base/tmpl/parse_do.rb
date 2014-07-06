@@ -1449,6 +1449,7 @@ p call
 	          unless res.strip.empty?
 	            paths=res.strip.split("\n").map{|e| e.strip unless e.strip.empty?}.compact
 #p paths
+              @tmpl_cfg[:rootDoc]="" unless @tmpl_cfg[:rootDoc]
 Dyndoc.warn "rootDoc",@tmpl_cfg[:rootDoc]
 	            rootpaths=@tmpl_cfg[:rootDoc].split(CqlsDoc::PATH_SEP)
 Dyndoc.warn "rootpaths",rootpaths
