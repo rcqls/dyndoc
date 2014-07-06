@@ -1449,7 +1449,9 @@ p call
 	          unless res.strip.empty?
 	            paths=res.strip.split("\n").map{|e| e.strip unless e.strip.empty?}.compact
 #p paths
-	            rootpaths=@tmpl_cfg[:rootDoc].split(":")
+Dyndoc.warn "rootDoc",@tmpl_cfg[:rootDoc]
+	            rootpaths=@tmpl_cfg[:rootDoc].split(CqlsDoc::PATH_SEP)
+Dyndoc.warn "rootpaths",rootpaths
 	            newpaths=[]
 	            paths.each{|e| 
 		            #if File.exist?(e)
@@ -1465,7 +1467,7 @@ p call
 	            }
 	            rootpaths=newpaths+rootpaths
 #p rootpaths
-	            @tmpl_cfg[:rootDoc]=rootpaths.join(":")
+	            @tmpl_cfg[:rootDoc]=rootpaths.join(CqlsDoc::PATH_SEP)
               #puts "rootDoc!!!!";p $curDyn[:rootDoc]
 	          end
 	        when :first
