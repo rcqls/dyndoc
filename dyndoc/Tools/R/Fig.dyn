@@ -19,6 +19,7 @@
     [#else][#<]
       {#if]File.dirname(#{=img})=="."[#>]img[:{File.join($dyn_rsrc,"img",#{=img})}][#if}
     [#if}
+    {#if]RUBY_PLATFORM =~ /mingw/ and #{=img}.include? ":"[#=]img[:{#{=img}.gsub(/\:/,"\\string:")}][#if}
   [#?]end
   [#<]{#if]File.basename(#{=img},".*")==File.basename(#{=img})[#>]img[#{img}:{$rfig_exts[:#{deviceR}]}][#}
   [#rb<]
