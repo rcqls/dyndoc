@@ -28,7 +28,7 @@
     rcode=#{=rcode}.strip
     Utils.clean_eol(rcode)
   [#rb>]img[File.expand_path(#{=img})]
-  [#?]RUBY_PLATFORM =~ /mingw/ and #{=img}.include? ":"[#=]img[:{#{=img}.gsub(/\:/,"\\string:")}][#?]end
+  [#?]RUBY_PLATFORM =~ /mingw/ and #{=img}.include? ":"[#=]img[:{#{=img}.gsub(/\:/,"\\\\string:")}][#?]end
   [#<]{#r]
     if(#{newR} || !file.exists('#{img}')) {
       #{deviceR}('#{img}',width=#{widthR},height=#{heightR}{#if]#{+?unitR}[#>],units="#{unitR}"[#}{#if]#{+?resR}[#>],res=#{resR}[#} {#if]#{+?optR}[#>],[#}#{optR})
