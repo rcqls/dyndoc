@@ -28,14 +28,14 @@
     rcode=#{=rcode}.strip
     Utils.clean_eol(rcode)
   [#rb>]img[File.expand_path(#{=img})]
-  [#?]RUBY_PLATFORM =~ /mingw/ and #{=img}.include? ":"[#=]img[:{#{=img}.gsub(/\:/,"\\\\string:")}][#?]end
+  [#?]RUBY_PLATFORM =~ /mingw/ and #{=img}.include? ":"[#=]shorthandoff[:ok][#?]end
   [#<]{#r]
     if(#{newR} || !file.exists('#{img}')) {
       #{deviceR}('#{img}',width=#{widthR},height=#{heightR}{#if]#{+?unitR}[#>],units="#{unitR}"[#}{#if]#{+?resR}[#>],res=#{resR}[#} {#if]#{+?optR}[#>],[#}#{optR})
       :{rcode}
       dev.off()
     }[#in]#{Renvir}[#}
-  [#?] #{include} [#>]{#if]{#dyndoc_mode#} == :web[#>]{#if](File.exists? #{=img}) and (File.stat(#{=img}).size>0)[#>]<img src="{#cqlsweb_public_imgName]#{img}[#}" alt="rfig"/>[#else]<p>Error in the following figure R code!</p><code><pre>:{rcode}</pre></code>[#if}[#else][\includegraphics[#{optTex}]{#{img}}][#if}
+  [#?] #{include} [#>]{#if]{#dyndoc_mode#} == :web[#>]{#if](File.exists? #{=img}) and (File.stat(#{=img}).size>0)[#>]<img src="{#cqlsweb_public_imgName]#{img}[#}" alt="rfig"/>[#else]<p>Error in the following figure R code!</p><code><pre>:{rcode}</pre></code>[#if}[#else][{#if]#{shorthandoff}==:ok[#>]{\shorthandoff{:}[#if}\includegraphics[#{optTex}]{#{img}}{#if]#{shorthandoff}==:ok[#>]}[#if}][#if}
   [#}
 
   {#def]rpng[#,] rcode[] [#,] img[]
