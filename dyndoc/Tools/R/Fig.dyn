@@ -28,7 +28,8 @@
     rcode=#{=rcode}.strip
     Utils.clean_eol(rcode)
   [#rb>]img[File.expand_path(#{=img})]
-  [#?]RUBY_PLATFORM =~ /mingw/ and #{=img}.include? ":"[#=]shorthandoff[:ok][#?]end
+  [#%]Very bad trip about babel package and : (caractère actif latex) solved by \shorthandoff{:}
+  [#?]RUBY_PLATFORM =~ /mingw/ and (#{=_USEPACKAGE_} =~ /[^\[\]]*\[[^\[\]]*french[^\[\]]*\]\{babel\}/) and #{=img}.include? ":"[#=]shorthandoff[:ok][#?]end
   [#<]{#r]
     if(#{newR} || !file.exists('#{img}')) {
       #{deviceR}('#{img}',width=#{widthR},height=#{heightR}{#if]#{+?unitR}[#>],units="#{unitR}"[#}{#if]#{+?resR}[#>],res=#{resR}[#} {#if]#{+?optR}[#>],[#}#{optR})
