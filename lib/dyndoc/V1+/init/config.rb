@@ -23,14 +23,15 @@ module CqlsDoc
 
   def CqlsDoc.init_dyndoc_library_path
 
-    [File.join(FileUtils.pwd,".dyndoc_library_path"),File.join(FileUtils.pwd,"dyndoc_library_path.txt"),File.join(@@cfg_dir[:home],"dyndoc_library_path")].each |dyndoc_library_path|
+    [File.join(FileUtils.pwd,".dyndoc_library_path"),File.join(FileUtils.pwd,"dyndoc_library_path.txt"),File.join(@@cfg_dir[:home],"dyndoc_library_path")].each do |dyndoc_library_path|
     
       if File.exists? dyndoc_library_path
         path=File.read(dyndoc_library_path).strip
+        path=path.split(CqlsDoc::PATH_SEP).map{|pa| File.expand_path(pa)}.join(CqlsDoc::PATH_SEP)
         if !ENV["DYNDOC_LIBRARY_PATH"] or ENV["DYNDOC_LIBRARY_PATH"].empty?
-          ENV["DYNDOC_LIBRARY_PATH"]=path 
+          ENV["DYNDOC_LIBRARY_PATH"]= path 
         else
-          ENV["DYNDOC_LIBRARY_PATH"]+= CqlsDoc::PATH_SEP + path
+          ENV["DYNDOC_LIBRARY_PATH"] += CqlsDoc::PATH_SEP + path
         end
       end
 
@@ -208,8 +209,9 @@ module CqlsDoc
   def CqlsDoc.get_pathenv(rootDoc=nil,with_currentRoot=true)
     pathenv =  CqlsDoc.init_pathenv
     pathenv += PATH_SEP + File.join($dyn_gem_root,"dyndoc") + PATH_SEP + File.join($dyn_gem_root,"dyndoc","Std") if File.exists? File.join($dyn_gem_root,"dyndoc")
-    pathenv += PATH_SEP + File.join(@@cfg_dir[:home_root],"library") if File.exists? File.join(@@cfg_dir[:home_root],"library")
+    # high level of priority since provided by user
     pathenv += PATH_SEP + ENV["DYNDOC_LIBRARY_PATH"] if ENV["DYNDOC_LIBRARY_PATH"] and !ENV["DYNDOC_LIBRARY_PATH"].empty?
+    pathenv += PATH_SEP + File.join(@@cfg_dir[:home_root],"library") if File.exists? File.join(@@cfg_dir[:home_root],"library")
     pathenv += PATH_SEP + $dyndoc_currentRoot if with_currentRoot and $dyndoc_currentRoot and !$dyndoc_currentRoot.empty?
     pathenv += PATH_SEP + rootDoc  if rootDoc and !rootDoc.empty?
     pathenv += PATH_SEP + $cfg_dyn[:rootDoc]  if $cfg_dyn and $cfg_dyn[:rootDoc] and !$cfg_dyn[:rootDoc].empty?
@@ -229,7 +231,7 @@ module CqlsDoc
     end
      
     pathenv = CqlsDoc.get_pathenv(rootDoc)
-    exts = exts+@@tmplExt.values.flatten  #if @cfg[:output]
+    exts = exts + @@tmplExt.values.flatten  #if @cfg[:output]
     exts << "" #with extension
 #puts "before finding paths";p filename;p @@mode;p exts
     exts.uniq!
