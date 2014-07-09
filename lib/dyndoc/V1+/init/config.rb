@@ -22,15 +22,20 @@ module CqlsDoc
   end
 
   def CqlsDoc.init_dyndoc_library_path
-    dyndoc_library_path=File.join(@@cfg_dir[:home],"dyndoc_library_path")
-    if File.exists? dyndoc_library_path
-      path=File.read(dyndoc_library_path).strip
-      if !ENV["DYNDOC_LIBRARY_PATH"] or ENV["DYNDOC_LIBRARY_PATH"].empty?
-        ENV["DYNDOC_LIBRARY_PATH"]=path 
-      else
-        ENV["DYNDOC_LIBRARY_PATH"]+= ":" + path
+
+    [File.join(FileUtils.pwd,".dyndoc_library_path"),File.join(FileUtils.pwd,"dyndoc_library_path.txt"),File.join(@@cfg_dir[:home],"dyndoc_library_path")].each |dyndoc_library_path|
+    
+      if File.exists? dyndoc_library_path
+        path=File.read(dyndoc_library_path).strip
+        if !ENV["DYNDOC_LIBRARY_PATH"] or ENV["DYNDOC_LIBRARY_PATH"].empty?
+          ENV["DYNDOC_LIBRARY_PATH"]=path 
+        else
+          ENV["DYNDOC_LIBRARY_PATH"]+= CqlsDoc::PATH_SEP + path
+        end
       end
+
     end
+
   end
 
 # rootDoc
@@ -231,7 +236,7 @@ module CqlsDoc
     names=exts.map{|ext| CqlsDoc.absolute_path(filename+ext,pathenv)}.compact
     name=(names.length>0 ? names[0] : nil)
     if warn
-      print "WARNING: #{filename} not reachable in #{pathenv.join(":")} with extension #{exts.join(',')}\n" unless name
+      print "WARNING: #{filename}  with extension #{exts.join(',')} not reachable in:\n #{pathenv.join('\n')}\n" unless name
       #puts "tmpl:";p name
     end
     return name
