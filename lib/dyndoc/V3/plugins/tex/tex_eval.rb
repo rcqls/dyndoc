@@ -56,6 +56,14 @@ module CqlsDoc
       end
     end
 
+    def append_to_begin_document(filter,content)
+      ## _BEGINDOC_ already declared in DefaultPre_tmpl.tex
+      if  filter.envir.global["_BEGINDOC_"]
+        filter.envir.global["_BEGINDOC_"][:val][0] << "\n" unless filter.envir.global["_BEGINDOC_"][:val][0].empty?
+        filter.envir.global["_BEGINDOC_"][:val][0] << content
+      end
+    end
+
   end
   end
 end
