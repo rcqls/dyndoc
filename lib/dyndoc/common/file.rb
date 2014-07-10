@@ -17,3 +17,36 @@ module CqlsDoc
 	end
 
 end
+
+## inspired from http://stackoverflow.com/questions/21511347/how-to-create-a-symlink-on-windows-via-ruby
+require 'open3'
+
+class << File
+  alias_method :old_symlink, :symlink
+  alias_method :old_symlink?, :symlink?
+
+  def symlink(target_name, link_name)
+    #if on windows, call mklink, else self.symlink
+    if RUBY_PLATFORM =~ /mswin32|cygwin|mingw|bccwin/
+      #windows mklink syntax is reverse of unix ln -s
+      #windows mklink is built into cmd.exe
+      #vulnerable to command injection, but okay because this is a hack to make a cli tool work.
+      opt = (File.directory? target_name) ? "/D" : ""
+      stdin, stdout, stderr, wait_thr = Open3.popen3('cmd.exe', "/c mklink " + opt + "#{link_name} #{target_name}")
+      wait_thr.value.exitstatus
+    else
+      self.old_symlink(target_name, link_name)
+    end
+  end
+
+  def symlink?(file_name)
+    #if on windows, call mklink, else self.symlink
+    if RUBY_PLATFORM =~ /mswin32|cygwin|mingw|bccwin/
+      #vulnerable to command injection because calling with cmd.exe with /c?
+      stdin, stdout, stderr, wait_thr = Open3.popen3("cmd.exe /c dir #{file_name} | find \"SYMLINK\"")
+      wait_thr.value.exitstatus
+    else
+      self.old_symlink?(file_name)
+    end
+  end
+end
