@@ -18,6 +18,7 @@ PKG_FILES=FileList[
     'share/odt/**/*',
     'share/julia/**/*',
     'share/R/dynArray.R',
+    'share/syntax/**/*',
     'dyndoc/**/.*' #IMPORTANT file starting with . are by default ignored!
 ]
 

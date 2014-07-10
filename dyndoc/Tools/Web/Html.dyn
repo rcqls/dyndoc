@@ -41,10 +41,11 @@ To test the different format! (see method format for TemplateManager in parse_do
 [#rb<]#require "uv"
 syntax,render=#{=syntax}.strip.downcase,#{=render}.strip
 p syntax
-if File.exists? File.join(ENV["HOME"],"dyndoc","etc","uv")
-require File.join(ENV["HOME"],"dyndoc","etc","uv","uv")
+#if File.exists? File.join(ENV["HOME"],"dyndoc","share","uv")
+#require File.join(ENV["HOME"],"dyndoc","share","uv","uv")
+require 'dyndoc/common/uv'
 syntax=File.join(Uv.syntax_path,syntax+".syntax")
-end
+#end
 uv_code = (#{=file}.empty? ? nil : File.read(#{=file}))
 uv_code=((!(#{=code}.empty?) or #{=key}.empty?) ? #{=code} : CqlsDoc::Utils.dyndoc_raw_text(#{=key})).strip unless uv_code
 p uv_code
