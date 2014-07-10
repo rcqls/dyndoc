@@ -13,7 +13,10 @@ syntax=File.join(Uv.syntax_path,syntax+".syntax")
 uv_code = (#{=file}.empty? ? nil : File.read(#{=file}))
 uv_code=((!(#{=code}.empty?) or #{=key}.empty?) ? #{=code} : CqlsDoc::Utils.dyndoc_raw_text(#{=key})).strip unless uv_code
 #Dyndoc.warn "CODE", #{=key},uv_code
+warn_level = $VERBOSE
+$VERBOSE = nil
 uv_res=Uv.parse(uv_code, "latex", syntax , #{lines}, render)
+$VERBOSE = warn_level
 #Dyndoc.warn "RESULT", uv_res
 [#rb>]uv_res
 [#>]<\n>
