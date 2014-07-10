@@ -4,7 +4,7 @@
 
 {#def]curpath[#,]name[][#rb>]File.join(File.dirname("#{_FILENAME_}"),"#{name}")[#}
 
-{#def]curExpPath[#,]name[][#rb>]File.expand_path(File.join(File.dirname("#{_FILENAME_}"),"#{name}"))[#}
+{#def]curExpPath[#,]name[][#rb>]require 'dyndoc/common/file';CqlsDoc.expand_path(File.join(File.dirname("#{_FILENAME_}"),"#{name}"))[#}
 
 {#def]home[#rb>][ENV["HOME"]][#}
 
