@@ -2,3 +2,11 @@
 [#>]\usepackage[french]{babel}
 [#}
 
+To deactivate active character : for windows because of includegraphicswith c: windows path
+
+{#set]_PREAMBLE_!+
+[#?]RUBY_PLATFORM =~ /mingw/[#nl][#>]%To deactivate active character ":" for Windows path file name 
+\shorthandoff{:}
+[#}
+
+
