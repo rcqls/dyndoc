@@ -22,6 +22,11 @@ $VERBOSE = warn_level
 [#>]<\n>
 [#def}
 
+{#def]rverbTexUV[#,]code[][#,]render[amy]
+[#>]{#uvTex]{#rverb]#{code}
+[#mode]raw[#rverb}[#syntax]r[#uvTex}
+[#def}
+
 {#def]testDynCode[#,]key[][#,]render[amy][#,]raw[false][#,]result[Result][#>]
 	|{#uvTex][#key]#{key}[#render]#{render}[#uvTex}
  	|\textbf{#{result}}:[#=]res[{#dyn]test|#{key}[#}][#>]
