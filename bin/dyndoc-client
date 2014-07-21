@@ -17,7 +17,7 @@ $cfg_dyn={
   :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
   :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
   :nbChar_error=> 300,:proj_list=>[],:working_dir=>"",:dyndoc_mode=>:local_server,
-  :dyndoc_room=>nil,:dyndoc_secret=>nil
+  :dyndoc_room=>nil,:dyndoc_secret=>nil,:dyndoc_session=>:normal #or :interactive
 }
 
 # user input dyn variable does not start with "--" and contains "=".
@@ -105,7 +105,9 @@ cmd.options = CmdParse::OptionParserWrapper.new do |opt|
 =end
   opt.on( '-r', '--root DIR', 'Prepend this document root' ) {|dir|
     $cfg_dyn[:rootDoc]=dir
-}
+  }
+
+  opt.on('-i','--interactive','interactive mode') { $cfg_dyn[:dyndoc_session] = :interactive}
   
   opt.on( '--doc', 'launch doc pdf file' ) {
     #$curDyn.init

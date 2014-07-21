@@ -17,7 +17,8 @@ module CqlsDoc
       first=require "R4rb" #save if it the first initialization!
       Dyndoc.warn "FIRST INIT OF R!!!! => #{first}"
       Array.initR
-      R4rb << "rm(list=ls(all=TRUE))" unless first #remove all initial variables if previous documents session
+      interactive=$cfg_dyn and $cfg_dyn[:dyndoc_session]==:interactive
+      R4rb << "rm(list=ls(all=TRUE))" unless first or interactive #remove all initial variables if previous documents session
       R4rb << ".dynStack<-new.env()" #used for R variables used by dyndoc
       RServer.init_envir 
       RServer.init_filter
