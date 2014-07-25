@@ -23,16 +23,16 @@ PKG_FILES=FileList[
 ]
 
 PKG_FILES_CLIENT=FileList[
-    'bin/dyndoc-client','bin/dyndoc-client-devel',
-    'lib/cqlsEM/*','lib/dyndocEM/dyndoc-client.rb',
+    'bin/dyndoc*-client','bin/dyndoc-client-devel',
+    'lib/cqlsEM/*','lib/dyndocEM/dyndoc*-client.rb',
     'lib/dyndoc/common/*.rb',
     'share/syntax/**/*'
 ]
 
 PKG_FILES_SERVER=FileList[
-    'bin/dyndoc-server',
+    'bin/dyndoc*-server',
     'bin/dyndoc-daemon',
-    'lib/dyndoc/**/*.rb', 'lib/cqlsEM/*.rb','lib/dyndocEM/dyndoc-server.rb', #included lib/cqlsEM/*
+    'lib/dyndoc/**/*.rb', 'lib/cqlsEM/*.rb','lib/dyndocEM/dyndoc*-server.rb', #included lib/cqlsEM/*
     'dyndoc/**/*',
     'share/initscript/**/*',
     'share/odt/**/*',
@@ -95,7 +95,7 @@ spec_client = Gem::Specification.new do |s|
     s.require_path = 'lib'
     s.files = PKG_FILES_CLIENT.to_a
     s.bindir = "bin"
-    s.executables = ["dyndoc-client","dyndoc-client-devel"]
+    s.executables = ["dyndoc-client","dyndoc-interactive-client","dyndoc-client-devel"]
     s.description = <<-EOF
   client for dyndoc.
   EOF
@@ -121,7 +121,7 @@ spec_server = Gem::Specification.new do |s|
     s.require_path = 'lib'
     s.files = PKG_FILES_SERVER.to_a
     s.bindir = "bin"
-    s.executables = ["dyndoc-server","dyndoc-daemon","dyndoc-server-devel"]
+    s.executables = ["dyndoc-server","dyndoc-interactive-server","dyndoc-daemon","dyndoc-server-devel"]
     s.description = <<-EOF
   server for dyndoc.
   EOF

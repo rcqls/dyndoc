@@ -139,6 +139,7 @@ module CqlsDoc
     end
 
     def RServer.echo(block,env="Global")
+    	Utils.clean_eol(block)
       txtout=""
       optout=nil #options for the output
       hide=0
@@ -220,6 +221,7 @@ module CqlsDoc
     end
 
     def RServer.echo_blocks(block,prompt={:normal=>'> ',:continue=>'+ '},env="Global")
+      Utils.clean_eol(block)
       inputs,outputs=[],[]
       input,output="",""
       optout=nil #options for the output
@@ -324,6 +326,7 @@ module CqlsDoc
     #end
     
     def RServer.inputsAndOutputs(block,id="",optRDevice="",prompt={:normal=>'',:continue=>''},env="Global")
+      Utils.clean_eol(block)
       envLoc=env
       optRDevice=(@@device=="png" ? "width=10,height=10,units=\"cm\",res=128" : "width=5,height=5,onefile=FALSE") if optRDevice.empty?
       R4rb << "require(dyndoc)" if @@mode==:capture_cqls

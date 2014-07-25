@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+require 'rubygems'        # if you use RubyGems
+$curARGV=0
+if ARGV[$curARGV]=="--test"
+    dynlib_path=nil
+    # The two first paths are for devel mode (the second one is maybe obsolete)
+    # The two last paths are for production mode (the last one is closed to be abandonned)
+    [["Dropbox","Dyndoc","System","dyndoc.ruby"],["DyndocVB","SharedFolder","System","dyndoc-ruby"],["DyndocVB","System","dyndoc.ruby"],[".gPrj","work","dyndoc.ruby"]].each {|prefix|
+        dynlib_path=Dir[File.join(ENV["HOME"],prefix,"lib")][0] unless dynlib_path
+    }
+    $:.unshift(dynlib_path) if  dynlib_path
+
+    #require 'pry'
+    $curARGV+=1
+end
+require 'dyndocEM/dyndoc-interactive-server'
+
+NOKEYBOARD= ["--no-keyboard"].include?  ARGV[$curARGV]
+$curARGV+=1 if NOKEYBOARD
+
+if ["-p","--port"].include?  ARGV[$curARGV]
+    PORT=ARGV[$curARGV+1]
+     $curARGV+=2
+else
+    PORT=7777
+end
+
+if ["-R","--Rserv"].include?  ARGV[$curARGV]
+    $dyndoc_rserv=ARGV[$curARGV+1]
+    $curARGV+=2
+end
+
+Encoding.default_external = Encoding::UTF_8 if RUBY_VERSION > '1.8.7'
+
+require "dyndoc/V3/init/dyn"
+CqlsDoc.init_dyn
+CqlsDoc.set_curDyn(:V3)
+## detect the gem path!
+$dyn_gem_root=File.join(File.split(File.dirname(__FILE__))[0...-1])
+$dyndoc_server_hostname=Socket.gethostname    
+EventMachine::run {
+    # hit Control + C to stop
+    Signal.trap("INT")  { EventMachine.stop }
+    Signal.trap("TERM") { EventMachine.stop }
+
+    EventMachine::start_server "0.0.0.0", PORT, DyndocInteractiveServer
+    puts "running dyndoc server on #{PORT}"
+    EM.open_keyboard(DyndocServerKeyboard) unless NOKEYBOARD
+}
