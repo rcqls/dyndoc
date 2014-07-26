@@ -180,6 +180,7 @@ module CqlsDoc
   PATH_SEP=";"
 
   def CqlsDoc.init_pathenv
+    p $cfg_dyn
       if !$cfg_dyn or $cfg_dyn[:dyndoc_mode]==:normal #normal mode
          pathenv="."
       else #client server mode

@@ -13,11 +13,13 @@ class DyndocInteractiveClient < EventMachine::Connection
 
     include CqlsClientServer
 
-    def initialize(cfg=nil)
+    def initialize(cfg=nil,content="")
         super 
         init_com("Client")
         # # stuff here...
-        # @cfg=cfg
+        @cfg,@content=cfg,content
+        puts "content";p @content
+
         # if !@cfg
         #     puts "[Client] sent server to exit"
         #     send_cmd :server_to_exit
@@ -46,7 +48,7 @@ class DyndocInteractiveClient < EventMachine::Connection
         #     end
         #     #p @cfg
         #     ##send "__cfg__"+YAML.dump(@cfg)
-
+        do__client_to_exit if @content.empty?
         send_cmd(:cfg,YAML.dump(@cfg))
     end
 
@@ -57,8 +59,13 @@ class DyndocInteractiveClient < EventMachine::Connection
         puts "[Client]  connection closed!"
     end
 
-    def do__get_content(content)
-       p content
+    def do__set_content
+        send_cmd(:dyndoc,@content)
+    end
+
+    def do__get_content(server_content)
+       puts server_content+"\n"
+       do__client_to_exit
     end
  
     def unbind

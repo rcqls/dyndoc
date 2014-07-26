@@ -21,6 +21,14 @@ class DyndocInteractiveServer < EventMachine::Connection
         puts "#{self.object_id.to_s} initialized!"
         super
         init_com("Server")
+        $cfg_dyn={
+          :format_output=>"txt",
+          :client_cmd=> :cfg,
+          :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
+          :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
+          :nbChar_error=> 300,:proj_list=>[],:working_dir=>"",:dyndoc_mode=>:local_interactive_server,
+          :dyndoc_session=>:interactive
+        }
         @room,@room_dir=nil,nil
     end
 
@@ -32,8 +40,8 @@ class DyndocInteractiveServer < EventMachine::Connection
     end
 
     def do__cfg(cfg)
-        $cfg_dyn=$cfg_dyn || {} 
         $cfg_dyn.merge(YAML.load(cfg))
+        send_cmd(:set_content)
     end
 
     def do__dyndoc(content)
@@ -47,8 +55,10 @@ class DyndocInteractiveServer < EventMachine::Connection
                 puts "[Server] #{self.object_id.to_s} in use!"
                 #puts "room (mode,name,dir):"; @room_mode;p @room;p @room_dir   
                 result=process_dyndoc(content)
+                result="__EMPTY_RESULT__" if result.empty?
                 timer.cancel
                 send_cmd(:get_content,result)
+                server_not_busy
             end
         end 
     end
