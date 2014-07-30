@@ -6,6 +6,7 @@
 	<array>
 		<string>dyn</string>
 		<string>dyn_tex</string>
+		<string>dyn_html</string>
 	</array>
 	<key>name</key>
 	<string>Dyndoc</string>
@@ -223,7 +224,7 @@
 		<key>tag_blck_out_dyn</key>
 		<dict>
 			<key>begin</key>
-			<string>(\[\#)(&lt;&lt;|&lt;|do|&gt;&gt;|&gt;|out|\\n|nl|\?|&amp;\?|tag|&amp;tag|yield|=|\+|%)(\])</string>
+			<string>(\[\#)(&lt;&lt;|&lt;|do|&gt;&gt;|&gt;|out|\\n|nl|\?|&amp;\?|tag|&amp;tag|\?\?|yield|=|\+|%)(\])</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -259,7 +260,7 @@
 		<key>tag_blck_r_dyn</key>
 		<dict>
 			<key>begin</key>
-			<string>(\[\#)(r&lt;|R&lt;|r&gt;|R&gt;)(\])</string>
+			<string>(\[\#)(r&lt;|R&lt;|r&gt;|R&gt;|r&gt;&gt;|R&gt;&gt;|rverb)(\])</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -433,7 +434,7 @@
 		<key>tag_r_dyn</key>
 		<dict>
 			<key>begin</key>
-			<string>(\{\#)(r|R&gt;|R)(])</string>
+			<string>(\{\#)(r|R&gt;|R&lt;|R|r&gt;&gt;|R&gt;&gt;|rverb)(])</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
