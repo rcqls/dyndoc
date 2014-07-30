@@ -25,7 +25,7 @@ module CqlsDoc
       RServer.init_filter
       ## ruby and R init for dynArray stuff
       require "dyndoc/common/dynArray"
-      R4rb << "source(\""+File.join($dyn_gem_root,"share","R","dynArray.R")+"\")"
+      R4rb << "source('"+File.join($dyn_gem_root,"share","R","dynArray.R").gsub('\\','/')+"')"
     end
 
     def TemplateManager.initJulia
