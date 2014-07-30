@@ -147,6 +147,24 @@
         'include': '#include_blck_dyn'
       }
     ]
+  'source_r_fix_bracket_for_dyndoc':
+    'begin': '\\{'
+    'beginCaptures':
+      '0':
+        'name': 'punctuation.section.block.begin.r'
+    'end': '\\}'
+    'endCaptures':
+      '0':
+        'name': 'punctuation.section.block.end.r'
+    'name': 'meta.block.r'
+    'patterns': [
+      {
+        'include': 'text.dyndoc'
+      }
+      {
+        'include': 'source.r'
+      }
+    ]
   'tag_blck_r_dyn':
     'begin': '(\\[\\#)(r<|R<|r>|R>|r>>|R>>|rverb)(\\])'
     'beginCaptures':
@@ -159,6 +177,12 @@
     'end': '(?=\\[\\#)'
     'endCaptures': {}
     'patterns': [
+      {
+        'include': '#tag_instr_dyn'
+      }
+      {
+        'include': '#source_r_fix_bracket_for_dyndoc'
+      }
       {
         'include': '#include_blck_dyn'
       }

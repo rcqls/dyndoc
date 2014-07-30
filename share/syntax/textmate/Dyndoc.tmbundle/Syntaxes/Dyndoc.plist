@@ -257,6 +257,42 @@
 				</dict>
 			</array>
 		</dict>
+		<key>source_r_fix_bracket_for_dyndoc</key>
+		<dict>
+    		<key>begin</key> 
+    		<string>\{</string>
+    		<key>beginCaptures</key>
+      		<dict>
+      			<key>0</key>
+      			<dict>
+        			<key>name</key> 
+        			<string>punctuation.section.block.begin.r</string>
+        		</dict>
+        	</dict>
+    		<key>end</key>
+    		<string>\}</string>
+    		<key>endCaptures</key>
+      		<dict>
+      			<key>0</key>
+        		<dict>
+        			<key>name</key> 
+        			<string>punctuation.section.block.end.r</string>
+    			</dict>
+    		</dict>
+    		<key>name</key>
+    		<string>meta.block.r</string>
+    		<key>patterns</key> 
+    			<array>
+    				<dict>
+    					<key>include</key>
+    					<string>text.dyndoc</string>
+      				</dict>
+  					<dict>
+        				<key>include</key> 
+        				<string>source.r</string>
+      				</dict>
+      			</array>
+    	</dict>
 		<key>tag_blck_r_dyn</key>
 		<dict>
 			<key>begin</key>
@@ -285,6 +321,14 @@
 			<dict/>
 			<key>patterns</key>
 			<array>
+      			<dict>
+					<key>include</key>
+					<string>#tag_instr_dyn</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>#source_r_fix_bracket_for_dyndoc</string>
+				</dict>
 				<dict>
 					<key>include</key>
 					<string>#include_blck_dyn</string>
