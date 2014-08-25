@@ -24,6 +24,7 @@ class DyndocInteractiveServer < EventMachine::Connection
         $cfg_dyn={
             :format_output=>"txt",
             :client_cmd=> :cfg,
+            :langs => [:R,:jl],
             :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
             :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
             :nbChar_error=> 300,:proj_list=>[],:working_dir=>"",:dyndoc_mode=>:local_interactive_server,

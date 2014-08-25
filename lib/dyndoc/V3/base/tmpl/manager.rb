@@ -49,6 +49,7 @@ module CqlsDoc
       Julia << "using Dyndoc"
       Julia << "Ruby.alive(true)"
       Julia << "global _dynArray=DynArray()"
+      Dyndoc.warn "Julia initialized inside dyndoc!"
 
     end
 
