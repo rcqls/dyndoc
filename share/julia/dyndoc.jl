@@ -22,6 +22,9 @@
 # end
 
 module DyndocSandbox
+	importall Ruby
+	importall Dyndoc
+	
     # Replace OUTPUT_STREAM references so we can capture output.
     OUTPUT_STREAM = IOBuffer()
     print(x) = Base.print(OUTPUT_STREAM, x)

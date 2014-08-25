@@ -1754,7 +1754,7 @@ p call
             process_r(@doLangBlock[id][:code][cptCode])
           when :jl
             # TODO
-            #process_jl(@doLangBlock[id][:code][cptCode])
+            process_jl(@doLangBlock[id][:code][cptCode])
           when :rb
             process_rb(@doLangBlock[id][:code][cptCode])
           end
@@ -1945,6 +1945,7 @@ p call
       ## Dyndoc.warn "evalJlBlock!!!"
       ## this deals with the problem of newBlcks!
       ## Dyndoc.warn "block_normal",blckMode_normal?
+      ## Dyndoc.warn "@doLangBlock",@doLangBlock
       code=(blckMode_normal? ? @doLangBlock[id][:code][cpt] : "{#blckAnyTag]"+@doLangBlock[id][:code][cpt]+"[#blckAnyTag}" )
       ## Dyndoc.warn "codeJL",code
       ## Dyndoc.warn "filter",@doLangBlock[id][:filter]
@@ -1980,6 +1981,8 @@ p call
       blck=make_do_lang_blck(blck,jlBlockId,:jl)
       ## Dyndoc.warn "do_jl",blck
       code = parse_args(blck,filter)
+      ## Dyndoc.warn "DO_JL",code
+      ## Dyndoc.warn "@doLangBlock",@doLangBlock[0][:code] if @doLangBlock[0]
       process_jl(code)
       ## Dyndoc.warn "code_jl",code
       if [:"jl>"].include? blck[0]

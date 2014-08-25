@@ -740,6 +740,7 @@ module CqlsDoc
 	def JLServer.inputsAndOutputs(code,hash=true)
 		JLServer.initVerb unless @@initVerb
 		res=(Julia << 'capture_julia('+code.strip.inspect+')')
+		## Dyndoc.warn "JLServer.inputsAndOutputs",res
 		res.map!{|input,output,output2,error,error2|
 			{:input=>input,:output=>output,:output2=>output2,:error=>error,:error2=>error2}
 		} if hash
@@ -757,7 +758,8 @@ module CqlsDoc
 	end
 
 	def JLServer.outputs(code,opts={}) #may have more than one lines in code
-		## Dyndoc.warn "JLServer opts",opts
+		## Dyndoc.warn "JLServer.outputs opts",opts
+		## Dyndoc.warn "JLServer code",code
 		if opts[:block]
 			JLServer.inputsAndOutputs(code,false).map{|input,output,output2,error,error2|
 				## Dyndoc.warn "output2",output2
