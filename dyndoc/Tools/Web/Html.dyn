@@ -40,7 +40,7 @@ To test the different format! (see method format for TemplateManager in parse_do
 [#%]in a html blck to be protected!
 [#rb<]#require "uv"
 syntax,render=#{=syntax}.strip.downcase,#{=render}.strip
-p syntax
+Dyndoc.warn "syntax",syntax
 #if File.exists? File.join(ENV["HOME"],"dyndoc","share","uv")
 #require File.join(ENV["HOME"],"dyndoc","share","uv","uv")
 require 'dyndoc/common/uv'
@@ -48,19 +48,22 @@ syntax=File.join(Uv.syntax_path,syntax+".syntax")
 #end
 uv_code = (#{=file}.empty? ? nil : File.read(#{=file}))
 uv_code=((!(#{=code}.empty?) or #{=key}.empty?) ? #{=code} : CqlsDoc::Utils.dyndoc_raw_text(#{=key})).strip unless uv_code
-p uv_code
-p Uv.parse(uv_code, "xhtml", syntax , #{lines}, render,true)
+#Dyndoc.warn "CODE",uv_code,#{lines}
+#Uv.parse(uv_code, "xhtml", syntax , #{lines}, render,true)
 #OLD: uv_res=CqlsDoc::AS_IS+Uv.parse(uv_code, "xhtml", #{=syntax}.downcase, true, #{=render})+CqlsDoc::AS_IS
-uv_res=CqlsDoc::AS_IS+Uv.parse(uv_code, "xhtml", syntax , #{lines}, render)+CqlsDoc::AS_IS
-puts "uv_res:";p uv_res
+#Dyndoc.warn "titi"
+uv_res=Uv.parse(uv_code, "xhtml", syntax , true, render)
+uv_res = CqlsDoc::AS_IS+uv_res+CqlsDoc::AS_IS unless CqlsDoc::V3::TemplateManager.interactive
+#Dyndoc.warn "titi"
+#Dyndoc.warn "uv_res:", uv_res
 [#>][:{uv_res}<\n>]
 [#=]::header.css_uv?[amy]
 [#=]::header.css_uv[{#rb>](#{=header.css_uv}.split(",")+[#{=render}]).join(",")[#}]
 [#def}
 
-{#def]rverbUV[#,]code[][#,]render[amy]
+{#def]rverbUV[#,]code[][#,]render[amy][#,]lines[true]
 [#>]{#uv]{#rverb]#{code}[#mode]raw[#rverb}
-[#syntax]r[#}
+[#syntax]r[#lines]#{lines}[#}
 [#def}
 
 {#meth]new.MenuSwitcher[#,].choices[][#,]first[js]

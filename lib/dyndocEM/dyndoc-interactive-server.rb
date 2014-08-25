@@ -22,12 +22,22 @@ class DyndocInteractiveServer < EventMachine::Connection
         super
         init_com("Server")
         $cfg_dyn={
-          :format_output=>"txt",
-          :client_cmd=> :cfg,
-          :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
-          :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
-          :nbChar_error=> 300,:proj_list=>[],:working_dir=>"",:dyndoc_mode=>:local_interactive_server,
-          :dyndoc_session=>:interactive
+            :format_output=>"txt",
+            :client_cmd=> :cfg,
+            :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
+            :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
+            :nbChar_error=> 300,:proj_list=>[],:working_dir=>"",:dyndoc_mode=>:local_interactive_server,
+            :dyndoc_session=>:interactive,
+            :interactive_session_libs => [
+                "Tools/Web/TabBar",
+                "Tools/Web/JQueryTools",
+                "Tools/Web/DHtmlX",
+                "Tools/Web/Code",
+                "Tools/Web/Html",
+                "Tools/Web/Html/Styles",
+                "Tools/Web/Html/JQuery",
+                "Tools/Web/Layout"
+            ].join("\n")
         }
         @room,@room_dir=nil,nil
     end

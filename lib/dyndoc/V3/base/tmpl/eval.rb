@@ -176,8 +176,8 @@ module CqlsDoc
       if b.length>0
         b2=b.map{|e| filter.apply(e)}
 #puts "b2";p b2
+#Dyndoc.warn "LOAD",b2
         b2.each{|lib|
-#p lib
           lib,tags,rest=lib.split(/\((.*)\)/)
 #p lib;p tags;p rest
           tags=tags.split(",").map{|e| e.strip.downcase} if tags

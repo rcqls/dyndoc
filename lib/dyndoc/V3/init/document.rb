@@ -57,9 +57,9 @@ module CqlsDoc
       else
         begin
           return prepare_content 
-        rescue
-          print "WARNING: fail to eval content #{@content} !!\n"
-          return ""
+        # rescue
+        #   print "WARNING: fail to eval content #{@content} !!\n"
+        #   return ""
         end
       end
     end

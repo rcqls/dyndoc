@@ -21,17 +21,29 @@
 # 	res
 # end
 
+module DyndocSandbox
+    # Replace OUTPUT_STREAM references so we can capture output.
+    OUTPUT_STREAM = IOBuffer()
+    print(x) = Base.print(OUTPUT_STREAM, x)
+    println(x) = Base.println(OUTPUT_STREAM, x)
+
+    # Output
+    MIME_OUTPUT = Array(Tuple, 0)
+    emit(mime, data) = push!(MIME_OUTPUT, (mime, data))
+end
+
 function get_stdout_iobuffer()
-	seek(STDOUT, 0)
-	jl4rb_out = takebuf_string(STDOUT)
-	truncate(STDOUT, 0)
-	jl4rb_out
+	#seek(DyndocSandbox.OUTPUT_STREAM, 0)
+	#jl4rb_out = 
+	takebuf_string(DyndocSandbox.OUTPUT_STREAM)
+	#truncate(DyndocSandbox.OUTPUT_STREAM, 0)
+	#jl4rb_out
 end
 
 function get_stderr_iobuffer()
-	seek(STDERR, 0)
-	jl4rb_out = takebuf_string(STDERR)
-	truncate(STDERR, 0)
+	#seek(STDERR.buffer, 0)
+	jl4rb_out = takebuf_string(STDERR.buffer)
+	#truncate(STDERR.buffer, 0)
 	jl4rb_out
 end
 
@@ -70,19 +82,19 @@ function capture_julia(cmd::String)
 		push!(cmd0,l) 
 		pcmd0=Base.parse_input_line(join(cmd0,"\n"))
 		#print(join(cmd0,"\n")*":");println(pcmd0)
-		add = typeof(pcmd0)==Expr && pcmd0.head == :continue
+		add = typeof(pcmd0)==Expr && pcmd0.head == :incomplete
 		if !add 
 			#print("ici:")
 			#println(Base.eval(pcmd0))
 			result,error = "","" 
 			try 
-				result=eval(pcmd0)
+				result=eval(DyndocSandbox, pcmd0)
 			catch e
-	            io = IOBuffer()
-	            print(io, "ERROR: ")
-	            Base.error_show(io, e)
-	            error = bytestring(io)
-	            close(io)
+	            #io = IOBuffer()
+	            #print(io, "ERROR: ")
+	            #Base.error_show(io, e)
+	            error = "Error: $(string(e))"
+	            #close(io)
 	        end
 			push!(res,(join(cmd0,"\n"),string(result),get_stdout_iobuffer(),error,get_stderr_iobuffer())) 
 			cmd0=String[] 

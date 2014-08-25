@@ -963,7 +963,7 @@ p [vars,b2]
 #p blck
 #p parse_args(blck,filter)
       tmpl=parse_args(blck,filter).strip.split("\n")
-#p tmpl
+#Dyndoc.warn "require",tmpl
       eval_LOAD(tmpl,filter)
     end
  

@@ -31,13 +31,14 @@ PKG_FILES_CLIENT=FileList[
 
 PKG_FILES_SERVER=FileList[
     'bin/dyndoc*-server',
-    'bin/dyndoc-daemon',
+    'bin/dyndoc*-daemon',
     'lib/dyndoc/**/*.rb', 'lib/cqlsEM/*.rb','lib/dyndocEM/dyndoc*-server.rb', #included lib/cqlsEM/*
     'dyndoc/**/*',
     'share/initscript/**/*',
     'share/odt/**/*',
     'share/julia/**/*',
     'share/R/dynArray.R',
+    'share/syntax/**/*',
     'dyndoc/**/.*' #IMPORTANT file starting with . are by default ignored!
 ]
 
@@ -121,7 +122,7 @@ spec_server = Gem::Specification.new do |s|
     s.require_path = 'lib'
     s.files = PKG_FILES_SERVER.to_a
     s.bindir = "bin"
-    s.executables = ["dyndoc-server","dyndoc-interactive-server","dyndoc-daemon","dyndoc-server-devel"]
+    s.executables = ["dyndoc-server","dyndoc-interactive-server","dyndoc-daemon","dyndoc-interactive-daemon","dyndoc-server-devel"]
     s.description = <<-EOF
   server for dyndoc.
   EOF

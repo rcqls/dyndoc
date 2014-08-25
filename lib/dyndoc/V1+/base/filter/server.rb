@@ -87,7 +87,7 @@ module CqlsDoc
 			end
 
 
-			if $cfg_dyn and $cfg_dyn[:dyndoc_mode]!=:normal
+			if $cfg_dyn and $cfg_dyn[:dyndoc_mode]!=:normal and $dyn_logger
 				##p ["error ruby",code]
 	        	$dyn_logger.write("\nERROR Ruby:\n"+code+"\n")
 	        end

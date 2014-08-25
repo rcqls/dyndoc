@@ -12,12 +12,19 @@ module CqlsDoc
     attr_reader :scan, :blckName
     ### attr_accessor :mark
 
+    @@interactive=nil
+    
+    def TemplateManager.interactive
+      @@interactive=(!$cfg_dyn.nil? and $cfg_dyn[:dyndoc_session]==:interactive) unless @@interactive
+      @@interactive
+    end
+
     # Maybe better located inside server.rb
     def TemplateManager.initR
       first=require "R4rb" #save if it the first initialization!
       Dyndoc.warn "FIRST INIT OF R!!!! => #{first}"
       Array.initR
-      interactive=(!$cfg_dyn.nil? and $cfg_dyn[:dyndoc_session]==:interactive)
+      interactive = TemplateManager.interactive
       #p "client";p $cfg_dyn;p interactive
       R4rb << "rm(list=ls(all=TRUE))" if !first and !interactive #remove all initial variables if previous documents session
       R4rb << ".dynStack<-new.env()" #used for R variables used by dyndoc

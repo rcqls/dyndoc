@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+require 'rubygems'        # if you use RubyGems
+$curARGV=0
+if ARGV[$curARGV]=="--test"
+    $:.unshift(File.join(ENV["HOME"],"static","dyndoc-ruby","lib")) 
+    require 'pry'
+    $curARGV+=1
+end
+require 'dyndocEM/dyndoc-interactive-server'
+
+if ["-p","--port"].include?  ARGV[$curARGV]
+    PORT=ARGV[$curARGV+1]
+     $curARGV+=2
+else
+    PORT=7777
+end
+
+if ["-R","--Rserv"].include?  ARGV[$curARGV]
+    $dyndoc_rserv=ARGV[$curARGV+1]
+    $curARGV+=2
+end
+ 
+   
+require "dyndoc/V3/init/dyn"
+CqlsDoc.init_dyn
+CqlsDoc.set_curDyn(:V3)
+## detect the gem path!
+$dyn_gem_root=File.join(File.split(File.dirname(__FILE__))[0...-1])
+$dyndoc_server_hostname=Socket.gethostname    
+require "daemons"
+Daemons.run_proc("dyndoc-daemon-#{PORT}",{:ARGV=>ARGV[$curARGV..-1],:dir=>DyndocInteractiveServer::RunDir}) do
+EventMachine::run {
+    EventMachine::start_server "0.0.0.0", PORT, DyndocInteractiveServer
+}
+end
