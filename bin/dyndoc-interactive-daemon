@@ -15,11 +15,19 @@ else
     PORT=7777
 end
 
+if ["--log"].include?  ARGV[$curARGV]
+    WITHLOG=true
+     $curARGV+=1
+else
+    WITHLOG=false
+end
+
 if ["-R","--Rserv"].include?  ARGV[$curARGV]
     $dyndoc_rserv=ARGV[$curARGV+1]
     $curARGV+=2
 end
  
+Encoding.default_external = Encoding::UTF_8 if RUBY_VERSION > '1.8.7'
    
 require "dyndoc/V3/init/dyn"
 CqlsDoc.init_dyn
@@ -28,7 +36,7 @@ CqlsDoc.set_curDyn(:V3)
 $dyn_gem_root=File.join(File.split(File.dirname(__FILE__))[0...-1])
 $dyndoc_server_hostname=Socket.gethostname    
 require "daemons"
-Daemons.run_proc("dyndoc-daemon-#{PORT}",{:ARGV=>ARGV[$curARGV..-1],:dir=>DyndocInteractiveServer::RunDir}) do
+Daemons.run_proc("dyndoc-daemon-#{PORT}",{:ARGV=>ARGV[$curARGV..-1],:dir=>DyndocInteractiveServer::RunDir,:log_output => WITHLOG,}) do
 EventMachine::run {
     EventMachine::start_server "0.0.0.0", PORT, DyndocInteractiveServer
 }

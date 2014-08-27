@@ -24,7 +24,7 @@
 module DyndocSandbox
 	importall Ruby
 	importall Dyndoc
-	
+
     # Replace OUTPUT_STREAM references so we can capture output.
     OUTPUT_STREAM = IOBuffer()
     print(x) = Base.print(OUTPUT_STREAM, x)
@@ -44,10 +44,11 @@ function get_stdout_iobuffer()
 end
 
 function get_stderr_iobuffer()
-	#seek(STDERR.buffer, 0)
-	jl4rb_out = takebuf_string(STDERR.buffer)
-	#truncate(STDERR.buffer, 0)
-	jl4rb_out
+	#jl4rb_out = takebuf_string(STDERR.buffer)
+	#jl4rb_out
+	## THIS FAILS WHEN DYNDOC DAEMONIZED SO AUTOMATIC EMPTY RESULT for now
+	## MAYBE TO DELETE SOON!
+	""
 end
 
 # export weave
@@ -80,6 +81,7 @@ end
 function capture_julia(cmd::String)
 	add,cmd0=true,String[]
 	res=Any[] #Dict{String,Any}()
+	#println(cmd)
 	for l=split(cmd,"\n")
 		#println("l => ",l)
 		push!(cmd0,l) 

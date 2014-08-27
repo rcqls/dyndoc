@@ -761,7 +761,9 @@ module CqlsDoc
 		## Dyndoc.warn "JLServer.outputs opts",opts
 		## Dyndoc.warn "JLServer code",code
 		if opts[:block]
-			JLServer.inputsAndOutputs(code,false).map{|input,output,output2,error,error2|
+			res=JLServer.inputsAndOutputs(code,false)
+			return "" unless res
+			res.map{|input,output,output2,error,error2|
 				## Dyndoc.warn "output2",output2
 				output2
 			}.join("\n")
