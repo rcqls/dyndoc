@@ -1,0 +1,19 @@
+{
+  "name": "dyndoc-session",
+  "main": "./lib/dyndoc-session",
+  "version": "0.0.1",
+  "private": true,
+  "description": "dyndoc session from atom",
+  "activationEvents": ["dyndoc-session:eval","dyndoc-session:toggle"],
+  "repository": "https://github.com/rcqls/atom-dyndoc-session",
+  "license": "LGPL",
+  "engines": {
+    "atom": ">0.39.0"
+  },
+  "dependencies": {
+     "net": ">1.0.0",
+     "fs-plus": "2.x",
+     "pathwatcher": "^2.0",
+     "underscore-plus": "1.x"
+  }
+}
