@@ -1,0 +1,31 @@
+# Keybindings require three things to be fully defined: A selector that is
+# matched against the focused element, the keystroke and the command to
+# execute.
+#
+# Below is a basic keybinding which registers on all platforms by applying to
+# the root workspace element.
+
+# For more detailed documentation see
+# https://www.atom.io/docs/latest/advanced/keymaps
+
+'.platform-darwin .workspace':
+  'cmd-alt-x': 'dyndoc-viewer:eval'
+  'cmd-alt-t': 'dyndoc-viewer:toggle'
+
+'.platform-win32 .workspace, .platform-linux .workspace':
+  'ctrl-alt-x': 'dyndoc-viewer:eval'
+  'ctrl-alt-t': 'dyndoc-viewer:toggle'
+
+'.platform-darwin .dyndoc-viewer':
+  'cmd-+': 'dyndoc-viewer:zoom-in'
+  'cmd-=': 'dyndoc-viewer:zoom-in'
+  'cmd--': 'dyndoc-viewer:zoom-out'
+  'cmd-_': 'dyndoc-viewer:zoom-out'
+  'cmd-0': 'dyndoc-viewer:reset-zoom'
+
+'.platform-win32 .dyndoc-viewer, .platform-linux .dyndoc-viewer':
+  'ctrl-+': 'dyndoc-viewer:zoom-in'
+  'ctrl-=': 'dyndoc-viewer:zoom-in'
+  'ctrl--': 'dyndoc-viewer:zoom-out'
+  'ctrl-_': 'markdown-preview:zoom-out'
+  'ctrl-0': 'dyndoc-viewer:reset-zoom'

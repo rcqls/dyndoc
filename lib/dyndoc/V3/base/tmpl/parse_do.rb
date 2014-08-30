@@ -1966,6 +1966,7 @@ p call
     end
 
     def do_jl(tex,blck,filter)
+      return unless $cfg_dyn[:langs].include? :jl
       ## rbBlock stuff
       dynBlock=dynBlock_in_doLangBlock?(blck)
       if dynBlock 

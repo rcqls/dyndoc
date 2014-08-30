@@ -10,7 +10,7 @@ renderer = require './render-dyndoc'
 module.exports =
 class DyndocViewer extends ScrollView
   @content: ->
-    @pre class: 'dyndoc-viewer native-key-bindings', tabindex: -1
+    @pre class: 'dyndoc-viewer native-key-bindings', tabindex: -1, =>
 
   constructor: ({@editorId, filePath}) ->
     super
@@ -41,7 +41,6 @@ class DyndocViewer extends ScrollView
   resolveEditor: (editorId) ->
     resolve = =>
       @editor = @editorForId(editorId)
-
       if @editor?
         @trigger 'title-changed' if @editor?
         @handleEvents()
@@ -67,15 +66,15 @@ class DyndocViewer extends ScrollView
     @subscribe this, 'core:move-up', => @scrollUp()
     @subscribe this, 'core:move-down', => @scrollDown()
 
-    @subscribeToCommand atom.workspaceView, 'dyndoc-session:zoom-in', =>
+    @subscribeToCommand atom.workspaceView, 'dyndoc-viewer:zoom-in', =>
       zoomLevel = parseFloat(@css('zoom')) or 1
       @css('zoom', zoomLevel + .1)
 
-    @subscribeToCommand atom.workspaceView, 'dyndoc-session:zoom-out', =>
+    @subscribeToCommand atom.workspaceView, 'dyndoc-viewer:zoom-out', =>
       zoomLevel = parseFloat(@css('zoom')) or 1
       @css('zoom', zoomLevel - .1)
 
-    @subscribeToCommand atom.workspaceView, 'dyndoc-session:reset-zoom', =>
+    @subscribeToCommand atom.workspaceView, 'dyndoc-viewer:reset-zoom', =>
       @css('zoom', 1)
 
     changeHandler = =>
@@ -88,12 +87,12 @@ class DyndocViewer extends ScrollView
       @subscribe(@file, 'contents-changed', changeHandler)
     else if @editor?
       @subscribe @editor.getBuffer(), 'contents-modified', =>
-        changeHandler() if atom.config.get 'dyndoc-session.liveUpdate'
+        changeHandler() if atom.config.get 'dyndoc-viewer.liveUpdate'
       @subscribe @editor, 'path-changed', => @trigger 'title-changed'
       @subscribe @editor.getBuffer(), 'reloaded saved', =>
-        changeHandler() unless atom.config.get 'dyndoc-session.liveUpdate'
+        changeHandler() unless atom.config.get 'dyndoc-viewer.liveUpdate'
 
-    @subscribe atom.config.observe 'dyndoc-session.breakOnSingleNewline', callNow: false, changeHandler
+    @subscribe atom.config.observe 'dyndoc-viewer.breakOnSingleNewline', callNow: false, changeHandler
 
   renderDyndoc: ->
     #@showLoading()
@@ -111,7 +110,7 @@ class DyndocViewer extends ScrollView
         @loading = false
         console.log('content:'+content)
         @html(content)
-        @trigger('dyndoc-session:dyndoc-changed')
+        @trigger('dyndoc-viewer:dyndoc-changed')
 
   getTitle: ->
     if @file?
@@ -126,9 +125,9 @@ class DyndocViewer extends ScrollView
 
   getUri: ->
     if @file?
-      "dyndoc-session://#{@getPath()}"
+      "dyndoc-viewer://#{@getPath()}"
     else
-      "dyndoc-session://editor/#{@editorId}"
+      "dyndoc-viewer://editor/#{@editorId}"
 
   getPath: ->
     if @file?

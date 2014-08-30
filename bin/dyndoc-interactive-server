@@ -25,6 +25,13 @@ else
     PORT=7777
 end
 
+if ["--jl","--julia"].include?  ARGV[$curARGV]
+    $dyndoc_julia=true
+     $curARGV+=1
+else
+    $dyndoc_julia=false
+end
+
 if ["-R","--Rserv"].include?  ARGV[$curARGV]
     $dyndoc_rserv=ARGV[$curARGV+1]
     $curARGV+=2

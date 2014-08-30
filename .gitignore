@@ -12,3 +12,4 @@
 *.OLD
 *#
 *.gem
+node_modules/

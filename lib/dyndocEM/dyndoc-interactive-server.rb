@@ -24,7 +24,7 @@ class DyndocInteractiveServer < EventMachine::Connection
         $cfg_dyn={
             :format_output=>"txt",
             :client_cmd=> :cfg,
-            :langs => [:R,:jl],
+            :langs => [:R],
             :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
             :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
             :nbChar_error=> 300,:proj_list=>[],:working_dir=>"",:dyndoc_mode=>:local_interactive_server,
@@ -40,6 +40,7 @@ class DyndocInteractiveServer < EventMachine::Connection
                 "Tools/Web/Layout"
             ].join("\n")
         }
+        $cfg_dyn[:langs] << :jl if $dyndoc_julia
         @room,@room_dir=nil,nil
     end
 

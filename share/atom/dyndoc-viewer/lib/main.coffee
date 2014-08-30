@@ -27,17 +27,17 @@ module.exports =
     ]
 
   activate: ->
-    atom.workspaceView.command "dyndoc-session:eval", =>
+    atom.workspaceView.command "dyndoc-viewer:eval", =>
       @eval()
 
-    atom.workspaceView.command 'dyndoc-session:toggle', =>
+    atom.workspaceView.command 'dyndoc-viewer:toggle', =>
       @toggle()
 
-    atom.workspaceView.on 'dyndoc-session:preview-file', (event) =>
+    atom.workspaceView.on 'dyndoc-viewer:preview-file', (event) =>
       @previewFile(event)
 
-    atom.workspaceView.command 'dyndoc-session:toggle-break-on-single-newline', ->
-      atom.config.toggle('dyndoc-session.breakOnSingleNewline')
+    atom.workspaceView.command 'dyndoc-viewer:toggle-break-on-single-newline', ->
+      atom.config.toggle('dyndoc-viewer.breakOnSingleNewline')
 
     atom.workspace.registerOpener (uriToOpen) ->
       try
@@ -45,7 +45,7 @@ module.exports =
       catch error
         return
 
-      return unless protocol is 'dyndoc-session:'
+      return unless protocol is 'dyndoc-viewer:'
 
       try
         pathname = decodeURI(pathname) if pathname
@@ -75,13 +75,13 @@ module.exports =
     editor = atom.workspace.getActiveEditor()
     return unless editor?
 
-    #grammars = atom.config.get('dyndoc-session.grammars') ? []
+    #grammars = atom.config.get('dyndoc-viewer.grammars') ? []
     #return unless editor.getGrammar().scopeName in grammars
 
     @addPreviewForEditor(editor) unless @removePreviewForEditor(editor)
 
   uriForEditor: (editor) ->
-    "dyndoc-session://editor/#{editor.id}"
+    "dyndoc-viewer://editor/#{editor.id}"
 
   removePreviewForEditor: (editor) ->
     uri = @uriForEditor(editor)
@@ -110,4 +110,4 @@ module.exports =
       @addPreviewForEditor(editor)
       return
 
-    atom.workspace.open "dyndoc-session://#{encodeURI(filePath)}", searchAllPanes: true
+    atom.workspace.open "dyndoc-viewer://#{encodeURI(filePath)}", searchAllPanes: true
