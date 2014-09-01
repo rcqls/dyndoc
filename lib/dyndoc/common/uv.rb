@@ -55,8 +55,10 @@ module Dyndoc
       @string      = ""
       @line        = nil
       @line_number = 0
+      ## Dyndoc.warn "render_options",@render_options["listing"]
       print @render_options["document"]["begin"] if @headers
-      print (@line_numbers ? @render_options["listing"]["begin"] : @render_options["listing"]["begin-line-numbers"])
+      ## FIX (01/09/2014): "begin-line-numbers" undefined for xhtml and has to replaced by "begin" 
+      print (@line_numbers ? @render_options["listing"]["begin"] : @render_options["listing"]["begin-line-numbers"] || @render_options["listing"]["begin"])
       #         opt = options @stack
       #         print opt["begin"] if opt
     end

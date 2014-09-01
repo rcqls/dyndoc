@@ -11,7 +11,7 @@ module CqlsDoc
               :end=>"\\end{verbatim}"
             },
             :txtl=>{
-              :begin=>"<pre><code style=\"color:yellow\">",
+              :begin=>"<pre><code style=\"color:yellow;background-color:black\">",
               :end=>"</code></pre>"
             },
             :tm=>{

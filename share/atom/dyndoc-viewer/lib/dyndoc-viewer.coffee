@@ -10,7 +10,7 @@ renderer = require './render-dyndoc'
 module.exports =
 class DyndocViewer extends ScrollView
   @content: ->
-    @pre class: 'dyndoc-viewer native-key-bindings', tabindex: -1, =>
+    @div class: 'dyndoc-viewer native-key-bindings', tabindex: -1, =>
 
   constructor: ({@editorId, filePath}) ->
     super

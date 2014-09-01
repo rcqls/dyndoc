@@ -23,7 +23,7 @@ module.exports =
     breakOnSingleNewline: false
     liveUpdate: true
     grammars: [
-      'text.plain'
+      'source.dyndoc'
     ]
 
   activate: ->
@@ -58,8 +58,11 @@ module.exports =
         createDyndocViewer(filePath: pathname)
 
   eval: ->
+    return unless dyndoc_viewer
     selection = atom.workspace.getActiveEditor().getSelection()
     text = selection.getText()
+    if text == ""
+      text = atom.workspace.getActiveEditor().getText()
     dyndoc_viewer.renderDyndocText(text)
     #res = renderer.toText text, "toto", (error, content) ->
     #  if error

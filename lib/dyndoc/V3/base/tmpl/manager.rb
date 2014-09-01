@@ -92,6 +92,7 @@ module CqlsDoc
       # register format
       @fmt=@cfg[:format_doc].to_s.downcase
       @Fmt=@fmt.capitalize
+      ##Dyndoc.warn "@cfg",@cfg
       @fmtOutput=@cfg[:format_output].to_s if @cfg[:format_output]
       @fmtOutput=@fmt if @fmt and ["html","tex","odt","tm"].include? @fmt
       @dyndocMode=:cmdline

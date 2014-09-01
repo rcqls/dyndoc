@@ -100,11 +100,11 @@ module CqlsDoc
     def Converter.convert(input,format,outputFormat,to_protect=nil)
       ##
       format=format.to_s unless format.is_a? String
-      #puts "convert input";p  input
+      ## Dyndoc.warn "convert input",[input,format]
       outputFormat=outputFormat.to_s unless outputFormat.is_a? String
       res=""
       input.split("__PROTECTED__FORMAT__").each_with_index do |code,i|
-        #puts "code";p code;p i;p format+outputFormat
+        ## Dyndoc.warn "code",[i,code,format+">"+outputFormat]
         if i%2==0
           res << case format+outputFormat
           when "md>html"
