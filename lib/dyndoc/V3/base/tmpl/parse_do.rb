@@ -17,9 +17,9 @@ module CqlsDoc
 
     @@depth=0
 
-    @@cmd=["newBlck","input","require","def","func","meth","new","super","blck","do","if","for","case", "loop","r","renv","rverb","rout","rb","var","set","hide","format","txt","code","<","<<",">","eval","ifndef","tags","keys","opt","document","yield","get","part","style"]
+    @@cmd=["newBlck","input","require","def","func","meth","new","super","blck","do","if","for","case", "loop","r","renv","rverb","jlverb","rout","rb","var","set","hide","format","txt","code","<","<<",">","eval","ifndef","tags","keys","opt","document","yield","get","part","style"]
     ## Alias
-    @@cmdAlias={"unless"=>"if","out"=>"do","r<"=>"r","R<"=>"R","rb<"=>"rb","r>"=>"r","R>"=>"R","rb>"=>"rb","m<"=>"m","M<"=>"m","m>"=>"m","M>"=>"m","jl>"=>"jl","jl<"=>"jl","<"=>"txt","<<"=>"txt",">"=>"txt","code"=>"txt","dyn"=>"eval","r>>"=>"rverb","R>>"=>"rverb","rout"=>"rverb","saved"=>"blck","blckAnyTag"=>"blck"}
+    @@cmdAlias={"unless"=>"if","out"=>"do","r<"=>"r","R<"=>"R","rb<"=>"rb","r>"=>"r","R>"=>"R","rb>"=>"rb","m<"=>"m","M<"=>"m","m>"=>"m","M>"=>"m","jl>"=>"jl","jl<"=>"jl","<"=>"txt","<<"=>"txt",">"=>"txt","code"=>"txt","dyn"=>"eval","r>>"=>"rverb","R>>"=>"rverb","rout"=>"rverb","jl>>" => "jlverb","saved"=>"blck","blckAnyTag"=>"blck"}
     @@cmd += @@cmdAlias.keys
 
     def add_dtag(dtag,cmdAlias=nil)
@@ -604,6 +604,31 @@ p [vars,b2]
                     filter.outType=nil
                   end
       	    end
+          when :"jl>>",:jlverb
+            newblck=blck[i]
+                  i,*b2=next_block(blck,i) 
+            if cond_tag and cond
+                  vars,b2=get_named_blck(b2,filter)
+                  if b2
+                    b2=[b2.unshift(newblck)]
+                    filter.outType=":jl" #+(blck[i].to_s)[0...-1]
+=begin
+              val=parse(b2,filter)
+      #puts "make_named_blck:val";p val
+              val=Utils.format_blocktext(val)
+      #puts "format_blocktext:val";p val
+              if vars
+          vars.split(",").each{|var| 
+          eval_SET(var.strip,val,filter)
+              }
+              else
+          tex << val
+              end
+=end
+                    make_named_blck(tex,filter,vars,b2)
+                    filter.outType=nil
+                  end
+            end
                 when :>>
                   i,*b2=next_block(blck,i)
       	    if cond_tag and cond
@@ -1706,9 +1731,40 @@ p call
       mode=:default if  newblck==:rout #or newblck==:"r>>"
       @rEnvir.unshift(inR) if inR
 #puts "rverb:rcode";p code
-      tex << (res=RServer.echo_verb(code,mode,@rEnvir[0]))
+      res=RServer.echo_verb(code,@@interactive ? :raw : mode,@rEnvir[0])
+      require "dyndoc/common/uv" if @@interactive
+      tex << (@@interactive ? Uv.parse(res, "xhtml", File.join(Uv.syntax_path,"r.syntax") , false, "solarized",false) : res )
 #puts "rverb:result";p res 
       @rEnvir.shift if inR
+      filter.outType=nil
+    end
+
+    def do_jlverb(tex,blck,filter)
+#      require 'pry'
+#      binding.pry
+      newblck=blck[0]
+      filter.outType=":jl"
+      i=0
+      i,*b2=next_block(blck,i)
+#puts "rverb:b2";p b2
+      code=parse(b2,filter)
+      i+=1
+      
+      mode=@cfg[:mode_doc]
+      #p [mode,@fmt,@fmtOutput]
+      mode=@fmtOutput.to_sym if @fmtOutput and ["html","tex","txtl","raw"].include? @fmtOutput
+      mode=(@fmt and !@fmt.empty? ? @fmt.to_sym : :default) unless mode
+      if blck[i]==:mode
+        i,*b2=next_block(blck,i)
+        mode=parse(b2,filter).strip.to_sym
+      end
+       
+#puts "rverb:rcode";p code
+      res=JLServer.echo_verb(code,@@interactive ? :raw : mode)
+      require "dyndoc/common/uv" if @@interactive
+      tex << (@@interactive ? Uv.parse(res, "xhtml", File.join(Uv.syntax_path,"julia.syntax") , false, "solarized",false) : res )
+#puts "rverb:result";p res 
+      
       filter.outType=nil
     end
  

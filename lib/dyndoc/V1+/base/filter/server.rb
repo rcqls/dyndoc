@@ -772,6 +772,36 @@ module CqlsDoc
 		end
 	end
 
+	def JLServer.echo(code,prompt="julia> ",tab=2)
+		out=""
+		res=JLServer.inputsAndOutputs(code)
+		## Dyndoc.warn "JLServer",res
+		res.each do |cmd|
+			## Dyndoc.warn "input",cmd
+		 	out << prompt+ cmd[:input].split("\n").each_with_index.map{|e,i| i==0 ? e : " "*(prompt.length)+e}.join("\n").gsub(/\t/," "*tab)
+			out << "\n"
+			## Dyndoc.warn "output1",out
+			out << cmd[:output2]
+			out << (cmd[:output]=="nothing"  ? "" : cmd[:output])
+			## Dyndoc.warn "output2",out
+			out << cmd[:error]!=""  ? cmd[:error] : ""
+			out << (cmd[:output]=="nothing"  ? "" : "\n\n")
+			## Dyndoc.warn "output3",out
+		end
+		out
+	end
+
+	def JLServer.echo_verb(txt,mode)
+      txtout=CqlsDoc::JLServer.echo(txt).strip
+      mode=:default unless CqlsDoc::VERB.keys.include? mode
+      header= (mode!=:default) and txtout.length>0
+      out=""
+      out << CqlsDoc::VERB[mode][:begin] << "\n" if header
+      out << txtout
+      out << "\n" << CqlsDoc::VERB[mode][:end] << "\n" if header
+      out
+    end
+
   end
 
 end

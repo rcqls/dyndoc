@@ -62,6 +62,9 @@ uv_res = CqlsDoc::AS_IS+uv_res+CqlsDoc::AS_IS unless CqlsDoc::V3::TemplateManage
 [#def}
 
 {#def]rverbUV[#,]code[][#,]render[amy][#,]lines[false]
+[#?]CqlsDoc::V3::TemplateManager.interactive
+[#>]{#rverb]#{code}[#mode]raw[#rverb}
+[#?]else
 [#>]{#uv]{#rverb]#{code}[#mode]raw[#rverb}
 [#syntax]r[#lines]#{lines}[#}
 [#def}

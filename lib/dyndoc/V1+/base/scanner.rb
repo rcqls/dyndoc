@@ -275,7 +275,7 @@ module CqlsDoc
       init_tag(@tag_type) if [:dtag].include? @tag_type
     end
 
-    @@tagblck_set=[:<<,:<,:do,:>>,:>,:">!",:out,:nl,:"\\n",:"r<",:"R<",:"rb<",:"m<",:"M<",:"jl<",:"r>>",:"R>>",:rverb,:rout,:"r>",:"R>",:"rb>",:"m>",:"M>",:"jl>",:"_<",:"_>",:"__>",:"html>",:"tex>",:"txtl>",:"ttm>",:"md>",:tag,:"??",:"?",:yield,:"=",:"-",:+,:"%"]
+    @@tagblck_set=[:<<,:<,:do,:>>,:>,:">!",:out,:nl,:"\\n",:"r<",:"R<",:"rb<",:"m<",:"M<",:"jl<",:"r>>",:"R>>",:rverb,:"jl>>",:jlverb,:rout,:"r>",:"R>",:"rb>",:"m>",:"M>",:"jl>",:"_<",:"_>",:"__>",:"html>",:"tex>",:"txtl>",:"ttm>",:"md>",:tag,:"??",:"?",:yield,:"=",:"-",:+,:"%"]
     #Rmk: when a symbol is included in another one, you have to place it before! Ex: :>> before :> and also :<< before :<
     @@tag_blck=[] #to cancel soon!!
 
@@ -317,7 +317,7 @@ module CqlsDoc
       },
 =end
       :dtag => {
-        :instr=>["newBlck","input","require","hide","format","txt",">","<","<<",">>","code","verb","if","unless","for","loop","case","var","set","def","func","meth","new","super","do","out","blck","blckAnyTag","saved","b>","call","R","r","m","M","jl","renv","rverb","rout","rb","eval","ifndef","tags","keys","opt","document","yield","get","part"],
+        :instr=>["newBlck","input","require","hide","format","txt",">","<","<<",">>","code","verb","if","unless","for","loop","case","var","set","def","func","meth","new","super","do","out","blck","blckAnyTag","saved","b>","call","R","r","m","M","jl","renv","rverb","jlverb","rout","rb","eval","ifndef","tags","keys","opt","document","yield","get","part"],
         :alias=>{
           :vars=>:var,
           :dyn=>:eval,
@@ -329,6 +329,7 @@ module CqlsDoc
           :"rb>" => [:blck, :"rb>"],
           :"R>" =>  [:blck, :"R>"],
           :"jl>" => [:blck, :"jl>"],
+          :"jl>>" => [:blck, :"jl>>"],
           :"rb<" => [:blck, :"rb<"],
           :"R<" =>  [:blck, :"R<"],
           :"jl<" => [:blck, :"jl<"],
@@ -366,6 +367,7 @@ module CqlsDoc
           :input=>[:","],
           :r=>[:in],
           :rverb=>[:in,:mode]+@@tag_blck,
+          :jlverb=>[:mode]+@@tag_blck,
 	        :rout=>[:in,:mode]+@@tag_blck,
           :eval=>[:to],
           :ifndef=>[:<<],
@@ -381,7 +383,7 @@ module CqlsDoc
           :newBlck=>'[%.\w,><?=+:-]+',
           :blckAnyTag=>'[%.\w,><?=+:-]+',
       	},
-      	:with_tagblck =>[:document,:if,:unless,:for,:loop,:case,:set,:def,:meth,:new,:super,:do,:out,:blck,:saved,:call,:style,:rverb,:rout,:tags,:keys,:part],
+      	:with_tagblck =>[:document,:if,:unless,:for,:loop,:case,:set,:def,:meth,:new,:super,:do,:out,:blck,:saved,:call,:style,:rverb,:jlverb,:rout,:tags,:keys,:part],
       	:named_tag=>{
       #=begin
       	  :> => {:tag=>'(_TAG_)(?:[^\]]+)?',:rest=>/^>([^\]]*)$/},
@@ -395,7 +397,7 @@ module CqlsDoc
         :tag_code=>[:code,:<,:>,:<<,:txt], #used for arg mode!
         :arg=>[:if,:unless,:elsif,:for,:case,:def,:func,:meth,:new,:super,:call,:input,:when,:break,:set,:style,:keys,:"?",:"rb<",:"r<",:"R<",:"m<",:"M<",:"jl<"],
         :blck=>{
-          :instr=>[:document,:if,:unless,:case,:loop,:set,:tag,:keys,:rverb,:for],
+          :instr=>[:document,:if,:unless,:case,:loop,:set,:tag,:keys,:rverb,:jlverb,:for],
           :keyword=>{
             :document=>[:content,:main,:class,:optclass,:preamble,:postamble,:style,:package,:title,:require,:helpers,:path,:texinputs,:first,:last],
             :set=>[:set],
@@ -405,6 +407,7 @@ module CqlsDoc
             :loop=>[:loop,:break],
             :tags=>[:when],
       	    :rverb=>[:rverb,:in,:mode],
+            :jlverb=>[:jlverb,:mode],
       	    :rout=>[:rout,:in,:mode]
           }
         },
