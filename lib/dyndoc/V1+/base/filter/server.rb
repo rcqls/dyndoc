@@ -104,6 +104,79 @@ module CqlsDoc
       	out
     end
 
+    def RbServer.capture(code,rbEnvir=nil)
+
+    	require 'stringio'
+		require 'ostruct'
+
+		begin
+		    # redirect output to StringIO objects
+		    oldstdout,oldstderr=$stdout, $stderr
+		    stdout, stderr = StringIO.new, StringIO.new
+		    $stdout, $stderr = stdout, stderr
+
+		    if rbEnvir.is_a? Binding
+		    	out=rbEnvir.eval(code)
+		    elsif rbEnvir.is_a? Module
+		        out=rbEnvir.module_eval(code)
+		    end
+		ensure
+		    # restore normal output
+		    $stdout, $stderr = oldstdout,oldstderr
+		end
+	    {input: code, output: out.inspect, stdout: stdout.string, stderr: stderr.string}
+  	end
+
+    def RbServer.inputsAndOutputs(code,rbEnvir=nil)
+    	require 'ripper'
+    	res = []
+    	input = ""
+    	code.each_line do |l|
+    		input += l
+    		if Ripper.sexp input
+    			res << RbServer.capture(input,rbEnvir)
+    			input = ""
+    		end
+    	end
+    	res
+    end
+
+    def RbServer.echo(code,rbEnvir=nil,prompt="ruby> ",tab=2)
+		out=""
+		res=RbServer.inputsAndOutputs(code,rbEnvir)
+		## 
+		Dyndoc.warn "RbServer",res
+		res.each do |cmd|
+			## 
+			Dyndoc.warn "input",cmd
+		 	out << prompt+ cmd[:input].split("\n").each_with_index.map{|e,i| i==0 ? e : " "*(prompt.length)+e}.join("\n").gsub(/\t/," "*tab)
+			out << "\n"
+			## 
+			Dyndoc.warn "output1",out
+			out << cmd[:stdout]
+			out << cmd[:output] || ""
+			## 
+			Dyndoc.warn "output2",out
+			out << cmd[:stderr]!=""  ? cmd[:stderr] : ""
+			out << (cmd[:output]  ? "\n\n" : "")
+			## 
+			Dyndoc.warn "output3",out
+		end
+		out
+	end
+
+	def RbServer.echo_verb(txt,mode,rbEnvir=nil)
+		Dyndoc.warn "echo_verb:txt",txt
+		txtout=CqlsDoc::RbServer.echo(txt.strip,rbEnvir).strip
+		mode=:default unless CqlsDoc::VERB.keys.include? mode
+		header= (mode!=:default) and txtout.length>0
+		out=""
+		out << CqlsDoc::VERB[mode][:begin] << "\n" if header
+		out << txtout
+		out << "\n" << CqlsDoc::VERB[mode][:end] << "\n" if header
+		out
+    end
+
   end
 
   class RServer
@@ -127,8 +200,8 @@ module CqlsDoc
 		R4rb_status? if $dyndoc_server_hostname
 	end
 
-    def RServer.echo_verb(txt,mode,env="Global")
-      txtout=CqlsDoc::RServer.echo(txt,env).strip
+    def RServer.echo_verb(txt,mode,env="Global",opts={prompt: ""})
+      txtout=CqlsDoc::RServer.echo(txt,env,opts[:prompt]).strip
       mode=:default unless CqlsDoc::VERB.keys.include? mode
       header= (mode!=:default) and txtout.length>0
       out=""
@@ -138,7 +211,7 @@ module CqlsDoc
       out
     end
 
-    def RServer.echo(block,env="Global")
+    def RServer.echo(block,env="Global",prompt="")
     	Utils.clean_eol(block)
       txtout=""
       optout=nil #options for the output
@@ -180,7 +253,7 @@ module CqlsDoc
 		when "##hide"
 		  hide = nb.to_i
 		else
-		  txtout << ( code.length==0 ? "> " : "+ ") << l2 << "\n" if hide==0
+		  txtout << ( code.length==0 ? prompt+"> " : "+ ") << l2 << "\n" if hide==0
 		  if passe==0 and l2[0,1]!="#"
 		    ## redirect R output
 		    code << l << "\n" ##ajout de "\n" grace à Pierre (le 15/12/05) pour bug: "1:10 #toto" -> pas de sortie car parse erreur n2!!!

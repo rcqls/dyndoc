@@ -17,9 +17,9 @@ module CqlsDoc
 
     @@depth=0
 
-    @@cmd=["newBlck","input","require","def","func","meth","new","super","blck","do","if","for","case", "loop","r","renv","rverb","jlverb","rout","rb","var","set","hide","format","txt","code","<","<<",">","eval","ifndef","tags","keys","opt","document","yield","get","part","style"]
+    @@cmd=["newBlck","input","require","def","func","meth","new","super","blck","do","if","for","case", "loop","r","renv","rverb","rbverb","jlverb","rout","rb","var","set","hide","format","txt","code","<","<<",">","eval","ifndef","tags","keys","opt","document","yield","get","part","style"]
     ## Alias
-    @@cmdAlias={"unless"=>"if","out"=>"do","r<"=>"r","R<"=>"R","rb<"=>"rb","r>"=>"r","R>"=>"R","rb>"=>"rb","m<"=>"m","M<"=>"m","m>"=>"m","M>"=>"m","jl>"=>"jl","jl<"=>"jl","<"=>"txt","<<"=>"txt",">"=>"txt","code"=>"txt","dyn"=>"eval","r>>"=>"rverb","R>>"=>"rverb","rout"=>"rverb","jl>>" => "jlverb","saved"=>"blck","blckAnyTag"=>"blck"}
+    @@cmdAlias={"unless"=>"if","out"=>"do","r<"=>"r","R<"=>"R","rb<"=>"rb","r>"=>"r","R>"=>"R","rb>"=>"rb","m<"=>"m","M<"=>"m","m>"=>"m","M>"=>"m","jl>"=>"jl","jl<"=>"jl","<"=>"txt","<<"=>"txt",">"=>"txt","code"=>"txt","dyn"=>"eval","r>>"=>"rverb","R>>"=>"rverb","rout"=>"rverb","rb>>" => "rbverb","jl>>" => "jlverb","saved"=>"blck","blckAnyTag"=>"blck"}
     @@cmd += @@cmdAlias.keys
 
     def add_dtag(dtag,cmdAlias=nil)
@@ -604,14 +604,14 @@ p [vars,b2]
                     filter.outType=nil
                   end
       	    end
-          when :"jl>>",:jlverb
+          when :"jl>>",:jlverb,:"rb>>",:rbverb
             newblck=blck[i]
                   i,*b2=next_block(blck,i) 
             if cond_tag and cond
                   vars,b2=get_named_blck(b2,filter)
                   if b2
                     b2=[b2.unshift(newblck)]
-                    filter.outType=":jl" #+(blck[i].to_s)[0...-1]
+                    filter.outType=newblck.to_s[0,2].to_sym  #":jl" #+(blck[i].to_s)[0...-1]
 =begin
               val=parse(b2,filter)
       #puts "make_named_blck:val";p val
@@ -1008,7 +1008,7 @@ p [vars,b2]
           when :binding
             i,*b2=next_block(blck,i)
             rbEnvir=b2[0][1].strip
-          when :do,:<,:out,:>,:"r<",:"rb<",:"r>",:"R>",:"R<",:"r>>",:rverb,:"rb>",:"?",:tag,:"??",:yield,:>>,:"=",:"+",:<<,:"txtl>",:"html>",:"tex>",:"_>"
+          when :do,:<,:out,:>,:"r<",:"rb<",:"r>",:"R>",:"R<",:"r>>",:rverb,:"rb>>",:rbverb,:"jl>>",:jlverb,:"rb>",:"?",:tag,:"??",:yield,:>>,:"=",:"+",:<<,:"txtl>",:"html>",:"tex>",:"_>"
             code = blck[i..-1].unshift(:blck)
           when :"," 
             i,*b2=next_block(blck,i)
@@ -1731,11 +1731,41 @@ p call
       mode=:default if  newblck==:rout #or newblck==:"r>>"
       @rEnvir.unshift(inR) if inR
 #puts "rverb:rcode";p code
-      res=RServer.echo_verb(code,@@interactive ? :raw : mode,@rEnvir[0])
+      res=RServer.echo_verb(code,@@interactive ? :raw : mode,@rEnvir[0], prompt: (@@interactive ? "R" : ""))
       require "dyndoc/common/uv" if @@interactive
       tex << (@@interactive ? Uv.parse(res, "xhtml", File.join(Uv.syntax_path,"r.syntax") , false, "solarized",false) : res )
 #puts "rverb:result";p res 
       @rEnvir.shift if inR
+      filter.outType=nil
+    end
+
+    def do_rbverb(tex,blck,filter)
+#      require 'pry'
+#      binding.pry
+      newblck=blck[0]
+      filter.outType=":rb"
+      i=0
+      i,*b2=next_block(blck,i)
+#puts "rverb:b2";p b2
+      code=parse(b2,filter)
+      i+=1
+      
+      mode=@cfg[:mode_doc]
+      #p [mode,@fmt,@fmtOutput]
+      mode=@fmtOutput.to_sym if @fmtOutput and ["html","tex","txtl","raw"].include? @fmtOutput
+      mode=(@fmt and !@fmt.empty? ? @fmt.to_sym : :default) unless mode
+      if blck[i]==:mode
+        i,*b2=next_block(blck,i)
+        mode=parse(b2,filter).strip.to_sym
+      end
+       
+      ## Dyndoc.warn "rverb:rcode";p code
+      res=RbServer.echo_verb(code,@@interactive ? :raw : mode,@rbEnvir[0])
+      Dyndoc.warn "rbverb:res",res
+      require "dyndoc/common/uv" if @@interactive
+      tex << (@@interactive ? Uv.parse(res, "xhtml", File.join(Uv.syntax_path,"ruby.syntax") , false, "solarized",false) : res )
+#puts "rverb:result";p res 
+      
       filter.outType=nil
     end
 
