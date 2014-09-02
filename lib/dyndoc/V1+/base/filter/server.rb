@@ -144,29 +144,24 @@ module CqlsDoc
     def RbServer.echo(code,rbEnvir=nil,prompt="ruby> ",tab=2)
 		out=""
 		res=RbServer.inputsAndOutputs(code,rbEnvir)
-		## 
-		Dyndoc.warn "RbServer",res
+		## Dyndoc.warn "RbServer",res
 		res.each do |cmd|
-			## 
-			Dyndoc.warn "input",cmd
+			## Dyndoc.warn "input",cmd
 		 	out << prompt+ cmd[:input].split("\n").each_with_index.map{|e,i| i==0 ? e : " "*(prompt.length)+e}.join("\n").gsub(/\t/," "*tab)
 			out << "\n"
-			## 
-			Dyndoc.warn "output1",out
+			## Dyndoc.warn "output1",out
 			out << cmd[:stdout]
 			out << cmd[:output] || ""
-			## 
-			Dyndoc.warn "output2",out
+			## Dyndoc.warn "output2",out
 			out << cmd[:stderr]!=""  ? cmd[:stderr] : ""
 			out << (cmd[:output]  ? "\n\n" : "")
-			## 
-			Dyndoc.warn "output3",out
+			## Dyndoc.warn "output3",out
 		end
 		out
 	end
 
 	def RbServer.echo_verb(txt,mode,rbEnvir=nil)
-		Dyndoc.warn "echo_verb:txt",txt
+		## Dyndoc.warn "echo_verb:txt",txt
 		txtout=CqlsDoc::RbServer.echo(txt.strip,rbEnvir).strip
 		mode=:default unless CqlsDoc::VERB.keys.include? mode
 		header= (mode!=:default) and txtout.length>0

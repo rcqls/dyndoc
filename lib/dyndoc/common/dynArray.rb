@@ -95,12 +95,13 @@ module Dyndoc
 		end
 
 		## object stuff
-		attr_accessor :vectors, :ary
+		attr_accessor :vectors, :ary, :id
 		
 		# ary is a String when lang is not :rb
-		def initialize(langs=[:r],first=[],lang=:rb)
+		def initialize(langs=[:r],first=[],lang=:rb,vname=nil)
 			@ary=(first.is_a? String) ? [] : first
 			@vectors={}
+			@vname,@id=vname,vname+"@"+self.object_id.abs.to_s
 			if langs.include? :r
 				Array.initR 
 				@vectors[:r]=R4rb::RVector.new ""
@@ -137,22 +138,22 @@ module Dyndoc
 		def ids(lang)
 			case lang
 			when :rb
-				 "rb"+self.object_id.abs.to_s
+				 @id
 			when :jl
-				"_dynArray.vars[\"rb"+self.object_id.abs.to_s+"\"].ary"
+				"Dyndoc.Vector[\""+@id+"\"].ary"
 			when :r
-				".dynArray$vars[[\"rb"+self.object_id.abs.to_s+"\"]]"
+				".dynArray[[\""+@id+"\"]]"
 			end
 		end
 
 		def wrapper(lang)
 			case lang
 			when :rb
-				 "Dyndoc::Vector[\""+ids(:rb)+"\"]"
+				 "Dyndoc::Vector[\""+@id+"\"]"
 			when :jl
-				"_dynArray[\"rb"+self.object_id.abs.to_s+"\"]"
+				"Dyndoc.Vector[\""+@id+"\"]"
 			when :r
-				".dynArray[[\"rb"+self.object_id.abs.to_s+"\"]]"
+				".dynArray[[\""+@id+"\"]]"
 			end
 		end
 
@@ -160,12 +161,14 @@ module Dyndoc
 		def sync(from=:rb)
 			if @unlock
 				@unlock=nil #to avoid the same update several times
-				## puts "rb sync (from #{from}):"+ids(:rb)
+				## Dyndoc.warn "rb sync (from #{from}):",ids(:rb)
 				@vectors[from] > @ary unless from==:rb
+				## 
+				Dyndoc.warn "new ary",[@vectors[from].name,@vectors[from].value,@ary]
 				([:jl,:r]-[from]).each do |to|
-					## puts "rb sync (to #{to})"
+					## Dyndoc.warn "rb sync (to #{to})"
 					@vectors[to] < @ary
-					## p @vectors[to].value
+					## Dyndoc.warn "@vectors[#{to}].value", @vectors[to].value
 				end
 				@unlock=true
 			end

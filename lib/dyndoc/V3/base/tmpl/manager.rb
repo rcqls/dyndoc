@@ -48,7 +48,7 @@ module CqlsDoc
       # Julia << "include(\""+File.expand_path("~/Github/dyndoc/share/julia/dynArray.jl")+"\")"
       Julia << "using Dyndoc"
       Julia << "Ruby.alive(true)"
-      Julia << "global _dynArray=DynArray()"
+      Julia << "global const _dynArray=DynArray()"
       Dyndoc.warn "Julia initialized inside dyndoc!"
 
     end

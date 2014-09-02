@@ -1730,6 +1730,7 @@ p call
       end
       mode=:default if  newblck==:rout #or newblck==:"r>>"
       @rEnvir.unshift(inR) if inR
+      process_r(code)
 #puts "rverb:rcode";p code
       res=RServer.echo_verb(code,@@interactive ? :raw : mode,@rEnvir[0], prompt: (@@interactive ? "R" : ""))
       require "dyndoc/common/uv" if @@interactive
@@ -1758,10 +1759,11 @@ p call
         i,*b2=next_block(blck,i)
         mode=parse(b2,filter).strip.to_sym
       end
-       
+      
+      process_rb(code)
       ## Dyndoc.warn "rverb:rcode";p code
       res=RbServer.echo_verb(code,@@interactive ? :raw : mode,@rbEnvir[0])
-      Dyndoc.warn "rbverb:res",res
+      ## Dyndoc.warn "rbverb:res",res
       require "dyndoc/common/uv" if @@interactive
       tex << (@@interactive ? Uv.parse(res, "xhtml", File.join(Uv.syntax_path,"ruby.syntax") , false, "solarized",false) : res )
 #puts "rverb:result";p res 
@@ -1789,6 +1791,7 @@ p call
         mode=parse(b2,filter).strip.to_sym
       end
        
+      process_jl(code)
 #puts "rverb:rcode";p code
       res=JLServer.echo_verb(code,@@interactive ? :raw : mode)
       require "dyndoc/common/uv" if @@interactive

@@ -245,7 +245,7 @@ module CqlsDoc
               [@rbEnvir[0].eval(cmdCode),:rb]
             end
             ## Dyndoc.warn "args",args
-            v[:rb]=Dyndoc::Vector.new([:r,:jl],args[0],args[1])
+            v[:rb]=Dyndoc::Vector.new([:r,:jl],args[0],args[1],k[0...-1])
 #p k;p v
             #v[:rb].replace @rbEnvir[0]eval(v[:val][0])
           end
@@ -529,8 +529,7 @@ module CqlsDoc
 #puts "instr:";p txt;p in_type
 #puts "res to convert?";p res;p out_type
 #puts "convert";p convert(res,out_type)
-#p res
-#p out_type
+## Dyndoc.warn "res", [out_type,res]
       return convert(res,out_type)
     end
 
