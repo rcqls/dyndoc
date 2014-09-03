@@ -75,6 +75,11 @@ end
 ## Dyndoc Array : ruby Array synchronized to Julia or R Vector
 # when change occurs from any language
 module Dyndoc
+
+	# Just a fancy funcion to access Dyndoc::Vector in the way as Julia and R
+	def Dyndoc.Vec 
+		Dyndoc::Vector
+	end
 	
 	class Vector
 
@@ -86,12 +91,12 @@ module Dyndoc
 		end
 
 		def Vector.[](key)
-			@@all[key]
+			@@all[key.to_s]
 		end
 
 		def Vector.[]=(key,value)
-			@@all[key].replace(value) if value.is_a? Array
-			@@all[key]
+			@@all[key.to_s].replace(value) if value.is_a? Array
+			@@all[key.to_s]
 		end
 
 		## object stuff
@@ -101,7 +106,7 @@ module Dyndoc
 		def initialize(langs=[:r],first=[],lang=:rb,vname=nil)
 			@ary=(first.is_a? String) ? [] : first
 			@vectors={}
-			@vname,@id=vname,vname+"@"+self.object_id.abs.to_s
+			@vname,@id=vname,vname #+"@"+self.object_id.abs.to_s
 			if langs.include? :r
 				Array.initR 
 				@vectors[:r]=R4rb::RVector.new ""
@@ -132,7 +137,7 @@ module Dyndoc
 		end
 
 		def inspect
-			"Dyndoc::Vector"+@ary.inspect
+			@ary.inspect
 		end
 
 		def ids(lang)
@@ -140,20 +145,20 @@ module Dyndoc
 			when :rb
 				 @id
 			when :jl
-				"Dyndoc.Vector[\""+@id+"\"].ary"
+				"Dyndoc.Vec[:"+@id+"].ary"
 			when :r
-				".dynArray[[\""+@id+"\"]]"
+				"Dyndoc.Vec[\""+@id+"\"]"
 			end
 		end
 
 		def wrapper(lang)
 			case lang
 			when :rb
-				 "Dyndoc::Vector[\""+@id+"\"]"
+				 "Dyndoc.Vec[:"+@id+"]"
 			when :jl
-				"Dyndoc.Vector[\""+@id+"\"]"
+				"Dyndoc.Vec[:"+@id+"]"
 			when :r
-				".dynArray[[\""+@id+"\"]]"
+				"Dyndoc.Vec[\""+@id+"\"]"
 			end
 		end
 
@@ -163,8 +168,7 @@ module Dyndoc
 				@unlock=nil #to avoid the same update several times
 				## Dyndoc.warn "rb sync (from #{from}):",ids(:rb)
 				@vectors[from] > @ary unless from==:rb
-				## 
-				Dyndoc.warn "new ary",[@vectors[from].name,@vectors[from].value,@ary]
+				## Dyndoc.warn "new ary",[@vectors[from].name,@vectors[from].value,@ary]
 				([:jl,:r]-[from]).each do |to|
 					## Dyndoc.warn "rb sync (to #{to})"
 					@vectors[to] < @ary
@@ -195,4 +199,4 @@ module Dyndoc
 
 	end
 
-end 
+end

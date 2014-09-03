@@ -2,13 +2,14 @@
 
 module Dyndoc
 
-import Base.setindex!,Base.getindex,Base.IO
+import Base.setindex!,Base.getindex,Base.IO,Base.show,Base.showarray
 importall Ruby
 
-export DynVector,DynArray,getindex,setindex!,show,Vector,sync
+export DynVector,DynArray,getindex,setindex!,show,Vector,sync,getkey
 
 # this is just a wrapper of Vector type with update of all connected vectors
-# when change on the vector occurs  
+# when change on the vector occurs 
+
 
 type DynVector
 	ary::Vector
@@ -25,7 +26,7 @@ function setindex!(dynvect::DynVector,value,i::Integer)
 	if Ruby.alive() Ruby.run("Dyndoc::Vector[\""*dynvect.key*"\"].sync(:jl)") end
 end
 
-show(io::IO,dynvect::DynVector)=show(io,dynvect.ary)
+show(io::IO,dynvect::DynVector)=showarray(io,dynvect.ary)
 
 # gather all the julia vectors connected to dyndoc.
 
@@ -35,9 +36,10 @@ type DynArray
 	DynArray()=(x=new();x.vars=Dict();x)
 end
 
-global const Vector=DynArray()
+global const Vec=DynArray()
 
 getindex(dynary::DynArray,key::ASCIIString)=dynary.vars[key]
+getindex(dynary::DynArray,key::Symbol)=getindex(dynary,string(key))
 
 function setindex!(dynary::DynArray,value,key::ASCIIString)
 	#println("key:" * key)
@@ -55,9 +57,24 @@ function setindex!(dynary::DynArray,value,key::ASCIIString)
 		Ruby.run("Dyndoc::Vector[\""*key*"\"].sync(:jl)")
 	end
 end
+setindex!(dynary::DynArray,value,key::Symbol)=setindex!(dynary,value,string(key))
+
 
 sync(dynary::DynArray,key::ASCIIString)= if Ruby.alive() Ruby.run("Dyndoc::Vector[\""*key*"\"].sync(:jl)") end
 
 show(io::IO,dynary::DynArray)=show(io,dynary.vars)
 
+# NO MORE KEY WITH THE FORM "<name>@<ruby id object>"
+# function getkey(dynary::DynArray,k::Symbol)
+# 	for k2 in keys(dynary.vars)  
+# 	 	if split(k2,"@")[1] == string(k)
+# 	 		return k2
+# 	 	end
+# 	end
+# 	return "#undef"
+# end
+# getindex(dynary::DynArray,key::Symbol)=getindex(dynary,getkey(dynary,key))
+# setindex!(dynary::DynArray,value,key::Symbol)=setindex!(dynary,value,getkey(dynary,key))
+
 end
+

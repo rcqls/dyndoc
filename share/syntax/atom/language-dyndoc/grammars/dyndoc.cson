@@ -9,7 +9,16 @@
     'include': '#tag_blck_r_dyn'
   }
   {
+    'include': '#tag_blck_julia_dyn'
+  }
+  {
     'include': '#tag_blck_ruby_dyn'
+  }
+  {
+    'include': '#tag_blck_markdown_dyn'
+  }
+  {
+    'include': '#tag_blck_textile_dyn'
   }
   {
     'include': '#tag_blck_var_dyn'
@@ -190,8 +199,27 @@
         'include': 'source.r'
       }
     ]
+  'tag_blck_julia_dyn':
+    'begin': '(\\[\\#)(jl<|jl>|jl>>)(\\])'
+    'beginCaptures':
+      '1':
+        'name': 'punctuation.definition.tag.dyndoc'
+      '2':
+        'name': 'keyword.name.tag.dyndoc'
+      '3':
+        'name': 'punctuation.definition.tag.dyndoc'
+    'end': '(?=\\[\\#)'
+    'endCaptures': {}
+    'patterns': [
+      {
+        'include': '#include_blck_dyn'
+      }
+      {
+        'include': 'source.julia'
+      }
+    ]
   'tag_blck_ruby_dyn':
-    'begin': '(\\[\\#)(rb<|rb>)(\\])'
+    'begin': '(\\[\\#)(rb<|rb>|rb>>)(\\])'
     'beginCaptures':
       '1':
         'name': 'punctuation.definition.tag.dyndoc'
@@ -207,6 +235,44 @@
       }
       {
         'include': 'source.ruby'
+      }
+    ]
+  'tag_blck_markdown_dyn':
+    'begin': '(\\[\\#)(md>)(\\])'
+    'beginCaptures':
+      '1':
+        'name': 'punctuation.definition.tag.dyndoc'
+      '2':
+        'name': 'keyword.name.tag.dyndoc'
+      '3':
+        'name': 'punctuation.definition.tag.dyndoc'
+    'end': '(?=\\[\\#)'
+    'endCaptures': {}
+    'patterns': [
+      {
+        'include': '#include_blck_dyn'
+      }
+      {
+        'include': 'source.gfm'
+      }
+    ]
+  'tag_blck_textile_dyn':
+    'begin': '(\\[\\#)(txtl>)(\\])'
+    'beginCaptures':
+      '1':
+        'name': 'punctuation.definition.tag.dyndoc'
+      '2':
+        'name': 'keyword.name.tag.dyndoc'
+      '3':
+        'name': 'punctuation.definition.tag.dyndoc'
+    'end': '(?=\\[\\#)'
+    'endCaptures': {}
+    'patterns': [
+      {
+        'include': '#include_blck_dyn'
+      }
+      {
+        'include': 'text.html.textile'
       }
     ]
   'tag_blck_var_dyn':

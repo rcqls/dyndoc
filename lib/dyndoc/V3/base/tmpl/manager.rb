@@ -32,7 +32,8 @@ module CqlsDoc
       RServer.init_filter
       ## ruby and R init for dynArray stuff
       require "dyndoc/common/dynArray"
-      R4rb << "source('"+File.join($dyn_gem_root,"share","R","dynArray.R").gsub('\\','/')+"')"
+      lib_root=File.join(File.dirname(__FILE__),[".."]*5) #or $dyn_gem_root
+      R4rb << "source('"+File.join(lib_root,"share","R","dynArray.R").gsub('\\','/')+"')"
     end
 
     def TemplateManager.initJulia
@@ -41,14 +42,15 @@ module CqlsDoc
       # init rb4jl stuff
       # since inside ruby, no need Ruby.start and Ruby.stop like in rb4R.
       # sort of equivalent of JLServer.init_filter (but not yet defined)!
-      Julia << "include(\""+File.join($dyn_gem_root,"share","julia","ruby.jl")+"\")"
-      Julia << "include(\""+File.join($dyn_gem_root,"share","julia","dynArray.jl")+"\")"
+      lib_root=File.join(File.dirname(__FILE__),[".."]*5) #or $dyn_gem_root
+      Julia << "include(\""+File.join(lib_root,"share","julia","ruby.jl")+"\")"
+      Julia << "include(\""+File.join(lib_root,"share","julia","dynArray.jl")+"\")"
       #-| To debug ruby.jl and dynArray.jl => uncomment below and commnt above
       # Julia << "include(\""+File.expand_path("~/Github/dyndoc/share/julia/ruby.jl")+"\")"
       # Julia << "include(\""+File.expand_path("~/Github/dyndoc/share/julia/dynArray.jl")+"\")"
       Julia << "using Dyndoc"
       Julia << "Ruby.alive(true)"
-      Julia << "global const _dynArray=DynArray()"
+      #Julia << "global const _dynArray=DynArray()"
       Dyndoc.warn "Julia initialized inside dyndoc!"
 
     end

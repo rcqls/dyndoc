@@ -1734,7 +1734,9 @@ p call
 #puts "rverb:rcode";p code
       res=RServer.echo_verb(code,@@interactive ? :raw : mode,@rEnvir[0], prompt: (@@interactive ? "R" : ""))
       require "dyndoc/common/uv" if @@interactive
+      warn_level = $VERBOSE;$VERBOSE = nil
       tex << (@@interactive ? Uv.parse(res, "xhtml", File.join(Uv.syntax_path,"r.syntax") , false, "solarized",false) : res )
+      $VERBOSE = warn_level
 #puts "rverb:result";p res 
       @rEnvir.shift if inR
       filter.outType=nil
@@ -1765,7 +1767,9 @@ p call
       res=RbServer.echo_verb(code,@@interactive ? :raw : mode,@rbEnvir[0])
       ## Dyndoc.warn "rbverb:res",res
       require "dyndoc/common/uv" if @@interactive
+      warn_level = $VERBOSE;$VERBOSE = nil
       tex << (@@interactive ? Uv.parse(res, "xhtml", File.join(Uv.syntax_path,"ruby.syntax") , false, "solarized",false) : res )
+      $VERBOSE = warn_level
 #puts "rverb:result";p res 
       
       filter.outType=nil
@@ -1795,7 +1799,9 @@ p call
 #puts "rverb:rcode";p code
       res=JLServer.echo_verb(code,@@interactive ? :raw : mode)
       require "dyndoc/common/uv" if @@interactive
+      warn_level = $VERBOSE;$VERBOSE = nil
       tex << (@@interactive ? Uv.parse(res, "xhtml", File.join(Uv.syntax_path,"julia.syntax") , false, "solarized",false) : res )
+      $VERBOSE = warn_level
 #puts "rverb:result";p res 
       
       filter.outType=nil

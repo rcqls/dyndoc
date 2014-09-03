@@ -6,16 +6,18 @@ require(rb4R)
 init.dynArray <- function() {
   local({
     # envir and not list to immediate sync in  "[[<-.dynArray"
-		.dynArray<-list(vars=new.env())
-		class(.dynArray)<-"dynArray"
+		Dyndoc.Vec<-list(vars=new.env())
+		class(Dyndoc.Vec)<-"dynArray"
 	},globalenv())
 }
 
-"[[.dynArray" <- function(obj,key) {
+#<- "[.dynArray" <- "$.dynArray" 
+"[.dynArray"  <- function(obj,key) {
   obj$vars[[key]]
 }
 
-"[[<-.dynArray" <- function(obj,key,value) {
+# <- "[<-.dynArray" <- "$<-.dynArray" 
+"[<-.dynArray" <-function(obj,key,value) {
   obj$vars[[key]] <- value
   #if(sync) { # Easily convertible to Julia!  
     # Clever: no need to convert ruby object in R object (done in the ruby part!)

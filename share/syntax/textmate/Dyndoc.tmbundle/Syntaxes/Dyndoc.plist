@@ -18,7 +18,19 @@
 		</dict>
 		<dict>
 			<key>include</key>
+			<string>#tag_blck_julia_dyn</string>
+		</dict>
+		<dict>
+			<key>include</key>
 			<string>#tag_blck_ruby_dyn</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#tag_blck_markdown_dyn</string>
+		</dict>
+		<dict>
+			<key>include</key>
+			<string>#tag_blck_textile_dyn</string>
 		</dict>
 		<dict>
 			<key>include</key>
@@ -339,10 +351,48 @@
 				</dict>
 			</array>
 		</dict>
+		<key>tag_blck_julia_dyn</key>
+		<dict>
+			<key>begin</key>
+			<string>(\[\#)(jl&lt;|jl&gt;|jl&gt;&gt;)(\])</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.tag.dyndoc</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.name.tag.dyndoc</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.tag.dyndoc</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=\[\#)</string>
+			<key>endCaptures</key>
+			<dict/>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#include_blck_dyn</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>source.julia</string>
+				</dict>
+			</array>
+		</dict>
 		<key>tag_blck_ruby_dyn</key>
 		<dict>
 			<key>begin</key>
-			<string>(\[\#)(rb&lt;|rb&gt;)(\])</string>
+			<string>(\[\#)(rb&lt;|rb&gt;|rb&gt;&gt;)(\])</string>
 			<key>beginCaptures</key>
 			<dict>
 				<key>1</key>
@@ -374,6 +424,82 @@
 				<dict>
 					<key>include</key>
 					<string>source.ruby</string>
+				</dict>
+			</array>
+		</dict>
+		<key>tag_blck_markdown_dyn</key>
+		<dict>
+			<key>begin</key>
+			<string>(\[\#)(md&gt;)(\])</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.tag.dyndoc</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.name.tag.dyndoc</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.tag.dyndoc</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=\[\#)</string>
+			<key>endCaptures</key>
+			<dict/>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#include_blck_dyn</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>source.gfm</string>
+				</dict>
+			</array>
+		</dict>
+		<key>tag_blck_textile_dyn</key>
+		<dict>
+			<key>begin</key>
+			<string>(\[\#)(txtl&gt;)(\])</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.tag.dyndoc</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.name.tag.dyndoc</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.tag.dyndoc</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=\[\#)</string>
+			<key>endCaptures</key>
+			<dict/>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#include_blck_dyn</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>text.html.textile</string>
 				</dict>
 			</array>
 		</dict>
