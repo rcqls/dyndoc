@@ -13,11 +13,13 @@ init.dynArray <- function() {
 
 #<- "[.dynArray" <- "$.dynArray" 
 "[.dynArray"  <- function(obj,key) {
+  if(inherits(key,"formula")) key<-as.character(key)[[2]]
   obj$vars[[key]]
 }
 
 # <- "[<-.dynArray" <- "$<-.dynArray" 
 "[<-.dynArray" <-function(obj,key,value) {
+  if(inherits(key,"formula")) key<-as.character(key)[[2]]
   obj$vars[[key]] <- value
   #if(sync) { # Easily convertible to Julia!  
     # Clever: no need to convert ruby object in R object (done in the ruby part!)
