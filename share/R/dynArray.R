@@ -14,6 +14,7 @@ init.dynArray <- function() {
 #<- "[.dynArray" <- "$.dynArray" 
 "[.dynArray"  <- function(obj,key) {
   if(inherits(key,"formula")) key<-as.character(key)[[2]]
+  .rb(paste("Dyndoc::Vector[\"",key,"\"].sync(:r)",sep=""))
   obj$vars[[key]]
 }
 

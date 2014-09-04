@@ -18,12 +18,17 @@ type DynVector
 	DynVector(a::Vector,k::ASCIIString)=(x=new();x.ary=a;x.key=k;x)
 end
 
-getindex(dynvect::DynVector,i::Integer)=dynvect.ary[i]
+function getindex(dynvect::DynVector,i::Integer)
+	#if Ruby.alive() Ruby.run("Dyndoc::Vector[\""*dynvect.key*"\"].sync_to(:jl)") end
+	dynvect.ary[i]
+end
 
 function setindex!(dynvect::DynVector,value,i::Integer)
 	dynvect.ary[i]=value
 	## println("inisde vect:",Ruby.alive())
-	if Ruby.alive() Ruby.run("Dyndoc::Vector[\""*dynvect.key*"\"].sync(:jl)") end
+	if Ruby.alive() 
+		Ruby.run("Dyndoc::Vector[\""*dynvect.key*"\"].sync(:jl)") 
+	end
 end
 
 show(io::IO,dynvect::DynVector)=showarray(io,dynvect.ary)
@@ -38,7 +43,15 @@ end
 
 global const Vec=DynArray()
 
-getindex(dynary::DynArray,key::ASCIIString)=dynary.vars[key]
+function getindex(dynary::DynArray,key::ASCIIString)
+	#println("getindex(" * key * ")->todo")
+	#if Ruby.alive()
+		#println("getindex(" * key * ")->to sync")
+		#Ruby.run("Dyndoc::Vector[\""*key*"\"].sync_to(:jl)") 
+	#end
+	#println("getindex(" * key * ")->done")
+	dynary.vars[key]
+end
 getindex(dynary::DynArray,key::Symbol)=getindex(dynary,string(key))
 
 function setindex!(dynary::DynArray,value,key::ASCIIString)

@@ -105,13 +105,15 @@ module Dyndoc
 		# ary is a String when lang is not :rb
 		def initialize(langs=[:r],first=[],lang=:rb,vname=nil)
 			@ary=(first.is_a? String) ? [] : first
-			@vectors={}
+			@vectors={} 
+			#@to_update={}
 			@vname,@id=vname,vname #+"@"+self.object_id.abs.to_s
 			if langs.include? :r
 				Array.initR 
 				@vectors[:r]=R4rb::RVector.new ""
 				@vectors[:r] << ids(:r)
 				@vectors[:r] < @ary unless @ary.empty?
+				##@to_update[:r]=nil
 			end
 			if langs.include? :jl
 				Julia.init 
@@ -119,6 +121,7 @@ module Dyndoc
 				@vectors[:jl] << ids(:jl)
 				Julia << wrapper(:jl)+"=Any[]"
 				@vectors[:jl] < @ary unless @ary.empty?
+				#@to_update[:jl]=nil
 			end
 			# global register => callable for update 
 			@@all[ids(:rb)]=self
@@ -145,7 +148,7 @@ module Dyndoc
 			when :rb
 				 @id
 			when :jl
-				"Dyndoc.Vec[:"+@id+"].ary"
+				"Dyndoc.Vec[\""+@id+"\"].ary"
 			when :r
 				"Dyndoc.Vec[\""+@id+"\"]"
 			end
@@ -156,7 +159,7 @@ module Dyndoc
 			when :rb
 				 "Dyndoc.Vec[:"+@id+"]"
 			when :jl
-				"Dyndoc.Vec[:"+@id+"]"
+				"Dyndoc.Vec[\""+@id+"\"]"
 			when :r
 				"Dyndoc.Vec[\""+@id+"\"]"
 			end
@@ -177,6 +180,35 @@ module Dyndoc
 				@unlock=true
 			end
 		end
+
+		## Replacement of sync splitted into 2 parts!
+		## Does not work for sync_to(:jl) => so OBSOLETE from now!
+		# from is :rb, :jl or :r
+		# def sync_from(from=:rb)
+		# 	if @unlock
+		# 		@unlock=nil #to avoid the same update several times
+		# 		## Dyndoc.warn "rb sync (from #{from}):",ids(:rb)
+		# 		@vectors[from] > @ary unless from==:rb
+		# 		## Dyndoc.warn "sync from #{from}",[@vectors[from].name,@vectors[from].value,@ary]
+		# 		## delay the update when demanded!
+		# 		@to_update[:r]=true unless from==:r
+		# 		@to_update[:jl]=true unless from==:jl
+		# 		@unlock=true
+		# 	end
+		# end
+
+		# # to is :jl or :r (:rb is always up to date)
+		# def sync_to(to=:r)
+		# 	if @unlock and @to_update[to]
+		# 		@unlock=nil #to avoid the same update several times
+		# 		## Dyndoc.warn "sync to #{to}",[@ary,@vectors[to].name]
+		# 		@vectors[to] < @ary
+		# 		## Dyndoc.warn "done", [@vectors[to].name,@vectors[to].value]
+		# 		@to_update[to]=nil
+		# 		@unlock=true
+		# 	end
+		# end
+
 
 		def [](key)
 			@ary[key]
