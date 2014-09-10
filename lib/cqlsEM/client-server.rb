@@ -132,6 +132,7 @@ module CqlsClientServer
     
     def receive_data(data)
         @recv_buffer.extract(data).each do |m2| 
+            ## Dyndoc.warn "receive_data",m2
             ##extract does not split properly if TOKEN is between two sent messages! 
             ##this fix the problem! Alternative is maybe to recode BufferTokenizer class!
             m2.split(TOKEN).each{|m| process_file(m) unless process_cmd(m) }
@@ -145,6 +146,7 @@ module CqlsClientServer
 =end
     
     def process_cmd(data)
+        ##Dyndoc.warn "process_cmd",data
         if data =~ /^__send_cmd__\[\[(.*)\]\]__/
             ##cmd="do_"+$1+"(\""+$'+"\")"
             cmd,param=$1,$'

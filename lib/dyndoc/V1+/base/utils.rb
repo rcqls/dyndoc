@@ -339,11 +339,11 @@ module CqlsDoc
 
     ## Added for atom
     def Utils.protect_dyn_block_for_atom(txt)
-      txt.gsub("#","__DIESE_ATOM__")
+      txt.gsub("#","__DIESE_ATOM__") # => since dyndoc command uses "#" this is very easy way to protect evaluation 
     end
 
     def Utils.parse_dyn_block_for_atom!(txt)
-      #puts "parse_raw_text:";p txt
+      #Dyndoc.warn "parse_dyn_block_for_atom",txt
       filter=/(?:(\{\#dyn>\])|(\[\#dyn>\}))/m
       txt2=txt.split(filter,-1)
       return if txt2.length==1

@@ -99,9 +99,9 @@ class DyndocViewer extends ScrollView
     if @file?
       @file.read().then (contents) => @renderDyndocText(contents)
     else if @editor?
-      @renderDyndocText(@editor.getText())
+      @render(@editor.getText())
 
-  renderDyndocText: (text) ->
+  render: (text) ->
     console.log("text:"+text)
     rendererDyndoc.eval text, @getPath(), (error, content) =>
       if error

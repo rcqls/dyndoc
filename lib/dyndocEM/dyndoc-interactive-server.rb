@@ -57,7 +57,6 @@ class DyndocInteractiveServer < EventMachine::Connection
     end
 
     def do__dyndoc(content)
-
         #p $dyndoc_interactive_server #to hide!
         timer = EventMachine::PeriodicTimer.new(0.1) do
             if @@busy and @@busy!=self

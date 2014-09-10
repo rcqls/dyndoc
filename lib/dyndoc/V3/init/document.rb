@@ -44,6 +44,7 @@ module CqlsDoc
     end
 
     def prepare_content
+      #Dyndoc.warn "prepare_content",@content
       out=@tmplMngr.parse(@content)
       return out
     end

@@ -3,7 +3,7 @@ vm     = require 'vm'
 
 module.exports =
 
-  coffeeEval: (code) ->
+  eval: (code) ->
     try
       output = vm.runInThisContext(coffee.compile(code, bare: true))
       console.log output

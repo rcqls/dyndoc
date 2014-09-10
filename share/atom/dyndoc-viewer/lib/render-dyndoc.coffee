@@ -7,12 +7,16 @@ exports.eval = (text='', filePath, callback) ->
 
 	end_token = "__[[END_TOKEN]]__"
 
+	text=text.replace /\#\{/g,"__AROBAS_ATOM__{"
+
 	net = require 'net'
+	#util = require 'util'
 	client = net.connect {port: 7777, host: 'localhost'}, () ->
+		#console.log (util.inspect '__send_cmd__[[dyndoc]]__' + text + end_token)
 		client.write '__send_cmd__[[dyndoc]]__' + text + end_token + '\n'
 
 		client.on 'data', (data) ->
-			#console.log(data.toString())
+			#console.log "data:" + data.toString()
 			data.toString().split(end_token).slice(0,-1).map (cmd) ->
 				#console.log("<<"+cmd+">>")
 				resCmd = decode_cmd(cmd)
