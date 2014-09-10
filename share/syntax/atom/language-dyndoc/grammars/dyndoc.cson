@@ -21,6 +21,9 @@
     'include': '#tag_blck_textile_dyn'
   }
   {
+    'include': '#tag_blck_html_dyn'
+  }
+  {
     'include': '#tag_blck_var_dyn'
   }
   {
@@ -273,6 +276,25 @@
       }
       {
         'include': 'text.html.textile'
+      }
+    ]
+  'tag_blck_html_dyn':
+    'begin': '(\\[\\#)(html>)(\\])'
+    'beginCaptures':
+      '1':
+        'name': 'punctuation.definition.tag.dyndoc'
+      '2':
+        'name': 'keyword.name.tag.dyndoc'
+      '3':
+        'name': 'punctuation.definition.tag.dyndoc'
+    'end': '(?=\\[\\#)'
+    'endCaptures': {}
+    'patterns': [
+      {
+        'include': '#include_blck_dyn'
+      }
+      {
+        'include': 'text.html.basic'
       }
     ]
   'tag_blck_var_dyn':

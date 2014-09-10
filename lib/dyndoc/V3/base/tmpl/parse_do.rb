@@ -37,12 +37,17 @@ module CqlsDoc
     ## insert text between start and stop marks
     ## the text is automatically loaded from
     def parse(texblock,filterLoc=nil,tags=nil)
+      #Dyndoc.warn "texblock",texblock
       @scan=DevTagScanner.new(:dtag) unless @scan
       @varscan=VarsScanner.new unless @varscan
 #puts "parse";p texblock
       if texblock.is_a? String
         ## Dyndoc.warn "parse",texblock
-        Utils.parse_raw_text!(texblock,self)
+        if @@interactive or $cfg_dyn[:atom_session] ## TODO => atom-interactive
+          Utils.parse_dyn_block_for_atom!(texblock)
+        else 
+          Utils.parse_raw_text!(texblock,self)
+        end
         #puts "After parse_raw_text";p texblock
         #puts "raw_key and raw_text";p Utils.dyndoc_raw_text
         #escape accolade every time a new text is scanned!

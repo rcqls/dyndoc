@@ -9,8 +9,11 @@
 # https://www.atom.io/docs/latest/advanced/keymaps
 
 '.platform-darwin .workspace':
-  'cmd-alt-x': 'dyndoc-viewer:eval'
+  'cmd-alt-x d': 'dyndoc-viewer:eval'
+  'cmd-alt-x a': 'dyndoc-viewer:atom-dyndoc'
+  'cmd-alt-x c': 'dyndoc-viewer:coffee'
   'cmd-alt-t': 'dyndoc-viewer:toggle'
+
 
 '.platform-win32 .workspace, .platform-linux .workspace':
   'ctrl-alt-x': 'dyndoc-viewer:eval'

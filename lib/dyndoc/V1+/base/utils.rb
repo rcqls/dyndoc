@@ -337,5 +337,31 @@ module CqlsDoc
       end
     end
 
+    ## Added for atom
+    def Utils.protect_dyn_block_for_atom(txt)
+      txt.gsub("#","__DIESE_ATOM__")
+    end
+
+    def Utils.parse_dyn_block_for_atom!(txt)
+      #puts "parse_raw_text:";p txt
+      filter=/(?:(\{\#dyn>\])|(\[\#dyn>\}))/m
+      txt2=txt.split(filter,-1)
+      return if txt2.length==1
+      #Dyndoc.warn "parse:txt2",txt2
+      code=""
+      while txt2.length>1
+        if txt2[0]=="{#dyn>]" and txt2[1..-1].include? "[#dyn>}"
+          start,tmp,stop=txt2.shift(3)
+          ## protect the dyndoc code to delay the evaluation after unprotection (in javascript)
+          code << Utils.protect_dyn_block_for_atom(tmp.inspect) 
+        else
+          code << txt2.shift
+        end
+      end
+      code << txt2.join("") #the remaining code
+      #Dyndoc.warn "atom",code 
+      txt.replace(code)
+    end
+
   end
 end

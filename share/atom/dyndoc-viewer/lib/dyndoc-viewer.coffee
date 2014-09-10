@@ -5,7 +5,7 @@ _ = require 'underscore-plus'
 fs = require 'fs-plus'
 {File} = require 'pathwatcher'
 
-renderer = require './render-dyndoc'
+rendererDyndoc = require './render-dyndoc'
 
 module.exports =
 class DyndocViewer extends ScrollView
@@ -103,7 +103,7 @@ class DyndocViewer extends ScrollView
 
   renderDyndocText: (text) ->
     console.log("text:"+text)
-    renderer.toText text, @getPath(), (error, content) =>
+    rendererDyndoc.eval text, @getPath(), (error, content) =>
       if error
         alert(content)
       else

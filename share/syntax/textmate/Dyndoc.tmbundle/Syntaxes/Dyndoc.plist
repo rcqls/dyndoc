@@ -34,6 +34,10 @@
 		</dict>
 		<dict>
 			<key>include</key>
+			<string>#tag_blck_html_dyn</string>
+		</dict>
+		<dict>
+			<key>include</key>
 			<string>#tag_blck_var_dyn</string>
 		</dict>
 		<dict>
@@ -500,6 +504,44 @@
 				<dict>
 					<key>include</key>
 					<string>text.html.textile</string>
+				</dict>
+			</array>
+		</dict>
+		<key>tag_blck_html_dyn</key>
+		<dict>
+			<key>begin</key>
+			<string>(\[\#)(html&gt;)(\])</string>
+			<key>beginCaptures</key>
+			<dict>
+				<key>1</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.tag.dyndoc</string>
+				</dict>
+				<key>2</key>
+				<dict>
+					<key>name</key>
+					<string>keyword.name.tag.dyndoc</string>
+				</dict>
+				<key>3</key>
+				<dict>
+					<key>name</key>
+					<string>punctuation.definition.tag.dyndoc</string>
+				</dict>
+			</dict>
+			<key>end</key>
+			<string>(?=\[\#)</string>
+			<key>endCaptures</key>
+			<dict/>
+			<key>patterns</key>
+			<array>
+				<dict>
+					<key>include</key>
+					<string>#include_blck_dyn</string>
+				</dict>
+				<dict>
+					<key>include</key>
+					<string>text.html.basic</string>
 				</dict>
 			</array>
 		</dict>

@@ -26,7 +26,7 @@ Settings.define :langs, :type => Array
 Settings.read cfg if File.exists?(cfg=File.expand_path(File.join("~","dyndoc","etc","dyndoc.cfg")))
 
 $cfg_dyn={
-  :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],
+  :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],:atom_session => false,
   :doc_list=>[],:tag_tmpl=>[],:keys_tmpl=>[],:user_input=>[],:cmd_pandoc_options => [],
   :nbChar_error=> 300,:working_dir=>"",:dyndoc_mode=>:normal,:langs=>Settings[:langs].map{|e| e.to_sym}
 }
@@ -61,6 +61,9 @@ cmd.options = CmdParse::OptionParserWrapper.new do |opt|
 =begin
   opt.on('-o',"--output OUTPUT","output format tex(default),txt,txtl,html,c") {|o| $cfg_dyn[:output]=o.to_sym}
 =end
+  opt.on('--atom','Atom mode (for debug)') {
+    $cfg_dyn[:atom_session]=true
+  }
   opt.on('--test','Use local package for development purposes') {
     ## NEW: this is put in dyndoc-devel!
     #$:.unshift(File.join(ENV["HOME"],".gPrj","work","dyndoc.ruby","lib"))

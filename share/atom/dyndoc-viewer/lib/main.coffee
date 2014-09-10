@@ -2,7 +2,8 @@ url = require 'url'
 
 dyndoc_viewer = null
 DyndocViewer = null # Defer until used
-renderer = require './render-dyndoc' # Defer until used
+rendererCoffee = require './render-coffee'
+rendererDyndoc = require './render-dyndoc'
 
 createDyndocViewer = (state) ->
   DyndocViewer ?= require './dyndoc-viewer'
@@ -24,11 +25,20 @@ module.exports =
     liveUpdate: true
     grammars: [
       'source.dyndoc'
+      'source.gfm'
+      'text.html.basic'
+      'text.html.textile'
     ]
 
   activate: ->
     atom.workspaceView.command "dyndoc-viewer:eval", =>
       @eval()
+
+    atom.workspaceView.command "dyndoc-viewer:atom-dyndoc", =>
+      @atomDyndoc()
+
+    atom.workspaceView.command "dyndoc-viewer:coffee", =>
+      @coffee()
 
     atom.workspaceView.command 'dyndoc-viewer:toggle', =>
       @toggle()
@@ -56,6 +66,22 @@ module.exports =
         createDyndocViewer(editorId: pathname.substring(1))
       else
         createDyndocViewer(filePath: pathname)
+
+  coffee: ->
+    selection = atom.workspace.getActiveEditor().getSelection()
+    text = selection.getText()
+    console.log rendererCoffee.coffeeEval text
+
+  atomDyndoc: ->
+    selection = atom.workspace.getActiveEditor().getSelection()
+    text = selection.getText()
+    if text == ""
+      text = atom.workspace.getActiveEditor().getText()
+    rendererDyndoc.eval text, atom.workspace.getActiveEditor().getPath(), (error, content) ->
+      if error
+        console.log "err: "+content
+      else
+        console.log "echo:" + content
 
   eval: ->
     return unless dyndoc_viewer
