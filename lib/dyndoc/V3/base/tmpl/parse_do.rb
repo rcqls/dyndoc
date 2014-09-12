@@ -1740,7 +1740,7 @@ p call
       res=RServer.echo_verb(code,@@interactive ? :raw : mode,@rEnvir[0], prompt: (@@interactive ? "R" : ""))
       require "dyndoc/common/uv" if @@interactive
       warn_level = $VERBOSE;$VERBOSE = nil
-      tex << (@@interactive ? Uv.parse(res, "xhtml", File.join(Uv.syntax_path,"r.syntax") , false, "solarized",false) : res )
+      tex << (@@interactive ? Uv.parse(res.force_encoding("utf-8"), "xhtml", File.join(Uv.syntax_path,"r.syntax") , false, "solarized",false) : res.force_encoding("utf-8") )
       $VERBOSE = warn_level
 #puts "rverb:result";p res 
       @rEnvir.shift if inR

@@ -270,6 +270,7 @@ module CqlsDoc
 		      short=optout["short"].split(",")
 		      short[0]=short[0].to_i
 		      short[2]=short[2].to_i
+		      ## Dyndoc.warn "short",[short,txt]
 		      (0...short[0]).each{|i| txtout << txt[i] << "\n"}
 		      txtout << short[1] << "\n"
 		      le = txt.length
