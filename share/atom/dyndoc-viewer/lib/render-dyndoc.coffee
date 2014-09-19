@@ -11,7 +11,14 @@ exports.eval = (text='', filePath, callback) ->
 
 	net = require 'net'
 	#util = require 'util'
-	client = net.connect {port: 7777, host: 'localhost'}, () ->
+	if atom.config.get 'dyndoc-viewer.localServer'
+		host = atom.config.get 'dyndoc-viewer.localServerUrl'
+		port = atom.config.get 'dyndoc-viewer.localServerPort'
+	else
+		host = atom.config.get 'dyndoc-viewer.remoteServerUrl'
+		port = atom.config.get 'dyndoc-viewer.remoteServerPort'
+
+	client = net.connect {port: port, host: host}, () ->
 		#console.log (util.inspect '__send_cmd__[[dyndoc]]__' + text + end_token)
 		client.write '__send_cmd__[[dyndoc]]__' + text + end_token + '\n'
 
@@ -26,6 +33,6 @@ exports.eval = (text='', filePath, callback) ->
 						client.end()
 				resCmd
 
-	  client.on 'error', (err) ->
-	    #console.log('error:', err.message)
-	    callback error,err.message
+	  	client.on 'error', (err) ->
+	    	#console.log('error:', err.message)
+	    	callback error,err.message

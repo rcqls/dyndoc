@@ -108,9 +108,20 @@ class DyndocViewer extends ScrollView
         alert(content)
       else
         @loading = false
-        console.log('content:'+content)
+        console.log('render content:'+content)
         @html(content)
         @trigger('dyndoc-viewer:dyndoc-changed')
+
+  eval: (text,callback) ->
+    console.log("eval text:"+text)
+    output = null
+    rendererDyndoc.eval text, @getPath(), (error, content) =>
+      if error
+        alert(content)
+        ":eval_dyndoc_error"
+      else
+        console.log('eval content:'+content)
+        callback(content)
 
   getTitle: ->
     if @file?

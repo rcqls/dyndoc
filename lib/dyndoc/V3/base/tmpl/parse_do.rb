@@ -61,6 +61,7 @@ module CqlsDoc
 #p "texblock";p texblock
       unless filterLoc
 	      filterLoc=FilterManager.new({:global=>@global},self)
+        filterLoc.envir["_FILENAME_CURRENT_"]=@filename.to_s if @filename
 	      Envir.set_textElt!(filterLoc.envir.global,["_FILENAME_"],@filename.to_s) if @filename
 	      Envir.set_textElt!(filterLoc.envir.global,["_FILENAME_ORIG_"], @tmpl_cfg[:filename_tmpl_orig].to_s) if @tmpl_cfg[:filename_tmpl_orig]
 	      Envir.set_textElt!(filterLoc.envir.global,["_PWD_"],Dir.pwd) if @filename

@@ -95,3 +95,22 @@
   [#,] newR[FALSE]
   [#>][{#rfig]#{rcode}[#,]deviceR[pdf][#,]unitR[][#,]resR[][#}]
   [#}
+
+  {#def]rsvg[#,] rcode[] [#,] img[]
+  [#,] widthR[5] [#,] heightR[5][#,] pointsizeR[12][#,] optR[]
+  [#,] Renvir[Global]
+  [#rb<]
+    require 'fileutils'
+    imgdir=File.expand_path("~/dyndoc/tmp")
+    FileUtils.mkdir_p(imgdir) unless File.exists? imgdir
+    rcode=#{=rcode}.strip
+    Utils.clean_eol(rcode)
+    img=File.join(imgdir,"last.svg")
+    Dyndoc.warn "img",img
+  [#<]{#r]
+    svg(:{=img},width=#{widthR},height=#{heightR}{#if]#{+?pointsizeR}[#>],pointsize="#{pointsizeR}"[#}{#if]#{+?optR}[#>],[#}#{optR})
+    :{rcode}
+    dev.off()
+  [#in]#{Renvir}[#}
+  [#rb>]File.readlines(img)[1..-1].join("\n") #everything except first line
+  [#def}

@@ -148,7 +148,15 @@ module CqlsDoc
       end
       filter2=FilterManager.new({:global=>@global},self)
       filter2.import_dict(dict2)
+      ###################################
+      # added to set the current filename 
+      # of the template in the local environment
+      # _FILENAME_ is maybe obsolete now 
+      # (see also "parse" in parse_do.rb file)
+      ###################################
+      filter2.envir["_FILENAME_CURRENT_"]=tmpl.dup
       filter2.envir["_FILENAME_"]=tmpl.dup #register name of template!!!
+      #####################################
       filter2.envir["_FILENAME_ORIG_"]=tmpl_orig.dup #register name of template!!!
       filter2.envir["_PWD_"]=File.dirname(tmpl) #register name of template!!!
 =begin

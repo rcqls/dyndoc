@@ -21,6 +21,11 @@ atom.deserializers.add(deserializer)
 
 module.exports =
   configDefaults:
+    localServer: true
+    localServerUrl: 'localhost'
+    localServerPort: 7777
+    remoteServerUrl: 'sagag6.upmf-grenoble.fr'
+    remoteServerPort: 5555
     breakOnSingleNewline: false
     liveUpdate: true
     grammars: [
