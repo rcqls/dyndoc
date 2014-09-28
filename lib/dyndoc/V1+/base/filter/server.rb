@@ -214,6 +214,7 @@ module CqlsDoc
       passe=0
       opt = nil
       code="" 
+      ##Dyndoc.warn "block",block
       block.each_line{|l|
 		l2=l.chomp
 		inst=l2.delete(" ").split("|")[0]
@@ -248,6 +249,7 @@ module CqlsDoc
 		when "##hide"
 		  hide = nb.to_i
 		else
+			txtout=txtout.force_encoding("utf-8")
 		  txtout << ( code.length==0 ? prompt+"> " : "+ ") << l2 << "\n" if hide==0
 		  if passe==0 and l2[0,1]!="#"
 		    ## redirect R output
@@ -276,6 +278,7 @@ module CqlsDoc
 		      le = txt.length
 		      ((le-short[2])...le).each{|i| txtout << txt[i] << "\n"}
 		    else
+		    	txt=txt.map{|e| e.force_encoding("utf-8")}
 		      txtout << txt.join("\n")
 		      txtout += "\n" if @@out.length>0
 		      ##txt.each{|l| txtout << l <<"\n"}

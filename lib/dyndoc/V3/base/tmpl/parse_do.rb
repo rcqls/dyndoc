@@ -85,8 +85,9 @@ module CqlsDoc
 #puts "parse:cmd,b";p cmd;p b
         @@depth+=1
         ###TO temporarily AVOID RESCUE MODE: 
-        if true; method("do_"+cmd).call(out,b,filterLoc); else
+        ###if true; method("do_"+cmd).call(out,b,filterLoc); else
         begin
+          ## Dyndoc.warn "cmd",[cmd,b]
           method("do_"+cmd).call(out,b,filterLoc)
           ## Dyndoc.warn [:out,out] if cmd=="eval"
         rescue
@@ -107,7 +108,7 @@ module CqlsDoc
           @@depth -= 1
         end 
         ###TO temporarily AVOID RESCUE MODE: 
-        end
+        ###end
       }
       ##restore old partTag and vars
       @tags=tagsOld if tags
@@ -388,7 +389,7 @@ p [vars,b2]
   	        i,*b2=next_block(blck,i)
   	        if cond_tag
   	          filter.outType=":rb"
-  #puts "do_block:?:b2"; p b2
+##Dyndoc.warn "do_block:?:b2",b2
   	          code=parse_args(b2[0],filter).strip
   #puts "do_block:?:code"; p code
   	          mode=code.downcase
@@ -1172,7 +1173,7 @@ p call
             i,*b2=next_block(blck,i)
             codename=parse(b2,filter).strip
             code[codename]=[:blck]
-          when :do,:<,:out,:>,:"r<",:"rb<",:"r>",:"rb>",:nl,:"\n",:>>,:"?",:tag,:"??",:"=",:"+",:<<,:"%" #NO :yield because of infinite loops 
+          when :do,:<,:out,:>,:"r<",:"R<",:"rb<",:"r>",:"R>",:"rb>",:nl,:"\n",:>>,:"?",:tag,:"??",:"=",:"+",:<<,:"%" #NO :yield because of infinite loops 
             code[codename] << blck[i]
             i,*b2=next_block(blck,i)
             code[codename] += b2
