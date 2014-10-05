@@ -5,7 +5,8 @@ module Dyndoc
 
       def binding
         # closure
-        Kernel
+        #Kernel
+        :nil
       end
 
       def rbenvir_init(envir)

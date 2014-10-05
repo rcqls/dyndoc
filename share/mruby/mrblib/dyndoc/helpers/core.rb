@@ -6,7 +6,7 @@
    
 module Dyndoc
 
-  module Opal
+  module MRuby
 
     module Helpers
 

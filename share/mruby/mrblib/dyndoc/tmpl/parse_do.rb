@@ -39,7 +39,7 @@ module Dyndoc
       #Dyndoc.warn "texblock",texblock
       @scan=DevTagScanner.new(:dtag) unless @scan
       @varscan=VarsScanner.new(:vars) unless @varscan
-#puts "parse";p texblock
+Dyndoc.warn "parse",texblock
       if texblock.is_a? String
         ## Dyndoc.warn "parse",texblock
         if @@interactive or $cfg_dyn[:atom_session] ## TODO => atom-interactive
@@ -84,9 +84,12 @@ module Dyndoc
 #puts "parse:cmd,b";p cmd;p b
         @@depth+=1
         ###TO temporarily AVOID RESCUE MODE: 
-        if true; method("do_"+cmd).call(out,b,filterLoc); else
+        ##if true; method("do_"+cmd).call(out,b,filterLoc); else
+        #puts "ii";p cmd
+        if true; send ("do_"+cmd).to_sym,out,b,filterLoc; else
         begin
-          method("do_"+cmd).call(out,b,filterLoc)
+          #method("do_"+cmd).call(out,b,filterLoc)
+          send ("do_"+cmd).to_sym,out,b,filterLoc
           ## Dyndoc.warn [:out,out] if cmd=="eval"
         rescue
           puts "=> Leaving block depth #{@@depth}: "
@@ -720,15 +723,17 @@ module Dyndoc
       #OLD: @userTag.evalUserTags(tex,b[1],filter)
       #NEW: simply apply the filter on the text
       #b[1]="" unless b[1]
-#puts "do_main";p b[1]
+#Dyndoc.warn "do_main",[b[1],filter.class]
       res=filter.apply(b[1])
+#Dyndoc.warn :do_main_res,res
       unless res.scan(/^__RAW__/).empty?
         res=Utils.protect_format_blocktext(res)
       else
 	     res=Utils.format_blocktext(res)
       end
-#puts res
+#Dyndoc.warn [:res2,res]
       tex << res
+      #Dyndoc.warn "ici"
       #TODO: maybe propose a language like textile to be converted in any format
     end
 
@@ -1944,9 +1949,10 @@ end
 
 #=begin NEW STUFF!!!
     def do_rb(tex,blck,filter)
-      require 'stringio'
+      ##disabled: require 'stringio'
       @rbIO=[] unless @rbIO
-      @rbIO << (blck[0]==:"rb>" ? StringIO.new : STDOUT)
+      ##@rbIO << (blck[0]==:"rb>" ? StringIO.new : STDOUT)
+      @rbIO << (blck[0]==:"rb>" ? STDOUT : STDOUT)
       $stdout=@rbIO[-1]
 
       ## Dyndoc.warn "blck",blck

@@ -188,7 +188,7 @@ module Dyndoc
     def rebuild_after_filter(res,filter=nil)
       txt=""
       start=0
-#p res
+#p [:rebuild,res]
       parts=res[:txt].split(@re_strange,-1)
 ##puts "parts";p parts
 ##puts "inside";p res[:inside]
@@ -198,12 +198,14 @@ module Dyndoc
         txt2= (e[:inside] ? rebuild_after_filter(e,filter) : e[:txt] )
 #puts "txt2";p txt2; p [res[:type],e[:type]]
         #IMPORTANT: process has to have as the second argument e[:type] corresponding to the inside_type and as the third argument res[:type] corresponding to the out_type
-##Dyndoc.warn "scan",txt2,e[:type],res[:type],(filter ? filter.process(txt2,e[:type],res[:type]) : txt2)
+##
+#p [ "scan",txt2,e[:type],res[:type],(filter ? filter.process(txt2,e[:type],res[:type]) : txt2)]
+#p ["rebuild:txt2AV",txt2]
         txt2=((filter and !(txt2=~/\[HTML\]/)) ? filter.process(txt2,e[:type],res[:type]) : txt2)
-##p txt2
+#p ["rebuild:txt2AP",txt2]
         txt += txt2
       end
-#puts "txt";p txt
+#p ["rebuild:txt",txt]
       txt += parts.shift unless parts.empty?
       txt
     end

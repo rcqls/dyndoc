@@ -331,17 +331,17 @@ module Dyndoc
 # mode -> nil (normal), :pre (fragment to preprocess), :post (post-processed)
 ###############################
     def apply(str,mode=nil,to_filter=true,escape=false)
-#puts "Filter:apply:str->";p str
+Dyndoc.warn "Filter:apply:str",str
       @mode=mode
       str=str.gsub(/\\?\#?\##{@@start}[#{@@letters}]+#{@@stop}/) {|w|
-	if w[0,1]=="\\"
-	  w[1..-1]
-	else
-	  @envir.output(w,mode,escape)
-	end
+        	if w[0,1]=="\\"
+        	  w[1..-1]
+        	else
+        	  @envir.output(w,mode,escape)
+        	end
       }
       if @rbEnvir and @mode!=:pre
-	str=RbServer.filter(str,@rbEnvir)
+	     str=RbServer.filter(str,@rbEnvir)
       end
       ## very important!! multilines have to be splitted -> flatten is applied just after!!!
       ## obsolete : str=str.split("\n") if @@start=="\\[" and !str.empty? # "".split("\n") -> [] and not [""]
@@ -369,11 +369,12 @@ module Dyndoc
 #p out_type
       case in_type
       when ":",":rb",":Rb","#rb","#Rb"
+        #p [:process,@mode,txt2,@rbEnvir[0]]
         return txt if @mode==:pre or !@rbEnvir[0]
         txt2=@tmpl.process_rb(txt2)
-        ## Dyndoc.warn "txt2",txt2
+        ## Dyndoc.warn ["txt2",txt2]
         res=RbServer.output(txt2,@rbEnvir[0])
-#Dyndoc.warn "process [rb]",res #,txt2,@rbEnvir[0],@tmpl.rbenvir_ls(@rbEnvir[0])] if txt2=~/\\\\be/
+#p ["process [rb]",res] #,txt2,@rbEnvir[0],@tmpl.rbenvir_ls(@rbEnvir[0])] if txt2=~/\\\\be/
 #Dyndoc.warn "#rb", [@rbEnvir[0],$curDyn.tmpl.rbenvir_current,$curDyn.tmpl.rbenvir_get($curDyn.tmpl.rbenvir_current[0])] if txt2=="toto[i]"
       when ":R","#R"
         return txt if @mode==:pre
@@ -611,26 +612,31 @@ module Dyndoc
     end
 
     def apply(str,mode=nil,to_filter=true,escape=false)
+      #Dyndoc.warn "apply:str",[str]
       ##return str unless to_filter
       ##RMK: to_filter unused!
       @mode,@escape=mode,escape 
       res=""
       str.split(Dyndoc::AS_IS).each_with_index do |code,i|
-        #puts "code";p code;p i
+        #Dyndoc.warn "apply:code",[i,code]
         if i%2==0
+          #Dyndoc.warn "apply:code2",code
           @scan.tokenize(code)
           ext=@scan.extract
-          #p ext
+          #Dyndoc.warn "apply:ext",ext
           res2=@scan.rebuild_after_filter(ext,self)
+
           res += res2 
         else
           res += Dyndoc::AS_IS+code+Dyndoc::AS_IS
         end
+        #Dyndoc.warn "apply:res",[i,res]
       end
       if str.split(Dyndoc::AS_IS).length>1
         Dyndoc.warn "str to apply",str
         Dyndoc.warn "res",res
       end
+      #Dyndoc.warn "apply:res2",[res]
       res
     end
 

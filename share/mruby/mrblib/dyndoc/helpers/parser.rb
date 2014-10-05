@@ -1,4 +1,4 @@
-module Dyndoc;module Opal;module Helpers
+module Dyndoc;module MRuby;module Helpers
 
 
       # preprocessing for parsing a string
@@ -28,9 +28,8 @@ module Dyndoc;module Opal;module Helpers
       end
 
       def process_rb(str)
-          
         part=detect_string_inside_string(str)
-#p part
+#p [:process_rb,part]
         part.each_index{|i|
           delim=(i%2==0 ? "\"" : "\\\"" ) #depending on inside or outside string!!!!
           part[i]=part[i].gsub(/<[\w\.\_\-]+\@>/) {|e| 
