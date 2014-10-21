@@ -23,7 +23,7 @@ Settings({
   :langs => ['R']
 })
 Settings.define :langs, :type => Array
-Settings.read cfg if File.exists?(cfg=File.expand_path(File.join("~","dyndoc","etc","dyndoc.cfg")))
+Settings.read cfg if File.exists?(cfg=File.expand_path(File.join("~",".dyndocrc")))
 
 $cfg_dyn={
   :pre_tmpl=>[],:post_tmpl=>[],:out_tag=>[],:part_tag=>[],:atom_session => false,
